@@ -36,7 +36,6 @@ Evidence (all rendered, 1440x900, same fixtures on both sides):
 - Geometry probe, desktop only (prototype has 0 real findings): Review savebar over list and form, keychain hint over buttons, Edit-gown dialog taller than its box (974 px in 866 px), Notifications event label glued to its help text.
 - User-reported Review defects confirmed by render: group list collides with the form, "Actions" floats beside the heading, savebar covers content, list is cut off (UR-01 to UR-05).
 
-Not defects, recorded so they are not re-raised: banner counts on Review (clustering calibration is Epic 10.4); bundled Inter fonts are present.
 
 ## 2. Impact analysis
 
