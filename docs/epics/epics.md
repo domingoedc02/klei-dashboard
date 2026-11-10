@@ -183,7 +183,7 @@ FR-44: Epic 11 (11.14) Two-factor authentication
 
 ## Epic List
 
-Eleven epics, 60 stories. Epic 1 is infrastructure and security foundation by the user's explicit story order; its user value is a running, encrypted-by-construction system in which a Staff member can sign in. Epics 2 to 9 deliver user-visible capability. Epics 10 and 11 come from the 2026-11-10 course correction (`docs/planning-artifacts/sprint-change-proposal-2026-11-10.md`): matching accuracy first, then UI fidelity to the prototype. Dependencies only run forward: Epic N uses Epics before it.
+Thirteen epics. Epic 1 is infrastructure and security foundation by the user's explicit story order; its user value is a running, encrypted-by-construction system in which a Staff member can sign in. Epics 2 to 9 deliver user-visible capability. Epics 10 and 11 come from the 2026-11-10 course correction (`docs/planning-artifacts/sprint-change-proposal-2026-11-10.md`): matching accuracy first, then UI fidelity to the prototype. Dependencies only run forward: Epic N uses Epics before it.
 
 ### Epic 1: Foundation and sign-in
 A Staff member can sign in to a stack that is encrypted by construction, and the build proves it.
@@ -244,6 +244,11 @@ Stories: 11.1 Design tokens, icons and shared components; 11.2 Shell; 11.3 Sign-
 Close the layout and fidelity gaps Epic 11 shipped without a rendered side-by-side check: overlap, overflow, scroll chain, spacing and component drift against the prototype. Adds a screenshot harness so layout is verified at 1100x700 and 1280x800. No backend change, no new dependency.
 **FRs covered:** none new (screen changes to FR-7 to FR-17, FR-19 to FR-23, FR-25, FR-30 to FR-32, FR-35). **NFRs:** NFR-5, NFR-7. Source: `docs/planning-artifacts/ui-fidelity-audit.md`, `docs/planning-artifacts/sprint-change-proposal-2026-11-11.md`.
 Stories: 12.1 Screenshot harness; 12.2 Frame, tokens and primitives; 12.3 Shared components; 12.4 Top bar and bell; 12.5 Review layout fixes; 12.6 Review inline Move/Merge/Split; 12.7 Upload and processing pass; 12.8 Dashboard layout; 12.9 Gallery layout; 12.10 Viewer and edit gown; 12.11 Inquiries, thread, composer and profile; 12.12 Settings frame, Signature with Away message, Staff; 12.13 Assistant and sign-in polish; 12.14 Narrow-window and keyboard sweep.
+
+### Epic 13: UI/UX parity with prototype
+The desktop app matches the exported prototype (`/Users/ej/Downloads/Klei-Bridal-Dashboard-Prototype`) in layout, components, copy and behaviour, proven by rendered side-by-side screenshots and a geometry probe instead of a CSS read. Replaces Epic 12 in full. Desktop app only; no backend or API contract change.
+**FRs covered:** none new (screen changes to FR-7 to FR-17, FR-19 to FR-23, FR-25, FR-30 to FR-32, FR-35). **NFRs:** NFR-7, NFR-9. Source: `docs/planning-artifacts/ui-parity/audit.md` (182 gaps: P1 21, P2 115, P3 46), `docs/planning-artifacts/sprint-change-proposal-2026-11-11b.md`. Open decisions D1 to D5 are in the proposal, section 4.3; each story states its assumed option.
+Stories: 13.1 Parity harness; 13.2 Tokens and frame; 13.3 Shared components and formatters; 13.4 Shell: top bar, menus and Assistant; 13.5 Dashboard; 13.6 Upload: empty, processing and error; 13.7 Upload Review: layout; 13.8 Upload Review: select, Move, Merge, Split; 13.9 Gallery; 13.10 Gown viewer, edit and delete dialogs; 13.11 Inquiries: list, thread and composer; 13.12 Client profile; 13.13 Settings: frame and personal tabs; 13.14 Settings: Admin tabs; 13.15 Desktop sign-in phases; 13.16 Parity sign-off sweep.
 
 ## Stories
 
