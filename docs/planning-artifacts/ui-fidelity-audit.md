@@ -2,7 +2,8 @@
 title: UI fidelity audit, desktop vs prototype
 date: 2026-11-11
 author: Ej, drafted with Claude (UX Designer lead)
-status: draft for Epic 12
+status: superseded
+superseded_by: docs/planning-artifacts/ui-parity/audit.md (rendered side-by-side audit; this one was a static read)
 method: static read of CSS and TSX against the prototype. Nothing was rendered.
 ---
 

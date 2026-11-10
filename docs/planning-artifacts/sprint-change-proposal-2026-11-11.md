@@ -1,5 +1,6 @@
 ---
-status: proposed
+status: superseded
+superseded_by: docs/planning-artifacts/sprint-change-proposal-2026-11-11b.md
 workflow: bmad-correct-course
 mode: batch
 scope: moderate
