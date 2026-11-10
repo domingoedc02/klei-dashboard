@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The webview may call the nine app commands and nothing else.",
+  "windows": ["main"],
+  "permissions": [
+    "allow-api-request",
+    "allow-sign-in",
+    "allow-sign-out",
+    "allow-upload-files",
+    "allow-export-gowns",
+    "allow-check-update",
+    "allow-install-update",
+    "allow-set-dirty",
+    "allow-session-only"
+  ]
+}

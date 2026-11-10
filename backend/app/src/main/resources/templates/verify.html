@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Verify your email - Klei Bridal</title>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/auth.css">
+  <script src="/static/fragment.js" defer></script>
+  <script src="/static/countdown.js" defer></script>
+  <script src="/static/auth.js" defer></script>
+</head>
+<body>
+<main>
+  <p class="wordmark"><span class="mark" aria-hidden="true">K</span>Klei Bridal</p>
+  <th:block th:if="${mode == 'link'}">
+  <div class="card">
+    <h1>Verifying your email</h1>
+    <form method="post" th:action="@{/verify/link}" data-fragment>
+      <input type="hidden" name="token" value="">
+      <noscript><p class="alert">Turn on JavaScript to verify with this link, or enter the code from the email.</p></noscript>
+    </form>
+  </div>
+  </th:block>
+
+  <th:block th:if="${mode == 'expired'}">
+  <div class="card">
+    <h1>Link expired</h1>
+    <p class="alert" role="alert">This link has expired. Open Klei Bridal and sign in to get a new code.</p>
+  </div>
+  </th:block>
+
+  <th:block th:if="${mode == 'done'}">
+  <div class="card">
+    <h1>Email verified</h1>
+    <p>Email verified. Open Klei Bridal and sign in.</p>
+  </div>
+  </th:block>
+
+  <th:block th:if="${mode == 'code'}">
+  <div class="card">
+    <div class="head">
+      <h1>Check your email</h1>
+      <p class="lede">We sent a 6-digit code and a link to <strong th:text="${email}">you@example.test</strong>. They expire in 30 minutes.</p>
+    </div>
+    <p class="notice" role="status" th:if="${notice}" th:text="${notice}"></p>
+      <p class="alert" role="alert" th:if="${error}" th:text="${error}"></p>
+    <form method="post" th:action="@{/verify}" data-validate>
+      <div class="field">
+        <label for="code">Verification code<span class="req" aria-hidden="true"> *</span></label>
+        <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required autofocus data-v="code" aria-describedby="e-code">
+        <span class="err" id="e-code"></span>
+      </div>
+      <button class="btn" type="submit" data-busy="Verifying…">Verify email</button>
+    </form>
+    <form class="resend" method="post" th:action="@{/verify/resend}">
+      <span>Didn’t get it?</span>
+      <button class="linkbtn" type="submit" data-countdown th:attr="data-wait=${fresh} ? '30' : '0'">Resend</button>
+    </form>
+  </div>
+  </th:block>
+
+  <p class="foot" th:if="${mode == 'code'}"><a href="/return">Back to Klei Bridal</a></p>
+</main>
+</body>
+</html>

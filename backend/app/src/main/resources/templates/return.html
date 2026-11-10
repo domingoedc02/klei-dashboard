@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" th:if="${done}" th:content="'0;url=' + ${target}">
+  <title>Return to Klei Bridal</title>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/auth.css">
+</head>
+<body>
+<main>
+  <p class="wordmark"><span class="mark" aria-hidden="true">K</span>Klei Bridal</p>
+  <div class="card">
+  <h1 th:text="${done} ? 'You\'re signed in.' : 'Return to Klei Bridal'">You're signed in.</h1>
+  <p th:if="${done}">You can return to Klei Bridal.</p>
+  <a class="btn" th:href="${target}" th:text="${done} ? 'Open Klei Bridal' : 'Return to Klei Bridal'">Open Klei Bridal</a>
+  </div>
+</main>
+</body>
+</html>

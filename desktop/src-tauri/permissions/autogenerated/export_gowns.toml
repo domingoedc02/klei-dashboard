@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-export-gowns"
+description = "Enables the export_gowns command without any pre-configured scope."
+commands.allow = ["export_gowns"]
+
+[[permission]]
+identifier = "deny-export-gowns"
+description = "Denies the export_gowns command without any pre-configured scope."
+commands.deny = ["export_gowns"]

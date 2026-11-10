@@ -1,0 +1,5511 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Klei Bridal API",
+    "version" : "1"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "security" : [ {
+    "bearer" : [ ]
+  } ],
+  "paths" : {
+    "/api/v1/taxonomy" : {
+      "get" : {
+        "tags" : [ "taxonomy-controller" ],
+        "operationId" : "get",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TaxonomyView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "taxonomy-controller" ],
+        "operationId" : "put",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TaxonomyChange"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TaxonomyView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/signature" : {
+      "get" : {
+        "tags" : [ "signature-controller" ],
+        "operationId" : "get_1",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SignatureView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "signature-controller" ],
+        "operationId" : "put_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SignatureRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SignatureView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/preferences" : {
+      "get" : {
+        "tags" : [ "preferences-controller" ],
+        "operationId" : "get_2",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PreferencesView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "preferences-controller" ],
+        "operationId" : "put_2",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PreferencesRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PreferencesView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/avatar" : {
+      "get" : {
+        "tags" : [ "profile-controller" ],
+        "operationId" : "avatar",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "profile-controller" ],
+        "operationId" : "setAvatar",
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "profile-controller" ],
+        "operationId" : "removeAvatar",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inquiries/{id}/draft" : {
+      "get" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "draft",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DraftView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "saveDraft",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReplyRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DraftSaved"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "discardDraft",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/workspace" : {
+      "get" : {
+        "tags" : [ "workspace-controller" ],
+        "operationId" : "get_3",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WorkspaceView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "workspace-controller" ],
+        "operationId" : "put_3",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WorkspaceRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WorkspaceView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/roles" : {
+      "get" : {
+        "tags" : [ "role-admin-controller" ],
+        "operationId" : "matrix",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RoleMatrix"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "role-admin-controller" ],
+        "operationId" : "replace",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RolePermissionsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RoleView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/away" : {
+      "get" : {
+        "tags" : [ "away-controller" ],
+        "operationId" : "get_4",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AwayView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "away-controller" ],
+        "operationId" : "put_4",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AwayRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AwayView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/ai" : {
+      "get" : {
+        "tags" : [ "ai-admin-controller" ],
+        "operationId" : "get_5",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AiSettingsView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "ai-admin-controller" ],
+        "operationId" : "put_5",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AiSettingsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AiSettingsView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads" : {
+      "post" : {
+        "tags" : [ "upload-controller" ],
+        "operationId" : "open",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BatchView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/start" : {
+      "post" : {
+        "tags" : [ "upload-controller" ],
+        "operationId" : "start",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "202" : {
+            "description" : "Accepted",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StatusView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/save" : {
+      "post" : {
+        "tags" : [ "save-controller" ],
+        "operationId" : "save",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Saved"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/photos" : {
+      "post" : {
+        "tags" : [ "upload-controller" ],
+        "operationId" : "add",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PhotoCreated"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/photos/{pid}/restore" : {
+      "post" : {
+        "tags" : [ "rearrange-controller" ],
+        "operationId" : "restore",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "pid",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MoveBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Rearranged"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/photos/{pid}/move" : {
+      "post" : {
+        "tags" : [ "rearrange-controller" ],
+        "operationId" : "move",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "pid",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MoveBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Rearranged"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/photos/{pid}/discard" : {
+      "post" : {
+        "tags" : [ "rearrange-controller" ],
+        "operationId" : "discard",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "pid",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Rearranged"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/merge" : {
+      "post" : {
+        "tags" : [ "rearrange-controller" ],
+        "operationId" : "merge",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MergeBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Rearranged"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/groups/{gid}/split" : {
+      "post" : {
+        "tags" : [ "rearrange-controller" ],
+        "operationId" : "split",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "gid",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SplitBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Rearranged"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/groups/{gid}/rewrite" : {
+      "post" : {
+        "tags" : [ "upload-controller" ],
+        "operationId" : "rewrite",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "gid",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RewriteBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Rewritten"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/commit" : {
+      "post" : {
+        "tags" : [ "save-controller" ],
+        "operationId" : "commit",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CommitBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Saved"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/search" : {
+      "post" : {
+        "tags" : [ "search-controller" ],
+        "operationId" : "search",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SearchRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SearchResult"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/read" : {
+      "post" : {
+        "tags" : [ "notification-controller" ],
+        "operationId" : "read",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NotificationReadRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/messages/{id}/retry" : {
+      "post" : {
+        "tags" : [ "message-controller" ],
+        "operationId" : "retry",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DetailMessage"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/password" : {
+      "post" : {
+        "tags" : [ "profile-controller" ],
+        "operationId" : "password",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordChange"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/2fa/start" : {
+      "post" : {
+        "tags" : [ "two-factor-controller" ],
+        "operationId" : "start_1",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TwoFactorSetup"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/2fa/disable" : {
+      "post" : {
+        "tags" : [ "two-factor-controller" ],
+        "operationId" : "disable",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TwoFactorProof"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/2fa/confirm" : {
+      "post" : {
+        "tags" : [ "two-factor-controller" ],
+        "operationId" : "confirm",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TwoFactorCode"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecoveryCodes"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/2fa/codes" : {
+      "post" : {
+        "tags" : [ "two-factor-controller" ],
+        "operationId" : "codes",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TwoFactorProof"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecoveryCodes"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inquiries" : {
+      "post" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "create",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NewInquiryRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InquiryItem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inquiries/{id}/reply" : {
+      "post" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "reply",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReplyRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DetailMessage"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inquiries/{id}/read" : {
+      "post" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "read_1",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inquiries/{id}/attachments" : {
+      "post" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "attach",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AttachmentView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inquiries/query" : {
+      "post" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "query",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InquiryQueryRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InquiryPage"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gowns/query" : {
+      "post" : {
+        "tags" : [ "gown-query-controller" ],
+        "operationId" : "query_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GownQueryRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GownPage"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gowns/export" : {
+      "post" : {
+        "tags" : [ "gown-query-controller" ],
+        "operationId" : "export",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GownExportRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportManifest"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gowns/delete" : {
+      "post" : {
+        "tags" : [ "gown-query-controller" ],
+        "operationId" : "delete",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GownDeleteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DeleteResult"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/token" : {
+      "post" : {
+        "tags" : [ "auth-token-controller" ],
+        "operationId" : "token",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TokenRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenPair"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/v1/auth/refresh" : {
+      "post" : {
+        "tags" : [ "auth-token-controller" ],
+        "operationId" : "refresh",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenPair"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/v1/auth/logout" : {
+      "post" : {
+        "tags" : [ "auth-token-controller" ],
+        "operationId" : "logout",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/v1/assistant/chat/messages" : {
+      "post" : {
+        "tags" : [ "assistant-controller" ],
+        "operationId" : "send",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AssistantSendRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ChatView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users" : {
+      "get" : {
+        "tags" : [ "admin-users-controller" ],
+        "operationId" : "list",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffList"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "admin-users-controller" ],
+        "operationId" : "invite",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InviteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InvitedUser"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users/{id}/resend" : {
+      "post" : {
+        "tags" : [ "admin-users-controller" ],
+        "operationId" : "resend",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users/{id}/2fa/reset" : {
+      "post" : {
+        "tags" : [ "admin-users-controller" ],
+        "operationId" : "resetTwoFactor",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/keys/rewrap" : {
+      "post" : {
+        "tags" : [ "key-status-controller" ],
+        "operationId" : "rewrap",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RewrapRun"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/ai/test" : {
+      "post" : {
+        "tags" : [ "ai-admin-controller" ],
+        "operationId" : "test",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AiTestResult"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/ai/models" : {
+      "post" : {
+        "tags" : [ "ai-admin-controller" ],
+        "operationId" : "models",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AiModelsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AiModelsResult"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/groups/{gid}" : {
+      "patch" : {
+        "tags" : [ "upload-controller" ],
+        "operationId" : "editGroup",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "gid",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GroupEdit"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroupView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/profile" : {
+      "get" : {
+        "tags" : [ "profile-controller" ],
+        "operationId" : "get_6",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "profile-controller" ],
+        "operationId" : "rename",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProfilePatch"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inquiries/{id}" : {
+      "get" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "get_7",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InquiryDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "setStatus",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StatusPatch"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StatusChanged"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gowns/{id}" : {
+      "get" : {
+        "tags" : [ "gown-query-controller" ],
+        "operationId" : "get_8",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GownDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "gown-query-controller" ],
+        "operationId" : "edit",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GroupEdit"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GownDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/clients/{id}" : {
+      "get" : {
+        "tags" : [ "client-controller" ],
+        "operationId" : "get_9",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClientDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "client-controller" ],
+        "operationId" : "edit_1",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ClientPatch"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ClientDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users/{id}" : {
+      "delete" : {
+        "tags" : [ "admin-users-controller" ],
+        "operationId" : "delete_1",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "admin-users-controller" ],
+        "operationId" : "update",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateStaffRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffRow"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}" : {
+      "get" : {
+        "tags" : [ "upload-controller" ],
+        "operationId" : "status",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StatusView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "save-controller" ],
+        "operationId" : "discard_1",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/{id}/photos/{photoId}" : {
+      "get" : {
+        "tags" : [ "upload-controller" ],
+        "operationId" : "read_2",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "photoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "thumb"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "upload-controller" ],
+        "operationId" : "remove",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "photoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/uploads/current" : {
+      "get" : {
+        "tags" : [ "upload-controller" ],
+        "operationId" : "current",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BatchView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/notifications" : {
+      "get" : {
+        "tags" : [ "notification-controller" ],
+        "operationId" : "list_1",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationList"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "notification-controller" ],
+        "operationId" : "clear",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me" : {
+      "get" : {
+        "tags" : [ "me-controller" ],
+        "operationId" : "me",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/2fa" : {
+      "get" : {
+        "tags" : [ "two-factor-controller" ],
+        "operationId" : "status_1",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TwoFactorStatus"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inquiries/count" : {
+      "get" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "count",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InquiryCount"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gowns/{id}/photos/{photoId}" : {
+      "get" : {
+        "tags" : [ "gown-query-controller" ],
+        "operationId" : "photo",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "photoId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "thumb"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard" : {
+      "get" : {
+        "tags" : [ "dashboard-controller" ],
+        "operationId" : "get_10",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DashboardView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/assistant/chat" : {
+      "get" : {
+        "tags" : [ "assistant-controller" ],
+        "operationId" : "chat",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ChatView"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "assistant-controller" ],
+        "operationId" : "clear_1",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/keys/status" : {
+      "get" : {
+        "tags" : [ "key-status-controller" ],
+        "operationId" : "status_2",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/KeyStatus"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/audit" : {
+      "get" : {
+        "tags" : [ "audit-controller" ],
+        "operationId" : "page",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuditPage"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/ai/usage" : {
+      "get" : {
+        "tags" : [ "ai-usage-controller" ],
+        "operationId" : "page_1",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AiUsagePage"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/inquiries/{id}/attachments/{fileId}" : {
+      "delete" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "detach",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "fileId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "401" : {
+            "description" : "Sign-in required or out of date",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "TaxonomyChange" : {
+        "type" : "object",
+        "properties" : {
+          "op" : {
+            "type" : [ "string", "null" ]
+          },
+          "type" : {
+            "type" : [ "string", "null" ]
+          },
+          "id" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "value" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "TaxonomyGroup" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TaxonomyItem"
+            }
+          }
+        }
+      },
+      "TaxonomyItem" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "value" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "TaxonomyView" : {
+        "type" : "object",
+        "properties" : {
+          "groups" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TaxonomyGroup"
+            }
+          }
+        }
+      },
+      "SignatureRequest" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "signoff" : {
+            "type" : [ "string", "null" ]
+          },
+          "name" : {
+            "type" : [ "string", "null" ]
+          },
+          "title" : {
+            "type" : [ "string", "null" ]
+          },
+          "phone" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "SignatureView" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "signoff" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "phone" : {
+            "type" : "string"
+          },
+          "studio" : {
+            "$ref" : "#/components/schemas/StudioView"
+          },
+          "preview" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "StudioView" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "address" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PreferencesRequest" : {
+        "type" : "object",
+        "properties" : {
+          "timezone" : {
+            "type" : [ "string", "null" ]
+          },
+          "dateFormat" : {
+            "type" : [ "string", "null" ]
+          },
+          "startPage" : {
+            "type" : [ "string", "null" ]
+          },
+          "enterToSend" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "newInquiry" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "aiFinished" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "teamActivity" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "emailNewInquiry" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "emailAiFinished" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "emailTeamActivity" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "digest" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "PreferencesView" : {
+        "type" : "object",
+        "properties" : {
+          "timezone" : {
+            "type" : [ "string", "null" ]
+          },
+          "dateFormat" : {
+            "type" : "string"
+          },
+          "startPage" : {
+            "type" : "string"
+          },
+          "enterToSend" : {
+            "type" : "boolean"
+          },
+          "newInquiry" : {
+            "type" : "boolean"
+          },
+          "aiFinished" : {
+            "type" : "boolean"
+          },
+          "teamActivity" : {
+            "type" : "boolean"
+          },
+          "emailNewInquiry" : {
+            "type" : "boolean"
+          },
+          "emailAiFinished" : {
+            "type" : "boolean"
+          },
+          "emailTeamActivity" : {
+            "type" : "boolean"
+          },
+          "digest" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "ProfileView" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "avatar" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "ReplyRequest" : {
+        "type" : "object",
+        "properties" : {
+          "body" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "DraftSaved" : {
+        "type" : "object",
+        "properties" : {
+          "updatedAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          }
+        }
+      },
+      "WorkspaceRequest" : {
+        "type" : "object",
+        "properties" : {
+          "studioName" : {
+            "type" : [ "string", "null" ]
+          },
+          "studioAddress" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "WorkspaceView" : {
+        "type" : "object",
+        "properties" : {
+          "studioName" : {
+            "type" : "string"
+          },
+          "studioAddress" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "RolePermissionsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "roleId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "permissions" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "RoleView" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "locked" : {
+            "type" : "boolean"
+          },
+          "permissions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "AwayRequest" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : [ "boolean", "null" ]
+          },
+          "message" : {
+            "type" : [ "string", "null" ]
+          },
+          "schedule" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/ScheduleRequest"
+            }, {
+              "type" : "null"
+            } ]
+          }
+        }
+      },
+      "ScheduleRequest" : {
+        "type" : "object",
+        "properties" : {
+          "mode" : {
+            "type" : [ "string", "null" ]
+          },
+          "days" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "start" : {
+            "type" : [ "string", "null" ]
+          },
+          "end" : {
+            "type" : [ "string", "null" ]
+          },
+          "from" : {
+            "type" : [ "string", "null" ]
+          },
+          "to" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "AwaySchedule" : {
+        "type" : "object",
+        "properties" : {
+          "mode" : {
+            "type" : "string"
+          },
+          "days" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "start" : {
+            "type" : [ "string", "null" ]
+          },
+          "end" : {
+            "type" : [ "string", "null" ]
+          },
+          "from" : {
+            "type" : [ "string", "null" ]
+          },
+          "to" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "AwayView" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "schedule" : {
+            "$ref" : "#/components/schemas/AwaySchedule"
+          },
+          "zone" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "AiSettingsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "preset" : {
+            "type" : [ "string", "null" ]
+          },
+          "baseUrl" : {
+            "type" : [ "string", "null" ]
+          },
+          "apiKey" : {
+            "type" : [ "string", "null" ]
+          },
+          "organization" : {
+            "type" : [ "string", "null" ]
+          },
+          "chatModel" : {
+            "type" : [ "string", "null" ]
+          },
+          "visionModel" : {
+            "type" : [ "string", "null" ]
+          },
+          "embeddingModel" : {
+            "type" : [ "string", "null" ]
+          },
+          "embeddingBaseUrl" : {
+            "type" : [ "string", "null" ]
+          },
+          "embeddingApiKey" : {
+            "type" : [ "string", "null" ]
+          },
+          "temperature" : {
+            "type" : [ "number", "null" ],
+            "format" : "double"
+          },
+          "maxTokens" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "visionModelAdv" : {
+            "type" : [ "string", "null" ]
+          },
+          "sensitivity" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "tone" : {
+            "type" : [ "string", "null" ]
+          },
+          "advanced" : {
+            "type" : [ "boolean", "null" ]
+          }
+        }
+      },
+      "AiSettingsView" : {
+        "type" : "object",
+        "properties" : {
+          "preset" : {
+            "type" : "string"
+          },
+          "baseUrl" : {
+            "type" : "string"
+          },
+          "apiKeySet" : {
+            "type" : "boolean"
+          },
+          "apiKeyMask" : {
+            "type" : [ "string", "null" ]
+          },
+          "organization" : {
+            "type" : [ "string", "null" ]
+          },
+          "chatModel" : {
+            "type" : [ "string", "null" ]
+          },
+          "visionModel" : {
+            "type" : [ "string", "null" ]
+          },
+          "visionModelAdv" : {
+            "type" : [ "string", "null" ]
+          },
+          "sensitivity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "tone" : {
+            "type" : "string"
+          },
+          "advanced" : {
+            "type" : "boolean"
+          },
+          "embeddingModel" : {
+            "type" : "string"
+          },
+          "embeddingBaseUrl" : {
+            "type" : [ "string", "null" ]
+          },
+          "embeddingApiKeySet" : {
+            "type" : "boolean"
+          },
+          "temperature" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "maxTokens" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "testedAt" : {
+            "type" : [ "string", "null" ]
+          },
+          "models" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "BatchView" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "phase" : {
+            "type" : "string"
+          },
+          "photoIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          },
+          "rejected" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "ErrorView" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "step" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "lastGood" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          }
+        }
+      },
+      "GroupView" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "confidence" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "band" : {
+            "type" : "string"
+          },
+          "position" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "photoIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TagView"
+            }
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "StatusView" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "phase" : {
+            "type" : "string"
+          },
+          "step" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "done" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "error" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/ErrorView"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "groups" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "$ref" : "#/components/schemas/GroupView"
+            }
+          }
+        }
+      },
+      "TagView" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Saved" : {
+        "type" : "object",
+        "properties" : {
+          "saved" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "PhotoCreated" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }
+      },
+      "GroupEdit" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : [ "string", "null" ]
+          },
+          "attributes" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "$ref" : "#/components/schemas/TagEdit"
+            }
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "MoveBody" : {
+        "type" : "object",
+        "properties" : {
+          "groupId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "seed" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/GroupEdit"
+            }, {
+              "type" : "null"
+            } ]
+          }
+        }
+      },
+      "TagEdit" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : [ "string", "null" ]
+          },
+          "value" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "Rearranged" : {
+        "type" : "object",
+        "properties" : {
+          "groups" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GroupView"
+            }
+          },
+          "focus" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          }
+        }
+      },
+      "MergeBody" : {
+        "type" : "object",
+        "properties" : {
+          "sourceId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "targetId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          }
+        }
+      },
+      "SplitBody" : {
+        "type" : "object",
+        "properties" : {
+          "photoIds" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          },
+          "seed" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/GroupEdit"
+            }, {
+              "type" : "null"
+            } ]
+          }
+        }
+      },
+      "RewriteBody" : {
+        "type" : "object",
+        "properties" : {
+          "photoIds" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "Rewritten" : {
+        "type" : "object",
+        "properties" : {
+          "description" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CommitBody" : {
+        "type" : "object",
+        "properties" : {
+          "groups" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "$ref" : "#/components/schemas/CommitGroup"
+            }
+          },
+          "removed" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "$ref" : "#/components/schemas/GroupRef"
+            }
+          },
+          "discarded" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "CommitGroup" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "version" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : [ "string", "null" ]
+          },
+          "attributes" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "$ref" : "#/components/schemas/TagEdit"
+            }
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "photoIds" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "GroupRef" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "version" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          }
+        }
+      },
+      "SearchRequest" : {
+        "type" : "object",
+        "properties" : {
+          "q" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "SearchHit" : {
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "subtitle" : {
+            "type" : "string"
+          },
+          "thumbs" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "SearchResult" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SearchHit"
+            }
+          }
+        }
+      },
+      "NotificationReadRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ids" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "AttachmentView" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "DetailMessage" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "direction" : {
+            "type" : "string"
+          },
+          "author" : {
+            "type" : [ "string", "null" ]
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "body" : {
+            "type" : "string"
+          },
+          "html" : {
+            "type" : "boolean"
+          },
+          "mailState" : {
+            "type" : [ "string", "null" ]
+          },
+          "attachments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AttachmentView"
+            }
+          }
+        }
+      },
+      "PasswordChange" : {
+        "type" : "object",
+        "properties" : {
+          "current" : {
+            "type" : [ "string", "null" ]
+          },
+          "new" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "TwoFactorSetup" : {
+        "type" : "object",
+        "properties" : {
+          "uri" : {
+            "type" : "string"
+          },
+          "secret" : {
+            "type" : "string"
+          },
+          "qr" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TwoFactorProof" : {
+        "type" : "object",
+        "properties" : {
+          "password" : {
+            "type" : [ "string", "null" ]
+          },
+          "code" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "TwoFactorCode" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "RecoveryCodes" : {
+        "type" : "object",
+        "properties" : {
+          "codes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "NewInquiryRequest" : {
+        "type" : "object",
+        "properties" : {
+          "clientName" : {
+            "type" : [ "string", "null" ]
+          },
+          "clientEmail" : {
+            "type" : [ "string", "null" ]
+          },
+          "subject" : {
+            "type" : [ "string", "null" ]
+          },
+          "body" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "InquiryItem" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "clientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "clientName" : {
+            "type" : "string"
+          },
+          "subject" : {
+            "type" : "string"
+          },
+          "preview" : {
+            "type" : "string"
+          },
+          "lastMessageAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "unread" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "InquiryQueryRequest" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : [ "string", "null" ]
+          },
+          "before" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "limit" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          }
+        }
+      },
+      "InquiryPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InquiryItem"
+            }
+          },
+          "next" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          }
+        }
+      },
+      "GownQueryRequest" : {
+        "type" : "object",
+        "properties" : {
+          "silhouette" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          },
+          "fabric" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          },
+          "days" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "before" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "limit" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          }
+        }
+      },
+      "GownCard" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "silhouette" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "fabric" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "photos" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "thumbs" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          },
+          "addedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "isNew" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "GownPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GownCard"
+            }
+          },
+          "next" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "matching" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "GownExportRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ids" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "ExportGown" : {
+        "type" : "object",
+        "properties" : {
+          "gownId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "photos" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ExportPhoto"
+            }
+          },
+          "details" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ExportManifest" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ExportGown"
+            }
+          },
+          "missing" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "ExportPhoto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      },
+      "GownDeleteRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ids" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "DeleteResult" : {
+        "type" : "object",
+        "properties" : {
+          "deleted" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "missing" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "TokenRequest" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : [ "string", "null" ]
+          },
+          "verifier" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "TokenPair" : {
+        "type" : "object",
+        "properties" : {
+          "accessToken" : {
+            "type" : "string"
+          },
+          "refreshToken" : {
+            "type" : "string"
+          },
+          "expiresIn" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "RefreshRequest" : {
+        "type" : "object",
+        "properties" : {
+          "refreshToken" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "AssistantSendRequest" : {
+        "type" : "object",
+        "properties" : {
+          "text" : {
+            "type" : [ "string", "null" ]
+          },
+          "inquiryId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          }
+        }
+      },
+      "ChatLine" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "text" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "gowns" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GownRef"
+            }
+          }
+        }
+      },
+      "ChatView" : {
+        "type" : "object",
+        "properties" : {
+          "messages" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ChatLine"
+            }
+          }
+        }
+      },
+      "GownRef" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "thumbs" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          }
+        }
+      },
+      "InviteRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : [ "string", "null" ]
+          },
+          "email" : {
+            "type" : [ "string", "null" ]
+          },
+          "roleId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          }
+        }
+      },
+      "InvitedUser" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "roleId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "RewrapRun" : {
+        "type" : "object",
+        "properties" : {
+          "state" : {
+            "type" : "string"
+          },
+          "done" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "dataKey" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "storedObject" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "AiCheck" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "label" : {
+            "type" : "string"
+          },
+          "ok" : {
+            "type" : "boolean"
+          },
+          "detail" : {
+            "type" : "string"
+          }
+        }
+      },
+      "AiTestResult" : {
+        "type" : "object",
+        "properties" : {
+          "checks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AiCheck"
+            }
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "AiModelsRequest" : {
+        "type" : "object",
+        "properties" : {
+          "baseUrl" : {
+            "type" : [ "string", "null" ]
+          },
+          "apiKey" : {
+            "type" : [ "string", "null" ]
+          },
+          "embedding" : {
+            "type" : [ "boolean", "null" ]
+          }
+        }
+      },
+      "AiModelsResult" : {
+        "type" : "object",
+        "properties" : {
+          "models" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "failure" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "ProfilePatch" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "StatusPatch" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "StatusChanged" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "GownDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "attributes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GownTags"
+            }
+          },
+          "photos" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GownPhoto"
+            }
+          },
+          "photoCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "addedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "confidence" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "band" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "GownPhoto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "GownTags" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "ClientPatch" : {
+        "type" : "object",
+        "properties" : {
+          "phone" : {
+            "type" : [ "string", "null" ]
+          },
+          "city" : {
+            "type" : [ "string", "null" ]
+          },
+          "weddingDate" : {
+            "type" : [ "string", "null" ]
+          },
+          "source" : {
+            "type" : [ "string", "null" ]
+          },
+          "note" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "ClientDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "phone" : {
+            "type" : [ "string", "null" ]
+          },
+          "city" : {
+            "type" : [ "string", "null" ]
+          },
+          "weddingDate" : {
+            "type" : [ "string", "null" ]
+          },
+          "source" : {
+            "type" : [ "string", "null" ]
+          },
+          "note" : {
+            "type" : [ "string", "null" ]
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "inquiries" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ClientInquiry"
+            }
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "ClientInquiry" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "subject" : {
+            "type" : "string"
+          },
+          "preview" : {
+            "type" : "string"
+          },
+          "lastMessageAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        }
+      },
+      "UpdateStaffRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : [ "string", "null" ]
+          },
+          "email" : {
+            "type" : [ "string", "null" ]
+          },
+          "roleId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          }
+        }
+      },
+      "StaffRow" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "roleId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "lastActive" : {
+            "type" : [ "string", "null" ]
+          },
+          "hasAvatar" : {
+            "type" : "boolean"
+          },
+          "lastAdmin" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "twoFactor" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "NotificationItem" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "target" : {
+            "type" : [ "string", "null" ]
+          },
+          "read" : {
+            "type" : "boolean"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "NotificationList" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NotificationItem"
+            }
+          },
+          "unread" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "MeResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "permissions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "avatar" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "preferences" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/PreferencesView"
+            }, {
+              "type" : "null"
+            } ]
+          }
+        }
+      },
+      "TwoFactorStatus" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "recoveryLeft" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "reset" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "DetailClient" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          }
+        }
+      },
+      "InquiryDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "subject" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "unread" : {
+            "type" : "boolean"
+          },
+          "client" : {
+            "$ref" : "#/components/schemas/DetailClient"
+          },
+          "messages" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DetailMessage"
+            }
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "DraftView" : {
+        "type" : "object",
+        "properties" : {
+          "body" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          },
+          "attachments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AttachmentView"
+            }
+          }
+        }
+      },
+      "InquiryCount" : {
+        "type" : "object",
+        "properties" : {
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "AiStatusView" : {
+        "type" : "object",
+        "properties" : {
+          "phase" : {
+            "type" : "string"
+          },
+          "step" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "done" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "total" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "groups" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "lowConfidence" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          }
+        }
+      },
+      "DashboardView" : {
+        "type" : "object",
+        "properties" : {
+          "recentGowns" : {
+            "type" : [ "array", "null" ],
+            "items" : {
+              "$ref" : "#/components/schemas/GownCard"
+            }
+          },
+          "totalGowns" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "newThisWeek" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "photosThisMonth" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "gownsThisMonth" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "aiStatus" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/AiStatusView"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "inquiries" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/InquiryWidget"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "avgReplySeconds" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "prevAvgReplySeconds" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "InquiryWidget" : {
+        "type" : "object",
+        "properties" : {
+          "unread" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "latest" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InquiryItem"
+            }
+          },
+          "oldestUnreadAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          }
+        }
+      },
+      "RoleRef" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StaffList" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffRow"
+            }
+          },
+          "next" : {
+            "type" : [ "string", "null" ]
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "roles" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RoleRef"
+            }
+          }
+        }
+      },
+      "RoleMatrix" : {
+        "type" : "object",
+        "properties" : {
+          "permissions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "roles" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RoleView"
+            }
+          }
+        }
+      },
+      "KeyRows" : {
+        "type" : "object",
+        "properties" : {
+          "dataKey" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          },
+          "storedObject" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        }
+      },
+      "KeyStatus" : {
+        "type" : "object",
+        "properties" : {
+          "active" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "highest" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "configured" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "rows" : {
+            "$ref" : "#/components/schemas/KeyRows"
+          },
+          "run" : {
+            "$ref" : "#/components/schemas/RewrapRun"
+          }
+        }
+      },
+      "AuditPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AuditRow"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "AuditRow" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ts" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "actor" : {
+            "type" : "string"
+          },
+          "action" : {
+            "type" : "string"
+          },
+          "detail" : {
+            "type" : [ "string", "null" ]
+          },
+          "ip" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "AiUsagePage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AiUsageRow"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "pages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "AiUsageRow" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "time" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "user" : {
+            "type" : "string"
+          },
+          "purpose" : {
+            "type" : "string"
+          },
+          "model" : {
+            "type" : [ "string", "null" ]
+          },
+          "size" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "outcome" : {
+            "type" : "string"
+          },
+          "durationMs" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "Extensions_bad_request" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_unauthenticated" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_token_stale" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_forbidden" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_not_found" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_method_not_allowed" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_conflict" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "usedBy" : {
+            "format" : "int64"
+          },
+          "check" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Extensions_too_large" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_unsupported_type" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_validation_failed" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_rate_limited" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_unavailable" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_internal" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_ai_provider_failed" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Extensions_crypto_failure" : {
+        "type" : "object",
+        "additionalProperties" : false
+      },
+      "Problem" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : { },
+          "code" : {
+            "type" : "string",
+            "enum" : [ "bad_request", "unauthenticated", "token_stale", "forbidden", "not_found", "method_not_allowed", "conflict", "too_large", "unsupported_type", "validation_failed", "rate_limited", "unavailable", "internal", "ai_provider_failed", "crypto_failure" ]
+          },
+          "correlationId" : {
+            "type" : "string"
+          },
+          "fields" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "field" : {
+                  "type" : "string"
+                },
+                "code" : {
+                  "type" : "string"
+                }
+              },
+              "required" : [ "code", "field" ]
+            }
+          },
+          "extensions" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/Extensions_bad_request"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_unauthenticated"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_token_stale"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_forbidden"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_not_found"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_method_not_allowed"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_conflict"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_too_large"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_unsupported_type"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_validation_failed"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_rate_limited"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_unavailable"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_internal"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_ai_provider_failed"
+            }, {
+              "$ref" : "#/components/schemas/Extensions_crypto_failure"
+            } ]
+          }
+        },
+        "required" : [ "code", "correlationId", "status", "title", "type" ]
+      }
+    },
+    "securitySchemes" : {
+      "bearer" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}

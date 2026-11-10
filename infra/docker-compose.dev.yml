@@ -1,0 +1,24 @@
+# Developer override: publishes ports on loopback only. Never use in production.
+# docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml --profile dev up -d --wait
+# `internal` networks cannot publish ports, so each service also joins `devhost`.
+# Host ports can be changed when another project holds them, e.g. KLEI_DEV_MAILPIT_UI_PORT=18025.
+
+services:
+  postgres:
+    ports: ["127.0.0.1:${KLEI_DEV_PG_PORT:-5432}:5432"]
+    networks: [internal, devhost]
+  objectstore:
+    ports: ["127.0.0.1:${KLEI_DEV_S3_PORT:-8333}:8333"]
+    networks: [internal, devhost]
+  backend:
+    ports:
+      - "127.0.0.1:${KLEI_DEV_API_PORT:-8080}:8080"
+      - "127.0.0.1:${KLEI_DEV_AUTH_PORT:-8081}:8081"
+  mailpit:
+    ports:
+      - "127.0.0.1:${KLEI_DEV_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${KLEI_DEV_MAILPIT_UI_PORT:-8025}:8025"
+    networks: [internal, devhost]
+
+networks:
+  devhost: {}

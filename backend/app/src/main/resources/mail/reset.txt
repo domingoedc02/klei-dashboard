@@ -1,0 +1,7 @@
+Hello,
+
+Open this link to choose a new Klei Bridal password. The link works for 30 minutes.
+
+[(${link})]
+
+If you did not ask for this, you can ignore this email.

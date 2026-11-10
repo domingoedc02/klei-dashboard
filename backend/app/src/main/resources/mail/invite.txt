@@ -1,0 +1,7 @@
+Hello,
+
+You have been invited to Klei Bridal. Open this link to set up your account. The link works for 7 days.
+
+[(${link})]
+
+If you did not expect this email, you can ignore it.

@@ -1,0 +1,3 @@
+[(${title})]
+
+Change what you get by email in Settings › Notifications.

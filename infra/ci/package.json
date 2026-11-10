@@ -1,0 +1,6 @@
+{
+  "name": "klei-ci-tools",
+  "private": true,
+  "type": "module",
+  "devDependencies": { "axe-core": "4.10.2", "puppeteer-core": "24.1.1" }
+}

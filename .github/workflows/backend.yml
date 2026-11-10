@@ -1,0 +1,12 @@
+name: backend
+on:
+  push:
+    paths: ["backend/**", "infra/**"]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: "25", cache: maven}
+      - run: infra/ci/backend.sh

@@ -1,0 +1,90 @@
+server:
+  port: 8080
+  forward-headers-strategy: none
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+    include-exception: false
+  tomcat:
+    accesslog:
+      enabled: false
+  servlet:
+    session:
+      timeout: 10m
+      tracking-modes: cookie
+      cookie:
+        # `__Host-` needs Secure and Path=/ and no Domain; browsers accept Secure on http://localhost for dev.
+        name: __Host-klei-auth
+        http-only: true
+        secure: true
+        same-site: lax
+        path: /
+
+klei:
+  ai:
+    # Plain HTTP and private addresses for a stub provider; the backend refuses to start with it set outside profiles dev or test.
+    dev-mode: ${KLEI_AI_DEV_MODE:false}
+  auth-port: ${KLEI_AUTH_PORT:8081}
+  # Links in mail point at the Auth Web host; the fragment carries the token (architecture §6.2).
+  auth-base-url: ${KLEI_AUTH_BASE_URL:http://localhost:8081}
+  mail:
+    from: ${KLEI_MAIL_FROM:no-reply@klei.test}
+    # Outside dev the SMTP connection must upgrade to TLS and the certificate must match (architecture §8.2).
+    require-tls: ${KLEI_SMTP_REQUIRE_TLS:false}
+  s3:
+    endpoint: ${KLEI_S3_ENDPOINT:}
+    access-key: ${KLEI_S3_ACCESS_KEY:}
+    secret-key: ${KLEI_S3_SECRET_KEY:}
+    bucket: ${KLEI_S3_BUCKET:}
+
+spring:
+  application:
+    name: klei
+  mail:
+    host: ${KLEI_SMTP_HOST:localhost}
+    port: ${KLEI_SMTP_PORT:1025}
+    username: ${KLEI_SMTP_USER:}
+    password: ${KLEI_SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${KLEI_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${KLEI_SMTP_REQUIRE_TLS:false}
+      mail.smtp.starttls.required: ${KLEI_SMTP_REQUIRE_TLS:false}
+      mail.smtp.ssl.checkserveridentity: true
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+  datasource:
+    url: ${KLEI_DB_URL:}
+    username: ${KLEI_DB_USER:}
+    password: ${KLEI_DB_PASSWORD:}
+  servlet:
+    multipart:
+      max-file-size: 26MB
+      max-request-size: 26MB
+  flyway:
+    enabled: true
+  mvc:
+    problemdetails:
+      enabled: false
+    # Auth Web files live under /static so the port guard can keep them off the API port.
+    static-path-pattern: /static/**
+  thymeleaf:
+    cache: true
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level %logger{20} %msg%n"
+  level:
+    root: INFO
+    org.springframework.web: WARN
+    org.apache.coyote: WARN
+
+springdoc:
+  # Off in every deployment; the contract test turns it on to generate docs/api/openapi.json.
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+  paths-to-match: /api/v1/**
+  paths-to-exclude: /api/v1/probe/**,/api/v1/boom/**

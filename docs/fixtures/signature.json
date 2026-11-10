@@ -1,0 +1,82 @@
+{
+  "note": "Golden cases for SignatureRenderer (Kotlin) and renderSignature (desktop). Edit both runtimes together.",
+  "cases": [
+    {
+      "case": "full",
+      "enabled": true,
+      "signoff": "Warm regards,",
+      "name": "Mara Lindqvist",
+      "title": "Bridal consultant",
+      "phone": "+1 555 0100",
+      "studioName": "Klei Bridal",
+      "studioAddress": "12 Rose Lane\nSuite 4\nPortland, OR 97201",
+      "expected": "Warm regards,\nMara Lindqvist\nBridal consultant\nKlei Bridal · +1 555 0100\n12 Rose Lane\nSuite 4\nPortland, OR 97201"
+    },
+    {
+      "case": "off",
+      "enabled": false,
+      "signoff": "Warm regards,",
+      "name": "Mara Lindqvist",
+      "title": "Bridal consultant",
+      "phone": "+1 555 0100",
+      "studioName": "Klei Bridal",
+      "studioAddress": "12 Rose Lane",
+      "expected": ""
+    },
+    {
+      "case": "no phone",
+      "enabled": true,
+      "signoff": "Best,",
+      "name": "Mara",
+      "title": "",
+      "phone": "",
+      "studioName": "Klei Bridal",
+      "studioAddress": "",
+      "expected": "Best,\nMara\nKlei Bridal"
+    },
+    {
+      "case": "no studio",
+      "enabled": true,
+      "signoff": "Thanks,",
+      "name": "Mara",
+      "title": "Consultant",
+      "phone": "+1 555 0100",
+      "studioName": "",
+      "studioAddress": "",
+      "expected": "Thanks,\nMara\nConsultant\n+1 555 0100"
+    },
+    {
+      "case": "blank lines and padding dropped",
+      "enabled": true,
+      "signoff": "  Warm regards,  ",
+      "name": "  Mara  ",
+      "title": "   ",
+      "phone": "",
+      "studioName": " Klei Bridal ",
+      "studioAddress": "  12 Rose Lane  \n\n  Portland  \n",
+      "expected": "Warm regards,\nMara\nKlei Bridal\n12 Rose Lane\nPortland"
+    },
+    {
+      "case": "everything empty",
+      "enabled": true,
+      "signoff": "",
+      "name": "",
+      "title": "",
+      "phone": "",
+      "studioName": "",
+      "studioAddress": "",
+      "expected": ""
+    },
+    {
+      "case": "unicode kept",
+      "enabled": true,
+      "signoff": "Cordialement,",
+      "name": "Zoë Dubois",
+      "title": "Créatrice",
+      "phone": "",
+      "studioName": "Klei Bridal",
+      "studioAddress": "Rue de l'Église 5",
+      "expected": "Cordialement,\nZoë Dubois\nCréatrice\nKlei Bridal\nRue de l'Église 5"
+    }
+  ]
+}

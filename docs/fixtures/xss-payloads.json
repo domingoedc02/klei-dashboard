@@ -1,0 +1,232 @@
+{
+ "note": "Every payload goes through the server HtmlSanitizer and the desktop sanitize.ts. The output must hold none of `forbidden` (case-insensitive) and all of `kept`.",
+ "cases": [
+  {
+   "name": "script tag",
+   "input": "<b>hi</b><script>alert(1)</script>",
+   "forbidden": [
+    "<script",
+    "alert(1)"
+   ],
+   "kept": [
+    "<b>hi</b>"
+   ]
+  },
+  {
+   "name": "img onerror",
+   "input": "<img src=x onerror=alert(1)>ok",
+   "forbidden": [
+    "<img",
+    "onerror",
+    "alert"
+   ],
+   "kept": [
+    "ok"
+   ]
+  },
+  {
+   "name": "javascript href",
+   "input": "<a href=\"javascript:alert(1)\">go</a>",
+   "forbidden": [
+    "javascript:"
+   ],
+   "kept": [
+    "go"
+   ]
+  },
+  {
+   "name": "mixed case javascript href",
+   "input": "<a href=\"JaVaScRiPt:alert(1)\">go</a>",
+   "forbidden": [
+    "javascript:",
+    "alert(1)\""
+   ],
+   "kept": [
+    "go"
+   ]
+  },
+  {
+   "name": "entity encoded javascript href",
+   "input": "<a href=\"&#106;avascript:alert(1)\">go</a>",
+   "forbidden": [
+    "javascript:",
+    "&#106;"
+   ],
+   "kept": [
+    "go"
+   ]
+  },
+  {
+   "name": "data uri href",
+   "input": "<a href=\"data:text/html;base64,PHNjcmlwdD4=\">x</a>",
+   "forbidden": [
+    "data:"
+   ],
+   "kept": [
+    "x"
+   ]
+  },
+  {
+   "name": "vbscript href",
+   "input": "<a href=\"vbscript:msgbox(1)\">x</a>",
+   "forbidden": [
+    "vbscript:"
+   ],
+   "kept": [
+    "x"
+   ]
+  },
+  {
+   "name": "on handler on allowed tag",
+   "input": "<b onclick=\"alert(1)\">bold</b>",
+   "forbidden": [
+    "onclick",
+    "alert"
+   ],
+   "kept": [
+    "bold"
+   ]
+  },
+  {
+   "name": "style attribute",
+   "input": "<div style=\"background:url(javascript:alert(1))\">t</div>",
+   "forbidden": [
+    "style",
+    "javascript:"
+   ],
+   "kept": [
+    "t"
+   ]
+  },
+  {
+   "name": "iframe",
+   "input": "<iframe src=\"https://evil.test\"></iframe>text",
+   "forbidden": [
+    "<iframe",
+    "evil.test"
+   ],
+   "kept": [
+    "text"
+   ]
+  },
+  {
+   "name": "svg onload",
+   "input": "<svg onload=alert(1)><circle/></svg>after",
+   "forbidden": [
+    "<svg",
+    "onload",
+    "alert"
+   ],
+   "kept": [
+    "after"
+   ]
+  },
+  {
+   "name": "form and input",
+   "input": "<form action=\"https://evil.test\"><input name=p></form>f",
+   "forbidden": [
+    "<form",
+    "<input",
+    "evil.test"
+   ],
+   "kept": []
+  },
+  {
+   "name": "object embed",
+   "input": "<object data=\"x.swf\"></object><embed src=\"x.swf\">e",
+   "forbidden": [
+    "<object",
+    "<embed",
+    "x.swf"
+   ],
+   "kept": []
+  },
+  {
+   "name": "meta refresh and base",
+   "input": "<meta http-equiv=\"refresh\" content=\"0;url=https://evil.test\"><base href=\"https://evil.test/\">m",
+   "forbidden": [
+    "<meta",
+    "<base",
+    "evil.test"
+   ],
+   "kept": []
+  },
+  {
+   "name": "style element",
+   "input": "<style>body{display:none}</style>s",
+   "forbidden": [
+    "<style",
+    "display:none"
+   ],
+   "kept": []
+  },
+  {
+   "name": "broken tag split",
+   "input": "<scr<script>ipt>alert(1)</scr</script>ipt>",
+   "forbidden": [
+    "<script",
+    "alert(1)</"
+   ],
+   "kept": []
+  },
+  {
+   "name": "link target blank gets rel",
+   "input": "<a href=\"https://studio.example\" target=\"_blank\">site</a>",
+   "forbidden": [
+    "target"
+   ],
+   "kept": [
+    "rel=\"noopener noreferrer\"",
+    "href=\"https://studio.example\""
+   ]
+  },
+  {
+   "name": "mailto allowed",
+   "input": "<a href=\"mailto:hello@studio.example\">mail</a>",
+   "forbidden": [],
+   "kept": [
+    "mailto:hello@studio.example"
+   ]
+  },
+  {
+   "name": "lists survive",
+   "input": "<ul><li>one</li><li>two</li></ul><ol><li>a</li></ol>",
+   "forbidden": [],
+   "kept": [
+    "<ul>",
+    "<li>one</li>",
+    "<ol>"
+   ]
+  },
+  {
+   "name": "allowed formatting survives",
+   "input": "<strong>s</strong><em>e</em><u>u</u><i>i</i><br>",
+   "forbidden": [],
+   "kept": [
+    "<strong>s</strong>",
+    "<em>e</em>",
+    "<u>u</u>"
+   ]
+  },
+  {
+   "name": "html comment",
+   "input": "a<!-- <script>alert(1)</script> -->b",
+   "forbidden": [
+    "<!--",
+    "<script"
+   ],
+   "kept": [
+    "a",
+    "b"
+   ]
+  },
+  {
+   "name": "unclosed tag",
+   "input": "<a href=\"https://studio.example\"><b>open",
+   "forbidden": [],
+   "kept": [
+    "open"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+name: desktop
+on:
+  push:
+    paths: ["desktop/**", "docs/api/openapi.json", ".github/workflows/desktop.yml"]
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: desktop
+    env:
+      # Release builds refuse to compile without these (src-tauri/src/config.rs).
+      KLEI_API_URL: http://127.0.0.1:8080
+      KLEI_AUTH_URL: http://127.0.0.1:8081
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "24", cache: npm, cache-dependency-path: desktop/package-lock.json}
+      - uses: dtolnay/rust-toolchain@stable
+        with: {components: clippy}
+      - uses: Swatinem/rust-cache@v2
+        with: {workspaces: desktop/src-tauri}
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libsoup-3.0-dev libxdo-dev libssl-dev xvfb
+      - run: npm ci
+      - run: npm test
+      - run: npm run types:check
+      - run: npm run build
+      - run: cargo test
+        working-directory: desktop/src-tauri
+      - run: cargo clippy --all-targets -- -D warnings
+        working-directory: desktop/src-tauri
+      # shortcut: binary only on every push; installers, signing and upload run on tag v* in release.yml, install and launch are the manual release checklist.
+      - run: npx tauri build --no-bundle
+      - name: Smoke launch
+        working-directory: desktop/src-tauri/target/release
+        env: {KLEI_SMOKE: "1"}
+        run: |
+          bin=./klei-desktop; [ "$RUNNER_OS" = Windows ] && bin=./klei-desktop.exe
+          if [ "$RUNNER_OS" = Linux ]; then xvfb-run -a "$bin"; else "$bin"; fi
+      - name: No tokens in the bundle
+        run: |
+          bin=src-tauri/target/release/klei-desktop; [ "$RUNNER_OS" = Windows ] && bin=$bin.exe
+          # JWT-shaped strings or the PKCE test vector must not be compiled in.
+          if grep -rIlE 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.' dist || grep -aEq 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.|dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk' "$bin"; then
+            echo "secret-shaped string in bundle"; exit 1
+          fi

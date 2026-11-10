@@ -1,0 +1,5 @@
+{
+  "priority": 1,
+  "request": {"method": "GET", "urlPath": "/v1/models", "headers": {"Authorization": {"equalTo": "Bearer smoke-stub-key"}}},
+  "response": {"status": 200, "headers": {"Content-Type": "application/json"}, "jsonBody": {"object": "list", "data": [{"id": "dinov2-base", "object": "model"}, {"id": "stub-chat", "object": "model"}]}}
+}

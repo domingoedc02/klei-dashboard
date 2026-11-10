@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Enter your code - Klei Bridal</title>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/auth.css">
+  <script src="/static/auth.js" defer></script>
+</head>
+<body>
+<main>
+  <p class="wordmark"><span class="mark" aria-hidden="true">K</span>Klei Bridal</p>
+  <div class="card">
+    <div class="head">
+      <h1>Enter your code</h1>
+      <p class="lede" th:unless="${recovery}">Open your authenticator app and enter the 6-digit code for Klei Bridal.</p>
+      <p class="lede" th:if="${recovery}">Enter one of the recovery codes you saved when you turned on two-factor. Each one works once.</p>
+    </div>
+    <p class="alert" role="alert" th:if="${error}" th:text="${error}"></p>
+    <form method="post" th:action="@{/login/code}" data-validate>
+      <input type="hidden" name="recovery" value="1" th:if="${recovery}">
+      <div class="field" th:unless="${recovery}">
+        <label for="code">6-digit code<span class="req" aria-hidden="true"> *</span></label>
+        <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required autofocus data-v="otp" aria-describedby="e-code">
+        <span class="err" id="e-code"></span>
+      </div>
+      <div class="field" th:if="${recovery}">
+        <label for="code">Recovery code<span class="req" aria-hidden="true"> *</span></label>
+        <input id="code" name="code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="16" required autofocus data-v="rcode" aria-describedby="e-code">
+        <span class="err" id="e-code"></span>
+      </div>
+      <button class="btn" type="submit" data-busy="Checking…">Continue</button>
+    </form>
+    <p class="resend">
+      <a th:unless="${recovery}" href="/login/code?recovery=1">Use a recovery code</a>
+      <a th:if="${recovery}" href="/login/code">Use an authenticator code instead</a>
+    </p>
+  </div>
+  <p class="foot"><a href="/return">Back to Klei Bridal</a></p>
+</main>
+</body>
+</html>

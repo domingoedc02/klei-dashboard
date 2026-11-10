@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forgot your password? - Klei Bridal</title>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/auth.css">
+  <script src="/static/auth.js" defer></script>
+</head>
+<body>
+<main>
+  <p class="wordmark"><span class="mark" aria-hidden="true">K</span>Klei Bridal</p>
+  <th:block th:if="${mode == 'form'}">
+  <div class="card">
+    <div class="head">
+      <h1>Forgot your password?</h1>
+      <p class="lede">Enter your work email and we’ll send a reset link.</p>
+    </div>
+      <p class="alert" role="alert" th:if="${error}" th:text="${error}"></p>
+    <form method="post" th:action="@{/forgot}" data-validate>
+      <div class="field">
+        <label for="email">Work email<span class="req" aria-hidden="true"> *</span></label>
+        <input id="email" name="email" type="email" autocomplete="username" required data-v="email" aria-describedby="e-email" autofocus maxlength="254" placeholder="you@kleibridal.com" th:value="${email}">
+        <span class="err" id="e-email"></span>
+      </div>
+      <button class="btn" type="submit" data-busy="Sending…">Send reset link</button>
+    </form>
+  </div>
+  <p class="foot"><a href="/return">Back to Klei Bridal</a></p>
+  </th:block>
+
+  <th:block th:if="${mode == 'sent'}">
+  <div class="card">
+    <div class="head">
+      <h1>Reset link sent</h1>
+      <p class="lede" role="status">If an account exists for <strong th:text="${email}">you@example.test</strong>, you'll get an email in a minute.</p>
+    </div>
+    <p class="notice">Link expires in 30 minutes. Check spam if you don’t see it.</p>
+    <a class="btn secondary" href="/forgot">Use a different email</a>
+  </div>
+  <p class="foot"><a href="/return">Back to Klei Bridal</a></p>
+  </th:block>
+
+</main>
+</body>
+</html>

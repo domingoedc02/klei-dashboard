@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in - Klei Bridal</title>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/auth.css">
+  <script src="/static/fragment.js" defer></script>
+  <script src="/static/auth.js" defer></script>
+</head>
+<body>
+<main>
+  <p class="wordmark"><span class="mark" aria-hidden="true">K</span>Klei Bridal</p>
+  <div class="card">
+    <div class="head">
+      <h1>Welcome back</h1>
+      <p class="lede">Sign in to manage gowns and inquiries.</p>
+    </div>
+    <p class="alert" role="alert" th:if="${error}" th:text="${error}"></p>
+    <form method="post" th:action="@{/login}" data-validate>
+      <div class="field">
+        <label for="email">Work email<span class="req" aria-hidden="true"> *</span></label>
+        <input id="email" name="email" type="email" autocomplete="username" required data-v="email" aria-describedby="e-email" autofocus placeholder="you@kleibridal.com" th:value="${email}">
+        <span class="err" id="e-email"></span>
+      </div>
+      <div class="field">
+        <label for="password">Password<span class="req" aria-hidden="true"> *</span></label>
+        <div class="pw">
+          <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="128" data-v="req" aria-describedby="e-password">
+          <button type="button" data-toggle="password" aria-controls="password" aria-pressed="false" hidden>Show</button>
+        </div>
+        <span class="err" id="e-password"></span>
+      </div>
+      <div class="row">
+        <label class="keep"><input type="checkbox" name="keep" value="1" th:checked="${keep}"> Keep me signed in</label>
+        <a href="/forgot">Forgot password?</a>
+      </div>
+      <button class="btn" type="submit" data-busy="Signing in…">Sign in</button>
+    </form>
+  </div>
+  <p class="foot">Have an invite? Open the link in your email.</p>
+</main>
+</body>
+</html>

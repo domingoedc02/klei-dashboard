@@ -1,0 +1,45 @@
+# secrets
+infra/.env
+.env
+*.pem
+*.key
+*.p12
+*.minisign
+*.keystore
+
+# Maven / Kotlin / JVM
+target/
+.mvn/wrapper/maven-wrapper.jar
+*.class
+*.log
+hs_err_pid*
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+coverage/
+
+# Rust / Tauri
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# tooling caches
+.taste-skill/
+node_modules/
+target/
+
+# Tauri
+desktop/src-tauri/gen/
+
+# Operator grouping evaluation output (Story 10.1)
+*.vectors.json
+
+# UI parity captures (working output)
+desktop/.shots/

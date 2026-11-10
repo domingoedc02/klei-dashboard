@@ -1,0 +1,89 @@
+name: release
+# Tag v* builds signed updater packages on three systems and uploads them to the public releases-only repo (OQ-3).
+# Repository settings this file expects (none of them live in the repo):
+#   secrets.TAURI_SIGNING_PRIVATE_KEY           updater private key (minisign), see infra/ops/key-custody.md
+#   secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD  its password, empty string if none
+#   secrets.RELEASES_TOKEN                      write token scoped to the releases repo only
+#   vars.RELEASES_OWNER, vars.RELEASES_REPO     where installers and latest.json go
+#   vars.KLEI_API_URL, vars.KLEI_AUTH_URL       production backend addresses compiled into the app
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: macos-latest, args: "--target aarch64-apple-darwin", rust: aarch64-apple-darwin}
+          - {os: macos-latest, args: "--target x86_64-apple-darwin", rust: x86_64-apple-darwin}
+          - {os: windows-latest, args: "", rust: ""}
+          # Oldest runner that still has libwebkit2gtk-4.1, so the AppImage runs on older distributions.
+          - {os: ubuntu-22.04, args: "", rust: ""}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: desktop
+    env:
+      KLEI_API_URL: ${{ vars.KLEI_API_URL }}
+      KLEI_AUTH_URL: ${{ vars.KLEI_AUTH_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag matches the app version
+        run: |
+          v=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          [ "refs/tags/v$v" = "$GITHUB_REF" ] || { echo "tag $GITHUB_REF does not match tauri.conf.json version $v"; exit 1; }
+      - name: Update address and key are set
+        run: |
+          node -e "
+            const u = require('./src-tauri/tauri.conf.json').plugins.updater;
+            if (/OWNER|RELEASES_REPO|REPLACE_WITH/.test(JSON.stringify(u))) { console.error('updater endpoint or pubkey is still a placeholder'); process.exit(1); }"
+          [ -n "$KLEI_API_URL" ] && [ -n "$KLEI_AUTH_URL" ] || { echo "KLEI_API_URL and KLEI_AUTH_URL variables are required"; exit 1; }
+      - uses: actions/setup-node@v4
+        with: {node-version: "24", cache: npm, cache-dependency-path: desktop/package-lock.json}
+      - uses: dtolnay/rust-toolchain@stable
+        with: {targets: "${{ matrix.rust }}"}
+      - uses: Swatinem/rust-cache@v2
+        with: {workspaces: desktop/src-tauri}
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libsoup-3.0-dev libxdo-dev libssl-dev
+      - run: npm ci
+      - run: npm test
+      - run: cargo test
+        working-directory: desktop/src-tauri
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: desktop
+          owner: ${{ vars.RELEASES_OWNER }}
+          repo: ${{ vars.RELEASES_REPO }}
+          tagName: ${{ github.ref_name }}
+          releaseName: Klei Bridal ${{ github.ref_name }}
+          releaseDraft: false
+          includeUpdaterJson: true
+          # Updater packages and .sig files only for release builds; the CI check build stays a plain binary.
+          args: ${{ matrix.args }} --config src-tauri/tauri.release.conf.json
+      # Log scan: GitHub masks secrets in logs, so look where masking does not help, in what was built.
+      - name: No token or private key in the built packages
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          RELEASES_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+        run: |
+          dir=src-tauri/target
+          for secret in "$TAURI_SIGNING_PRIVATE_KEY" "$RELEASES_TOKEN"; do
+            [ -n "$secret" ] || continue
+            if grep -rIalF -- "$secret" "$dir"/*/release/bundle "$dir"/release/bundle 2>/dev/null; then
+              echo "a CI secret appears in a built package"; exit 1
+            fi
+          done
+          if grep -rIalE 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.' dist; then
+            echo "token-shaped string in the web bundle"; exit 1
+          fi

@@ -1,0 +1,5 @@
+{
+  "priority": 1,
+  "request": {"method": "POST", "urlPath": "/v1/embeddings", "headers": {"Authorization": {"equalTo": "Bearer smoke-stub-key"}}, "bodyPatterns": [{"matchesJsonPath": "$[?(@.model == 'dinov2-base')]"}, {"matchesJsonPath": "$[?(@.input =~ /^data:image\\/png;base64,.+/)]"}]},
+  "response": {"status": 200, "headers": {"Content-Type": "application/json"}, "jsonBody": {"object": "list", "data": [{"object": "embedding", "index": 0, "embedding": [0.1, 0.2, 0.3, 0.4]}]}}
+}

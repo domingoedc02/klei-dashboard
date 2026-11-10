@@ -1,0 +1,125 @@
+name: klei
+
+# Infrastructure services (Story 1.1) and the backend (Story 1.2).
+# No secret has a default: a missing variable stops `docker compose` with its name.
+
+services:
+  postgres:
+    image: postgres:18.6
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${KLEI_DB_USER:?set KLEI_DB_USER in infra/.env}
+      POSTGRES_PASSWORD: ${KLEI_DB_PASSWORD:?set KLEI_DB_PASSWORD in infra/.env}
+      POSTGRES_DB: ${KLEI_DB_NAME:-klei}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  objectstore:
+    image: chrislusf/seaweedfs:4.52
+    restart: unless-stopped
+    command: ["server", "-dir=/data", "-s3", "-ip.bind=0.0.0.0", "-volume.max=0", "-volume.minFreeSpace=${KLEI_S3_MIN_FREE_SPACE:-5}"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${KLEI_S3_ACCESS_KEY:?set KLEI_S3_ACCESS_KEY in infra/.env}
+      AWS_SECRET_ACCESS_KEY: ${KLEI_S3_SECRET_KEY:?set KLEI_S3_SECRET_KEY in infra/.env}
+    volumes:
+      - objdata:/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:9333/cluster/status && nc -z 127.0.0.1 8333"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../infra/Dockerfile
+    image: klei-backend:dev
+    restart: unless-stopped
+    depends_on:
+      postgres: {condition: service_healthy}
+      objectstore: {condition: service_healthy}
+    read_only: true
+    tmpfs: ["/tmp"]
+    mem_limit: 1g
+    environment:
+      KLEI_DB_URL: jdbc:postgresql://postgres:5432/${KLEI_DB_NAME:-klei}
+      KLEI_DB_USER: ${KLEI_DB_USER:?set KLEI_DB_USER in infra/.env}
+      KLEI_DB_PASSWORD: ${KLEI_DB_PASSWORD:?set KLEI_DB_PASSWORD in infra/.env}
+      KLEI_S3_ENDPOINT: http://objectstore:8333
+      KLEI_S3_ACCESS_KEY: ${KLEI_S3_ACCESS_KEY:?set KLEI_S3_ACCESS_KEY in infra/.env}
+      KLEI_S3_SECRET_KEY: ${KLEI_S3_SECRET_KEY:?set KLEI_S3_SECRET_KEY in infra/.env}
+      KLEI_S3_BUCKET: ${KLEI_S3_BUCKET:-klei-objects}
+      # Rotation (infra/ops/key-custody.md): fill the next free slot, then raise KLEI_KEK_ACTIVE. Blank slots are ignored.
+      KLEI_KEK_1: ${KLEI_KEK_1:?set KLEI_KEK_1 in infra/.env}
+      KLEI_KEK_2: ${KLEI_KEK_2:-}
+      KLEI_KEK_3: ${KLEI_KEK_3:-}
+      KLEI_KEK_4: ${KLEI_KEK_4:-}
+      KLEI_KEK_ACTIVE: ${KLEI_KEK_ACTIVE:?set KLEI_KEK_ACTIVE in infra/.env}
+      KLEI_BIDX_KEY: ${KLEI_BIDX_KEY:?set KLEI_BIDX_KEY in infra/.env}
+      KLEI_JWT_KEY: ${KLEI_JWT_KEY:?set KLEI_JWT_KEY in infra/.env}
+      KLEI_TRUSTED_PROXY_HOPS: ${KLEI_TRUSTED_PROXY_HOPS:-1}
+      # Mail (Story 2.1): Mailpit in the dev profile. Outside dev set a real relay and KLEI_SMTP_REQUIRE_TLS=true.
+      KLEI_SMTP_HOST: ${KLEI_SMTP_HOST:-mailpit}
+      KLEI_SMTP_PORT: ${KLEI_SMTP_PORT:-1025}
+      KLEI_SMTP_USER: ${KLEI_SMTP_USER:-}
+      KLEI_SMTP_PASSWORD: ${KLEI_SMTP_PASSWORD:-}
+      KLEI_SMTP_AUTH: ${KLEI_SMTP_AUTH:-false}
+      KLEI_SMTP_REQUIRE_TLS: ${KLEI_SMTP_REQUIRE_TLS:-false}
+      KLEI_MAIL_FROM: ${KLEI_MAIL_FROM:-no-reply@klei.test}
+      KLEI_AUTH_BASE_URL: ${KLEI_AUTH_BASE_URL:-http://localhost:8081}
+      # Read only while no Admin exists; the backend names them if they are then missing.
+      KLEI_BOOTSTRAP_ADMIN_EMAIL: ${KLEI_BOOTSTRAP_ADMIN_EMAIL:-}
+      KLEI_BOOTSTRAP_ADMIN_PASSWORD: ${KLEI_BOOTSTRAP_ADMIN_PASSWORD:-}
+      # AI provider (Story 3.1): the key is typed into the app, never set here. Dev mode opens plain HTTP and private
+      # addresses for ai-stub; the backend refuses it unless SPRING_PROFILES_ACTIVE holds dev or test.
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      KLEI_AI_DEV_MODE: ${KLEI_AI_DEV_MODE:-false}
+    networks: [internal, edge]
+    healthcheck:
+      # The JRE image has no curl or wget: bash /dev/tcp and grep.
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '\"status\":\"up\"' <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+  mailpit:
+    image: axllent/mailpit:v1.33.0
+    restart: unless-stopped
+    profiles: [dev]
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  ai-stub:
+    image: wiremock/wiremock:3.13.1
+    restart: unless-stopped
+    profiles: [dev]
+    command: ["--disable-banner"]
+    volumes:
+      - ./ci/stub-ai/mappings:/home/wiremock/mappings:ro
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8080/__admin/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  internal:
+    internal: true
+  edge: {}
+
+volumes:
+  pgdata:
+  objdata:

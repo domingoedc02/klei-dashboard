@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klei Bridal Dashboard</title>
+<style>
+/* OD-LAYOUT-PRIMITIVES v1 — structure only: display, flex/grid, overflow, wrapping, ratio, geometry.
+   Put this @layer first; product CSS outside the layer wins ordinary layout rules.
+   Native hidden and closed-dialog states take precedence over component display rules. */
+@layer od-layout {
+  [hidden]:not([hidden="until-found" i]) { display: none !important; }
+  dialog:not([open]) { display: none !important; }
+
+  :where(.od-stack,.od-row,.od-row-top,.od-cluster,.od-grid,.od-field,.od-stat,.od-cell,.od-tile) > :where(*) { min-width: 0; }
+
+  .od-stack   { display: flex; flex-direction: column; gap: var(--od-gap, 8px); }
+  .od-row     { display: flex; align-items: center; gap: var(--od-gap, 8px); }
+  .od-row-top { display: flex; align-items: flex-start; gap: var(--od-gap, 8px); }
+  .od-cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--od-gap, 8px); }
+  .od-fill    { flex: 1 1 0; min-width: 0; }
+  .od-fixed   { flex: none; }
+  .od-grid    { display: grid; gap: var(--od-gap, 12px); grid-template-columns: repeat(var(--od-cols, 3), minmax(0, 1fr)); }
+
+  .od-stat, .od-field, .od-cell { display: grid; gap: var(--od-gap, 2px); }
+  :where(.od-stat,.od-field,.od-cell) > :where(*) { display: block; }
+  .od-tile { display: grid; grid-template-rows: auto 1fr; }
+  :where(.od-tile) > :where(*) { display: block; }
+
+  .od-media { display: block; width: 100%; height: auto; aspect-ratio: var(--od-ratio, auto); }
+  .od-media-cover { object-fit: cover; }
+
+  .od-icon { display: inline-block; inline-size: var(--od-icon-size, 1em); block-size: var(--od-icon-size, 1em); flex: none; }
+
+  .od-truncate { display: block; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .od-clamp-2, .od-clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .od-clamp-2 { -webkit-line-clamp: 2; }
+  .od-clamp-3 { -webkit-line-clamp: 3; }
+  .od-lines-2 { min-height: calc(2 * 1.4em); }
+  .od-nowrap  { white-space: nowrap; }
+  .od-keep    { word-break: keep-all; overflow-wrap: anywhere; }
+
+  .od-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; }
+  .od-scroll { overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+
+  .od-rail { display: flex; gap: var(--od-gap, 8px); overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none;
+             padding-inline: var(--od-rail-pad, 16px); scroll-padding-inline: var(--od-rail-pad, 16px); }
+  .od-rail::-webkit-scrollbar { display: none; }
+  :where(.od-rail) > :where(*) { flex: none; scroll-snap-align: start; }
+  :where(.od-rail) > :where(:last-child) { margin-inline-end: var(--od-rail-pad, 16px); }
+
+  .od-spacer { flex: none; visibility: hidden; pointer-events: none; }
+  .od-touch  { min-width: 44px; min-height: 44px; }
+}
+:root [hidden]:where(:not([hidden="until-found" i])) { display: none; }
+/* /OD-LAYOUT-PRIMITIVES v1 */
+
+:root {
+  --bg:           #ffffff;
+  --surface:      #f6f5f4;
+  --surface-warm: var(--surface);
+
+  --fg:   rgba(0, 0, 0, 0.95);
+  --fg-2: #31302e;
+  --muted: #615d59;
+  --meta:  #a39e98;
+
+  --border:      rgba(0, 0, 0, 0.1);
+  --border-soft: rgba(0, 0, 0, 0.06);
+
+  --accent:        #0075de;
+  --accent-on:     #ffffff;
+  --accent-hover:  #005bab;
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
+
+  --success: #1aae39;
+  --warn:    #dd5b00;
+  --danger:  #dc2626;
+
+  --font-display: "NotionInter", "Inter", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body:    "NotionInter", "Inter", -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+
+  --text-xs:   12px;
+  --text-sm:   14px;
+  --text-base: 16px;
+  --text-lg:   20px;
+  --text-xl:   26px;
+  --text-2xl:  40px;
+  --text-3xl:  48px;
+  --text-4xl:  64px;
+
+  --leading-body:     1.5;
+  --leading-tight:    1.00;
+  --tracking-display: -0.033em;
+
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+
+  --section-y-desktop: 80px;
+  --section-y-tablet:  48px;
+  --section-y-phone:   32px;
+
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-pill: 9999px;
+
+  --elev-flat:   none;
+  --elev-ring:   0 0 0 1px var(--border);
+  --elev-raised:
+    rgba(0, 0, 0, 0.04) 0px 4px 18px,
+    rgba(0, 0, 0, 0.027) 0px 2px 7.85px,
+    rgba(0, 0, 0, 0.02) 0px 0.8px 2.93px,
+    rgba(0, 0, 0, 0.01) 0px 0.175px 1.04px;
+
+  --focus-ring: 0 0 0 3px rgba(9, 127, 232, 0.3);
+
+  --motion-fast:   150ms;
+  --motion-base:   200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  --container-max:            1200px;
+  --container-gutter-desktop: 24px;
+  --container-gutter-tablet:  16px;
+  --container-gutter-phone:   12px;
+}
+</style>
+<link rel="stylesheet" href="/css/base.css?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz">
+<link rel="stylesheet" href="/css/shell.css?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz">
+<link rel="stylesheet" href="/css/screens.css?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz">
+</head>
+<body>
+<a class="skip-link" href="#view">Skip to main content</a>
+<div id="app"></div>
+<dialog id="dlg" class="dlg" aria-labelledby="dlg-title"></dialog>
+<div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+
+<script src="/js/core.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+<script src="/js/data.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+<script src="/js/auth.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+<script src="/js/dashboard.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+<script src="/js/upload.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+<script src="/js/gallery.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+<script src="/js/inquiries.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+<script src="/js/settings.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+<script src="/js/assistant.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+<script src="/js/main.js?workspaceId=gxounyhzcnxuzwt7arieoqq9&amp;workspaceMemberId=tn8g6kzegobjkp5e8wlhgmdz"></script>
+
+
+</body></html>

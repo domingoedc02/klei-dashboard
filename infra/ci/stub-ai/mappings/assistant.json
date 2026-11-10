@@ -1,0 +1,5 @@
+{
+  "priority": 0,
+  "request": {"method": "POST", "urlPath": "/v1/chat/completions", "headers": {"Authorization": {"equalTo": "Bearer smoke-stub-key"}}, "bodyPatterns": [{"contains": "Klei Assistant"}]},
+  "response": {"status": 200, "headers": {"Content-Type": "application/json"}, "jsonBody": {"object": "chat.completion", "choices": [{"index": 0, "message": {"role": "assistant", "content": "SmokeAssistAnswerZq: two new inquiries wait for a reply."}}]}}
+}

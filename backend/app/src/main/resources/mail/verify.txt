@@ -1,0 +1,9 @@
+Hello,
+
+Your Klei Bridal verification code is [(${code})]. It works for 30 minutes.
+
+You can also open this link to verify your email:
+
+[(${link})]
+
+If you did not ask for this, you can ignore this email.

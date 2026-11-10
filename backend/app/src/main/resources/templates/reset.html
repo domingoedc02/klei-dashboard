@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Choose a new password - Klei Bridal</title>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/auth.css">
+  <script src="/static/fragment.js" defer></script>
+  <script src="/static/strength.js" defer></script>
+  <script src="/static/auth.js" defer></script>
+</head>
+<body>
+<main>
+  <p class="wordmark"><span class="mark" aria-hidden="true">K</span>Klei Bridal</p>
+  <th:block th:if="${mode == 'open'}">
+  <div class="card">
+    <h1>Opening your reset link</h1>
+    <form method="post" th:action="@{/reset/open}" data-fragment>
+      <input type="hidden" name="token" value="">
+      <noscript><p class="alert">Turn on JavaScript to open this reset link.</p></noscript>
+    </form>
+  </div>
+  </th:block>
+
+  <th:block th:if="${mode == 'expired'}">
+  <div class="card">
+    <h1>Link expired</h1>
+    <p class="alert" role="alert">This reset link has expired. Request a new one.</p>
+    <a class="btn" href="/forgot">Request a new link</a>
+  </div>
+  </th:block>
+
+  <th:block th:if="${mode == 'done'}">
+  <div class="card">
+    <h1>Password updated</h1>
+    <p role="status">Password updated. Sign in.</p>
+    <p class="help">Open Klei Bridal and sign in with your new password.</p>
+  </div>
+  </th:block>
+
+  <th:block th:if="${mode == 'form'}">
+  <div class="card">
+    <div class="head">
+      <h1>Choose a new password</h1>
+      <p id="rule" class="lede">For <strong th:text="${email}">you@example.test</strong>. Use at least 8 characters with a number.</p>
+    </div>
+      <p class="alert" role="alert" th:if="${error}" th:text="${error}"></p>
+    <form method="post" th:action="@{/reset}" data-validate>
+      <input type="hidden" name="token" th:value="${token}">
+      <div class="field">
+        <label for="password">New password<span class="req" aria-hidden="true"> *</span></label>
+        <div class="pw">
+          <input id="password" name="password" type="password" autocomplete="new-password" required maxlength="128" data-v="newpw" aria-describedby="rule strength e-password" autofocus>
+          <button type="button" data-toggle="password" aria-controls="password" aria-pressed="false" hidden>Show</button>
+        </div>
+        <span class="err" id="e-password"></span>
+      </div>
+      <p id="strength" class="strength" data-strength="password" data-level="0" aria-live="polite">
+        <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="word"></span>
+      </p>
+      <div class="field">
+        <label for="confirm">Confirm new password<span class="req" aria-hidden="true"> *</span></label>
+        <div class="pw">
+          <input id="confirm" name="confirm" type="password" autocomplete="new-password" required maxlength="128" data-v="match" aria-describedby="e-confirm">
+          <button type="button" data-toggle="confirm" aria-controls="confirm" aria-pressed="false" hidden>Show</button>
+        </div>
+        <span class="err" id="e-confirm"></span>
+      </div>
+      <button class="btn" type="submit" data-busy="Updating…">Update password</button>
+    </form>
+  </div>
+  </th:block>
+
+  <p class="foot" th:if="${mode == 'form'}"><a href="/return">Back to Klei Bridal</a></p>
+</main>
+</body>
+</html>
