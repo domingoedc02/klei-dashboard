@@ -1,0 +1,1226 @@
+{
+ "dashboard-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "dashboard-loading": {
+  "prototype": [],
+  "desktop": []
+ },
+ "dashboard-empty": {
+  "prototype": [],
+  "desktop": []
+ },
+ "upload-empty": {
+  "prototype": [],
+  "desktop": []
+ },
+ "upload-processing": {
+  "prototype": [],
+  "desktop": []
+ },
+ "upload-review": {
+  "prototype": [
+   {
+    "kind": "overlap",
+    "sel": "span.sm.semi",
+    "text": "Genevieve",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "71x8px at (287,857)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "span.pill.pill-green",
+    "text": "High",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "27x8px at (542,857)"
+   }
+  ],
+  "desktop": [
+   {
+    "kind": "overlap",
+    "sel": "span.name",
+    "text": "Rosalind",
+    "with": "span.hint",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "66x17px at (273,815)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "span.pill.pos",
+    "text": "High",
+    "with": "span.hint",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "24x15px at (542,815)"
+   }
+  ]
+ },
+ "upload-error": {
+  "prototype": [],
+  "desktop": []
+ },
+ "upload-review-low-group": {
+  "prototype": [
+   {
+    "kind": "overlap",
+    "sel": "span.sm.semi",
+    "text": "Genevieve",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "71x8px at (287,857)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "span.pill.pill-green",
+    "text": "High",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "27x8px at (542,857)"
+   }
+  ],
+  "desktop": [
+   {
+    "kind": "overlap",
+    "sel": "span.name",
+    "text": "Rosalind",
+    "with": "span.hint",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "66x17px at (273,815)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "span.pill.pos",
+    "text": "High",
+    "with": "span.hint",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "24x15px at (542,815)"
+   }
+  ]
+ },
+ "upload-review-photos-selected": {
+  "prototype": [
+   {
+    "kind": "overlap",
+    "sel": "span.sm.semi",
+    "text": "Genevieve",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "71x8px at (287,857)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "span.pill.pill-green",
+    "text": "High",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "27x8px at (542,857)"
+   }
+  ],
+  "desktop": []
+ },
+ "upload-review-combo-open": {
+  "prototype": [
+   {
+    "kind": "overlap",
+    "sel": "span.sm.semi",
+    "text": "Genevieve",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "71x8px at (287,857)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "span.pill.pill-green",
+    "text": "High",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "27x8px at (542,857)"
+   }
+  ],
+  "desktop": [
+   {
+    "kind": "overlap",
+    "sel": "span.name",
+    "text": "Rosalind",
+    "with": "span.hint",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "66x17px at (273,815)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "span.pill.pos",
+    "text": "High",
+    "with": "span.hint",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "24x15px at (542,815)"
+   }
+  ]
+ },
+ "upload-review-discard-dialog": {
+  "prototype": [
+   {
+    "kind": "overlap",
+    "sel": "span.sm.semi",
+    "text": "Genevieve",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "71x8px at (287,857)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "span.pill.pill-green",
+    "text": "High",
+    "with": "span.sm.muted",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "27x8px at (542,857)"
+   }
+  ],
+  "desktop": [
+   {
+    "kind": "overlap",
+    "sel": "span.name",
+    "text": "Rosalind",
+    "with": "span.hint",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "66x17px at (273,815)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "span.pill.pos",
+    "text": "High",
+    "with": "span.hint",
+    "withText": "10 gowns · 30 photos will be added to Ga",
+    "detail": "24x15px at (542,815)"
+   }
+  ]
+ },
+ "upload-review-scrolled": {
+  "prototype": [],
+  "desktop": []
+ },
+ "gallery-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "gallery-loading": {
+  "prototype": [],
+  "desktop": []
+ },
+ "gallery-empty": {
+  "prototype": [],
+  "desktop": []
+ },
+ "gallery-no-match": {
+  "prototype": [],
+  "desktop": []
+ },
+ "gallery-selected": {
+  "prototype": [],
+  "desktop": []
+ },
+ "gallery-delete-dialog": {
+  "prototype": [],
+  "desktop": []
+ },
+ "viewer-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "viewer-photo-3": {
+  "prototype": [],
+  "desktop": []
+ },
+ "viewer-edit-dialog": {
+  "prototype": [],
+  "desktop": [
+   {
+    "kind": "dialog-scroll",
+    "sel": "div.dialog",
+    "text": "",
+    "detail": "content 974px > box 866px, footer/controls need an inner scroll"
+   }
+  ]
+ },
+ "viewer-edit-error": {
+  "prototype": [],
+  "desktop": [
+   {
+    "kind": "dialog-scroll",
+    "sel": "div.dialog",
+    "text": "",
+    "detail": "content 998px > box 866px, footer/controls need an inner scroll"
+   }
+  ]
+ },
+ "viewer-delete-dialog": {
+  "prototype": [],
+  "desktop": []
+ },
+ "inquiries-default": {
+  "prototype": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 408x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 441x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 446x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 430x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 456x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 415x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 432x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I would like to book a first fitting for",
+    "detail": "scroll 440x16 > client 219x16"
+   }
+  ],
+  "desktop": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Fitting availability for a June wedding",
+    "detail": "scroll 281x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 544x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Alterations and timeline question",
+    "detail": "scroll 247x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 588x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Lace ball gown pricing",
+    "detail": "scroll 170x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 595x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Can I reschedule my appointment?",
+    "detail": "scroll 262x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 573x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Thank you, we found the one",
+    "detail": "scroll 220x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 608x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Do you offer plus-size samples?",
+    "detail": "scroll 243x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 554x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Sample sizes for A-line gowns",
+    "detail": "scroll 229x24 > client 164x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 576x24 > client 164x24"
+   }
+  ]
+ },
+ "inquiries-loading": {
+  "prototype": [],
+  "desktop": []
+ },
+ "inquiries-empty": {
+  "prototype": [],
+  "desktop": []
+ },
+ "inquiries-filtered-empty": {
+  "prototype": [],
+  "desktop": []
+ },
+ "inquiries-thread-replied": {
+  "prototype": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 408x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 441x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 446x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 430x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 456x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 415x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 432x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I would like to book a first fitting for",
+    "detail": "scroll 440x16 > client 219x16"
+   }
+  ],
+  "desktop": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Fitting availability for a June wedding",
+    "detail": "scroll 281x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 544x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Alterations and timeline question",
+    "detail": "scroll 247x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 588x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Lace ball gown pricing",
+    "detail": "scroll 170x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 595x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Can I reschedule my appointment?",
+    "detail": "scroll 262x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 573x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Thank you, we found the one",
+    "detail": "scroll 220x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 608x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Do you offer plus-size samples?",
+    "detail": "scroll 243x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 554x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Sample sizes for A-line gowns",
+    "detail": "scroll 229x24 > client 164x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 576x24 > client 164x24"
+   }
+  ]
+ },
+ "inquiries-thread-closed": {
+  "prototype": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 408x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 441x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 446x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 430x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 456x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 415x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 432x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I would like to book a first fitting for",
+    "detail": "scroll 440x16 > client 219x16"
+   }
+  ],
+  "desktop": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Fitting availability for a June wedding",
+    "detail": "scroll 281x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 544x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Alterations and timeline question",
+    "detail": "scroll 247x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 588x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Lace ball gown pricing",
+    "detail": "scroll 170x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 595x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Can I reschedule my appointment?",
+    "detail": "scroll 262x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 573x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Thank you, we found the one",
+    "detail": "scroll 220x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 608x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Do you offer plus-size samples?",
+    "detail": "scroll 243x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 554x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Sample sizes for A-line gowns",
+    "detail": "scroll 229x24 > client 164x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 576x24 > client 164x24"
+   }
+  ]
+ },
+ "inquiries-composer-error": {
+  "prototype": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 408x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 441x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 446x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 430x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 456x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 415x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 432x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I would like to book a first fitting for",
+    "detail": "scroll 440x16 > client 219x16"
+   }
+  ],
+  "desktop": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Can I reschedule my appointment?",
+    "detail": "scroll 262x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 573x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Thank you, we found the one",
+    "detail": "scroll 220x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 608x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Do you offer plus-size samples?",
+    "detail": "scroll 243x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 554x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Sample sizes for A-line gowns",
+    "detail": "scroll 229x24 > client 164x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 576x24 > client 164x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "I would like to book a first fitting for",
+    "detail": "scroll 587x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Veil and accessory options",
+    "detail": "scroll 203x24 > client 163x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Which veils go with a lace ball gown? I ",
+    "detail": "scroll 570x24 > client 163x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "First consultation request",
+    "detail": "scroll 192x24 > client 163x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "I am getting married in December and nee",
+    "detail": "scroll 584x24 > client 163x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Mikado or satin for a winter wedding?",
+    "detail": "scroll 284x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We are torn between Mikado and satin for",
+    "detail": "scroll 596x24 > client 166x24"
+   }
+  ]
+ },
+ "inquiries-customer-card": {
+  "prototype": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 408x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 441x16 > client 234x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 446x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 430x16 > client 216x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 456x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 415x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 432x16 > client 219x16"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "span.xs.muted",
+    "text": "I would like to book a first fitting for",
+    "detail": "scroll 440x16 > client 219x16"
+   }
+  ],
+  "desktop": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Fitting availability for a June wedding",
+    "detail": "scroll 281x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 544x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Alterations and timeline question",
+    "detail": "scroll 247x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 588x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Lace ball gown pricing",
+    "detail": "scroll 170x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 595x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Can I reschedule my appointment?",
+    "detail": "scroll 262x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 573x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Thank you, we found the one",
+    "detail": "scroll 220x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 608x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Do you offer plus-size samples?",
+    "detail": "scroll 243x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 554x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Sample sizes for A-line gowns",
+    "detail": "scroll 229x24 > client 164x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 576x24 > client 164x24"
+   }
+  ]
+ },
+ "client-profile-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-profile-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-signature-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-signature-away-on": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-preferences-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-notifications-default": {
+  "prototype": [],
+  "desktop": [
+   {
+    "kind": "glued-text",
+    "sel": "th",
+    "text": "New inquiry|When a client submits the",
+    "detail": "no whitespace between nodes; accessible name / copied text runs together"
+   },
+   {
+    "kind": "glued-text",
+    "sel": "th",
+    "text": "AI finished|When a batch is ready to ",
+    "detail": "no whitespace between nodes; accessible name / copied text runs together"
+   },
+   {
+    "kind": "glued-text",
+    "sel": "th",
+    "text": "Team activity|Invites accepted and role",
+    "detail": "no whitespace between nodes; accessible name / copied text runs together"
+   }
+  ]
+ },
+ "settings-staff-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-staff-empty": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-staff-add-dialog": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-roles-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-ai-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-ai-provider-fail": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-audit-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-profile-staff-role": {
+  "prototype": [],
+  "desktop": []
+ },
+ "settings-2fa-on": {
+  "prototype": [],
+  "desktop": []
+ },
+ "overlay-notifications-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "overlay-notifications-empty": {
+  "prototype": [],
+  "desktop": []
+ },
+ "overlay-profile-menu-default": {
+  "prototype": [],
+  "desktop": []
+ },
+ "overlay-search-results": {
+  "prototype": [],
+  "desktop": []
+ },
+ "overlay-search-none": {
+  "prototype": [],
+  "desktop": []
+ },
+ "overlay-assistant-greeting": {
+  "prototype": [],
+  "desktop": []
+ },
+ "overlay-assistant-busy": {
+  "prototype": [],
+  "desktop": []
+ },
+ "upload-loading": {
+  "desktop": []
+ },
+ "upload-stopped": {
+  "desktop": []
+ },
+ "viewer-loading": {
+  "desktop": []
+ },
+ "inquiries-no-selection": {
+  "desktop": [
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Fitting availability for a June wedding",
+    "detail": "scroll 281x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 544x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Alterations and timeline question",
+    "detail": "scroll 247x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 588x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Lace ball gown pricing",
+    "detail": "scroll 170x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 595x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Can I reschedule my appointment?",
+    "detail": "scroll 262x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Something came up on Saturday. Is it pos",
+    "detail": "scroll 573x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Thank you, we found the one",
+    "detail": "scroll 220x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We just wanted to say thank you. We foun",
+    "detail": "scroll 608x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Do you offer plus-size samples?",
+    "detail": "scroll 243x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "I am a size 20 and want to know which go",
+    "detail": "scroll 554x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Sample sizes for A-line gowns",
+    "detail": "scroll 229x24 > client 164x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Do you carry sample sizes 8 and 10 in A-",
+    "detail": "scroll 576x24 > client 164x24"
+   }
+  ]
+ },
+ "settings-usage-default": {
+  "desktop": []
+ },
+ "settings-keys-default": {
+  "desktop": []
+ },
+ "settings-away-default": {
+  "desktop": []
+ },
+ "signin-booting": {
+  "desktop": []
+ },
+ "signin-signed_out": {
+  "desktop": []
+ },
+ "signin-waiting": {
+  "desktop": []
+ },
+ "signin-failed": {
+  "desktop": []
+ },
+ "signin-keychain_unavailable": {
+  "desktop": [
+   {
+    "kind": "overlap",
+    "sel": "button.btn.primary",
+    "text": "Try again",
+    "with": "p.hint",
+    "withText": "You will sign in again the next time you",
+    "detail": "63x4px at (550,535)"
+   },
+   {
+    "kind": "overlap",
+    "sel": "button.btn",
+    "text": "Continue without saving",
+    "with": "p.hint",
+    "withText": "You will sign in again the next time you",
+    "detail": "164x4px at (647,535)"
+   }
+  ]
+ },
+ "signin-unreachable": {
+  "desktop": []
+ },
+ "signin-session_expired": {
+  "desktop": []
+ },
+ "signin-no_access": {
+  "desktop": []
+ },
+ "banner-update-ready": {
+  "desktop": []
+ }
+}

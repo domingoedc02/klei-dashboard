@@ -1,0 +1,270 @@
+{
+ "groups": [
+  {
+   "id": "u0",
+   "name": "Marguerite",
+   "sil": [
+    "A-line"
+   ],
+   "fab": [
+    "Tulle",
+    "Lace"
+   ],
+   "neck": [
+    "Bateau"
+   ],
+   "slv": [
+    "Sheer long sleeve"
+   ],
+   "trn": [
+    "Sweep"
+   ],
+   "kind": "aline",
+   "n": 3,
+   "conf": 72,
+   "desc": "Marguerite is a a-line gown in tulle and lace with a bateau neckline and sheer long sleeves. The sweep train falls softly behind, finishing in a clean hem."
+  },
+  {
+   "id": "u1",
+   "name": "Isolde",
+   "sil": [
+    "Mermaid"
+   ],
+   "fab": [
+    "Lace"
+   ],
+   "neck": [
+    "Square"
+   ],
+   "slv": [
+    "Strapless"
+   ],
+   "trn": [
+    "Chapel"
+   ],
+   "kind": "mermaid",
+   "n": 3,
+   "conf": 94,
+   "desc": "Isolde is a mermaid gown in lace with a square neckline and straplesss. The chapel train falls softly behind, finishing in a clean hem."
+  },
+  {
+   "id": "u2",
+   "name": "Valentina",
+   "sil": [
+    "Ball gown"
+   ],
+   "fab": [
+    "Mikado",
+    "Tulle"
+   ],
+   "neck": [
+    "Sweetheart"
+   ],
+   "slv": [
+    "Cap sleeve"
+   ],
+   "trn": [
+    "Cathedral"
+   ],
+   "kind": "ball",
+   "n": 3,
+   "conf": 88,
+   "desc": "Valentina is a ball gown gown in mikado and tulle with a sweetheart neckline and cap sleeves. The cathedral train falls softly behind, finishing in a clean hem."
+  },
+  {
+   "id": "u3",
+   "name": "Anastasia",
+   "sil": [
+    "A-line"
+   ],
+   "fab": [
+    "Tulle"
+   ],
+   "neck": [
+    "V-neck"
+   ],
+   "slv": [
+    "Long sleeve"
+   ],
+   "trn": [
+    "None"
+   ],
+   "kind": "aline",
+   "n": 3,
+   "conf": 67,
+   "desc": "Anastasia is a a-line gown in tulle with a v-neck neckline and long sleeves. The none train falls softly behind, finishing in a clean hem."
+  },
+  {
+   "id": "u4",
+   "name": "Genevieve",
+   "sil": [
+    "Mermaid"
+   ],
+   "fab": [
+    "Lace",
+    "Mikado"
+   ],
+   "neck": [
+    "Off-shoulder"
+   ],
+   "slv": [
+    "Sheer long sleeve"
+   ],
+   "trn": [
+    "Sweep"
+   ],
+   "kind": "mermaid",
+   "n": 3,
+   "conf": 90,
+   "desc": "Genevieve is a mermaid gown in lace and mikado with a off-shoulder neckline and sheer long sleeves. The sweep train falls softly behind, finishing in a clean hem."
+  },
+  {
+   "id": "u5",
+   "name": "Rosalind",
+   "sil": [
+    "Ball gown"
+   ],
+   "fab": [
+    "Mikado"
+   ],
+   "neck": [
+    "Bateau"
+   ],
+   "slv": [
+    "Strapless"
+   ],
+   "trn": [
+    "Chapel"
+   ],
+   "kind": "ball",
+   "n": 3,
+   "conf": 93,
+   "desc": "Rosalind is a ball gown gown in mikado with a bateau neckline and straplesss. The chapel train falls softly behind, finishing in a clean hem."
+  },
+  {
+   "id": "u6",
+   "name": "Philippa",
+   "sil": [
+    "A-line"
+   ],
+   "fab": [
+    "Tulle",
+    "Lace"
+   ],
+   "neck": [
+    "Square"
+   ],
+   "slv": [
+    "Cap sleeve"
+   ],
+   "trn": [
+    "Cathedral"
+   ],
+   "kind": "aline",
+   "n": 3,
+   "conf": 79,
+   "desc": "Philippa is a a-line gown in tulle and lace with a square neckline and cap sleeves. The cathedral train falls softly behind, finishing in a clean hem."
+  },
+  {
+   "id": "u7",
+   "name": "Odette",
+   "sil": [
+    "Mermaid"
+   ],
+   "fab": [
+    "Lace"
+   ],
+   "neck": [
+    "Sweetheart"
+   ],
+   "slv": [
+    "Long sleeve"
+   ],
+   "trn": [
+    "None"
+   ],
+   "kind": "mermaid",
+   "n": 3,
+   "conf": 96,
+   "desc": "Odette is a mermaid gown in lace with a sweetheart neckline and long sleeves. The none train falls softly behind, finishing in a clean hem."
+  },
+  {
+   "id": "u8",
+   "name": "Calliope",
+   "sil": [
+    "Ball gown"
+   ],
+   "fab": [
+    "Mikado",
+    "Tulle"
+   ],
+   "neck": [
+    "V-neck"
+   ],
+   "slv": [
+    "Sheer long sleeve"
+   ],
+   "trn": [
+    "Sweep"
+   ],
+   "kind": "ball",
+   "n": 3,
+   "conf": 91,
+   "desc": "Calliope is a ball gown gown in mikado and tulle with a v-neck neckline and sheer long sleeves. The sweep train falls softly behind, finishing in a clean hem."
+  },
+  {
+   "id": "u9",
+   "name": "Aurelia",
+   "sil": [
+    "A-line"
+   ],
+   "fab": [
+    "Tulle"
+   ],
+   "neck": [
+    "Off-shoulder"
+   ],
+   "slv": [
+    "Strapless"
+   ],
+   "trn": [
+    "Chapel"
+   ],
+   "kind": "aline",
+   "n": 3,
+   "conf": 84,
+   "desc": "Aurelia is a a-line gown in tulle with a off-shoulder neckline and straplesss. The chapel train falls softly behind, finishing in a clean hem."
+  }
+ ],
+ "tax": {
+  "Silhouette": [
+   "A-line",
+   "Mermaid",
+   "Ball gown"
+  ],
+  "Fabric": [
+   "Mikado",
+   "Tulle",
+   "Lace"
+  ],
+  "Neckline": [
+   "Sweetheart",
+   "V-neck",
+   "Off-shoulder",
+   "Bateau",
+   "Square"
+  ],
+  "Sleeve": [
+   "Strapless",
+   "Cap sleeve",
+   "Long sleeve",
+   "Sheer long sleeve"
+  ],
+  "Train": [
+   "Sweep",
+   "Chapel",
+   "Cathedral",
+   "None"
+  ]
+ }
+}

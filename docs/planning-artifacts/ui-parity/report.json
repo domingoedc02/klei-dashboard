@@ -1,0 +1,235 @@
+{
+ "pairs": [
+  {
+   "name": "client-profile-default",
+   "pct": 2.29
+  },
+  {
+   "name": "dashboard-default",
+   "pct": 2.79
+  },
+  {
+   "name": "dashboard-empty",
+   "pct": 3.12
+  },
+  {
+   "name": "dashboard-loading",
+   "pct": 1.28
+  },
+  {
+   "name": "gallery-default",
+   "pct": 4.52
+  },
+  {
+   "name": "gallery-delete-dialog",
+   "pct": 4.85
+  },
+  {
+   "name": "gallery-empty",
+   "pct": 2.3
+  },
+  {
+   "name": "gallery-loading",
+   "pct": 1.11
+  },
+  {
+   "name": "gallery-no-match",
+   "pct": 1.99
+  },
+  {
+   "name": "gallery-selected",
+   "pct": 5.21
+  },
+  {
+   "name": "inquiries-composer-error",
+   "pct": 4.76
+  },
+  {
+   "name": "inquiries-customer-card",
+   "pct": 4.99
+  },
+  {
+   "name": "inquiries-default",
+   "pct": 5.07
+  },
+  {
+   "name": "inquiries-empty",
+   "pct": 2.6
+  },
+  {
+   "name": "inquiries-filtered-empty",
+   "pct": 2.58
+  },
+  {
+   "name": "inquiries-loading",
+   "pct": 2.38
+  },
+  {
+   "name": "inquiries-thread-closed",
+   "pct": 4.03
+  },
+  {
+   "name": "inquiries-thread-replied",
+   "pct": 5.11
+  },
+  {
+   "name": "overlay-assistant-busy",
+   "pct": 3.27
+  },
+  {
+   "name": "overlay-assistant-greeting",
+   "pct": 3.19
+  },
+  {
+   "name": "overlay-notifications-default",
+   "pct": 3.29
+  },
+  {
+   "name": "overlay-notifications-empty",
+   "pct": 2.89
+  },
+  {
+   "name": "overlay-profile-menu-default",
+   "pct": 2.79
+  },
+  {
+   "name": "overlay-search-none",
+   "pct": 3.1
+  },
+  {
+   "name": "overlay-search-results",
+   "pct": 2.73
+  },
+  {
+   "name": "settings-2fa-on",
+   "pct": 3.92
+  },
+  {
+   "name": "settings-ai-default",
+   "pct": 3.39
+  },
+  {
+   "name": "settings-ai-provider-fail",
+   "pct": 3.36
+  },
+  {
+   "name": "settings-audit-default",
+   "pct": 2.83
+  },
+  {
+   "name": "settings-notifications-default",
+   "pct": 2.36
+  },
+  {
+   "name": "settings-preferences-default",
+   "pct": 2.69
+  },
+  {
+   "name": "settings-profile-default",
+   "pct": 3.4
+  },
+  {
+   "name": "settings-profile-staff-role",
+   "pct": 3.21
+  },
+  {
+   "name": "settings-roles-default",
+   "pct": 2.96
+  },
+  {
+   "name": "settings-signature-away-on",
+   "pct": 3.9
+  },
+  {
+   "name": "settings-signature-default",
+   "pct": 3.36
+  },
+  {
+   "name": "settings-staff-add-dialog",
+   "pct": 5.45
+  },
+  {
+   "name": "settings-staff-default",
+   "pct": 3.35
+  },
+  {
+   "name": "settings-staff-empty",
+   "pct": 2.91
+  },
+  {
+   "name": "upload-empty",
+   "pct": 2.28
+  },
+  {
+   "name": "upload-error",
+   "pct": 2.76
+  },
+  {
+   "name": "upload-processing",
+   "pct": 6.75
+  },
+  {
+   "name": "upload-review-combo-open",
+   "pct": 4.98
+  },
+  {
+   "name": "upload-review-discard-dialog",
+   "pct": 5.05
+  },
+  {
+   "name": "upload-review-low-group",
+   "pct": 4.9
+  },
+  {
+   "name": "upload-review-photos-selected",
+   "pct": 5.25
+  },
+  {
+   "name": "upload-review-scrolled",
+   "pct": 4.75
+  },
+  {
+   "name": "upload-review",
+   "pct": 4.97
+  },
+  {
+   "name": "viewer-default",
+   "pct": 2.65
+  },
+  {
+   "name": "viewer-delete-dialog",
+   "pct": 3.09
+  },
+  {
+   "name": "viewer-edit-dialog",
+   "pct": 7.82
+  },
+  {
+   "name": "viewer-edit-error",
+   "pct": 7.83
+  },
+  {
+   "name": "viewer-photo-3",
+   "pct": 2.65
+  }
+ ],
+ "protoOnly": [],
+ "deskOnly": [
+  "banner-update-ready",
+  "inquiries-no-selection",
+  "settings-away-default",
+  "settings-keys-default",
+  "settings-usage-default",
+  "signin-booting",
+  "signin-failed",
+  "signin-keychain_unavailable",
+  "signin-no_access",
+  "signin-session_expired",
+  "signin-signed_out",
+  "signin-unreachable",
+  "signin-waiting",
+  "upload-loading",
+  "upload-stopped",
+  "viewer-loading"
+ ]
+}
