@@ -137,6 +137,8 @@ export function imgSvg(url) {
 
 // ---- Upload: one batch B, 10 groups of 3 photos mirroring the prototype's D.groups (u0-u9) ----
 export const BATCH = '0b1c2d3e-0000-4000-8000-000000000001';
+/** 60 characters: long enough to prove a group card truncates its name and keeps the Low pill. */
+export const LONG_NAME = 'Marguerite Eleonora Valentina Seraphina Isolde Cordelia Rose';
 const bandOf = (c) => (c < 80 ? 'low' : c < 90 ? 'medium' : 'high');
 const TAG_TYPES = [['sil', 'silhouette'], ['fab', 'fabric'], ['neck', 'neckline'], ['slv', 'sleeve'], ['trn', 'train']];
 const groupView = (g, i) => ({

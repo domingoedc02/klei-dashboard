@@ -3,7 +3,7 @@
 // `desk` (added in desktop.mjs) drives the Vite app through the Tauri shim.
 // Reach calls are from reading js/*.js; a failing step is logged, never swallowed silently.
 
-import { PENDING } from './fixtures.mjs';
+import { PENDING, LONG_NAME } from './fixtures.mjs';
 import DESK, { EXTRA } from './desk/index.mjs';
 
 const ev = (page, code) => page.evaluate(code);
@@ -33,6 +33,7 @@ export const SCREENS = [
   { id: 'upload', state: 'review', proto: review() },
   { id: 'upload', state: 'error', proto: upload('error') },
   { id: 'upload-review', state: 'low-group', proto: review(act('up-cur', 3)) },
+  { id: 'upload-review', state: 'long', proto: review(js(`K.S.ui.up.groups[3].name=${JSON.stringify(LONG_NAME)};K.render()`), act('up-cur', 3)) },
   { id: 'upload-review', state: 'photos-selected', proto: review(act('up-sel', 0), act('up-sel', 1), js(`K.S.ui.up.to={mvto:'u1'};K.render()`)) },
   { id: 'upload-review', state: 'combo-open', proto: review(js(`document.getElementById('mvto').focus()`)) },
   { id: 'upload-review', state: 'discard-dialog', proto: review(act('up-discard')) },

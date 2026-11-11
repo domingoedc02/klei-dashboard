@@ -52,3 +52,13 @@ Put labelled photos in `<gown-label>/<photo>.jpg` folders (at least 5 gowns, 3 p
 ## Performance
 
 `infra/ci/perf.sh` seeds 5,000 Gowns and checks the NFR-2 p95 targets on every pull request to main. `infra/ci/perf.sh --scale full` (10,000 Gowns, 100,000 Photos, 50,000 Inquiries) is run by hand before a release that touches queries. Desktop idle memory (300 MB) and cold start are measured by hand per operating system (release checklist).
+
+## UI parity capture
+
+Developer tool for the desktop app only; the backend and CI never depend on Playwright. Run from `desktop/`:
+
+- `npm run shots` captures prototype and desktop at 1440x900 into `docs/planning-artifacts/ui-parity/{prototype,desktop}/<screen>-<state>.png`. `npm run shots:proto` captures the prototype side only. `node scripts/capture.mjs --side desktop --only <substring of screen-state>` re-captures a subset. A full run takes about 30 s.
+- `npm run shots:diff` (also takes `--only`) writes `diff/<screen>-<state>.png` (prototype | desktop | pixelmatch), `report.json` (pixel %, desktop geometry findings per screen, `pending` captures) and prints a summary. Pixel % is a report metric, not a gate.
+- `geometry.json` and `copy.json` hold the in-page probe findings and the visible text of every shot. Probe kinds: `overlap`, `covered`, `glued-text`, `text-clipped`, `text-ellipsis`, `offscreen-x`, `page-h-scroll`, `dialog-scroll`, `dialog-overflow`. A screen passes when its desktop side has none, bar the prototype's own by-design findings (savebar over scrolled content, an ellipsised name).
+- A desktop capture marked `pending: '<story>'` in `scripts/shots/desk/*.mjs` shows a state the app cannot reach yet; the diff report lists it as pending.
+- The desktop side runs against the Vite dev server on port 1420 with a Tauri shim and fixtures in `scripts/shots/`; no backend is needed. A failed capture leaves a `*.FAILED.png` that must not be committed.

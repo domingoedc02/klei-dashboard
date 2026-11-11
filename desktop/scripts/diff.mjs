@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
 import { OUT, arg } from './shots/common.mjs';
+import { SCREENS, name } from './shots/screens.mjs';
 
 const only = arg('only');
 const png = async (p) => PNG.sync.read(await readFile(p));
@@ -24,5 +25,14 @@ for (const f of [...proto].filter((f) => desk.has(f) && (!only || f.includes(onl
   await writeFile(join(OUT, 'diff', f), PNG.sync.write(m));
   report.pairs.push({ name: f.slice(0, -4), pct: +((bad / (w * h)) * 100).toFixed(2) });
 }
+// Per-screen desktop geometry findings by kind (text-ellipsis is reported but is not a failure where the prototype truncates the same text).
+const geo = await readFile(join(OUT, 'geometry.json'), 'utf8').then(JSON.parse, () => ({}));
+report.geometry = Object.fromEntries(Object.entries(geo).map(([n, sides]) => [n, (sides.desktop ?? []).reduce((c, i) => ((c[i.kind] = (c[i.kind] || 0) + 1), c), {})]).filter(([, c]) => Object.keys(c).length));
+report.pending = SCREENS.filter((s) => s.desk?.pending).map((s) => ({ name: name(s), story: s.desk.pending }));
+// A --only run keeps the pairs it did not recompute.
+const old = only ? (await readFile(join(OUT, 'report.json'), 'utf8').then(JSON.parse, () => ({ pairs: [] }))).pairs : [];
+const fresh = new Set(report.pairs.map((p) => p.name));
+report.pairs = [...old.filter((p) => !fresh.has(p.name) && proto.has(`${p.name}.png`) && desk.has(`${p.name}.png`)), ...report.pairs].sort((a, b) => a.name.localeCompare(b.name));
+for (const p of report.pairs) { delete p.pending; const s = report.pending.find((x) => x.name === p.name)?.story; if (s) p.pending = s; }
 await writeFile(join(OUT, 'report.json'), JSON.stringify(report, null, 1));
-console.log(`${report.pairs.length} pairs | proto-only ${report.protoOnly.length} | desktop-only ${report.deskOnly.length}`);
+console.log(`${report.pairs.length} pairs | proto-only ${report.protoOnly.length} | desktop-only ${report.deskOnly.length} | pending ${report.pending.length} | screens with desktop geometry findings ${Object.keys(report.geometry).length}`);

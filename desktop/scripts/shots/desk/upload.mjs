@@ -1,5 +1,5 @@
 // desk reach for the upload screens: { '<id>-<state>': { hash, ready, fx(table), after(page) } }; see ../screens.mjs and ../desktop.mjs.
-import { PENDING, uploadRoutes, NOW } from '../fixtures.mjs';
+import { PENDING, uploadRoutes, NOW, BATCH, LONG_NAME } from '../fixtures.mjs';
 
 const H = '#/upload';
 const review = { hash: H, ready: '.review .grouplist .row', fx: (r) => Object.assign(r, uploadRoutes('review')) };
@@ -19,10 +19,19 @@ export default {
     after: async (page) => { await page.getByRole('button', { name: 'Choose photos' }).click(); await page.waitForSelector('.rejected'); },
   },
   'upload-review-low-group': { ...review, after: pickGroup(3) },
-  // no checkbox selection on desktop: nearest state is a photo's action menu open
-  'upload-review-photos-selected': { ...review, after: async (page) => { await page.getByRole('button', { name: 'Photo 1 actions' }).click(); } },
-  // no inline combobox on desktop: nearest state is the group Actions menu open
-  'upload-review-combo-open': { ...review, after: async (page) => { await page.getByRole('button', { name: 'Group actions' }).click(); } },
+  'upload-review-long': {
+    ...review,
+    fx: (r) => {
+      review.fx(r);
+      const status = r[`GET /api/v1/uploads/${BATCH}`];
+      r[`GET /api/v1/uploads/${BATCH}`] = (...a) => { const st = status(...a); return { ...st, groups: st.groups.map((g, i) => (i === 3 ? { ...g, name: LONG_NAME } : g)) }; };
+    },
+    after: pickGroup(3),
+  },
+  // no checkbox selection on desktop: nearest state is a photo's action menu open. Pending 13.8 (inline select + Move/Merge/Split).
+  'upload-review-photos-selected': { ...review, pending: '13.8', after: async (page) => { await page.getByRole('button', { name: 'Photo 1 actions' }).click(); } },
+  // no inline combobox on desktop: nearest state is the group Actions menu open. Pending 13.8.
+  'upload-review-combo-open': { ...review, pending: '13.8', after: async (page) => { await page.getByRole('button', { name: 'Group actions' }).click(); } },
   'upload-review-discard-dialog': { ...review, after: async (page) => { await page.getByRole('button', { name: 'Discard batch' }).click(); await page.waitForSelector('[role=dialog]'); } },
   'upload-review-scrolled': { ...review, after: async (page) => { await pickGroup(9)(page); await scrollEnd(page); } },
 };
