@@ -48,4 +48,6 @@ export const EXTRA = [
   phase('session_expired'),
   phase('no_access'),
   { id: 'banner', state: 'update-ready', desk: { ...DASH, fx: (r) => { r['cmd check_update'] = { status: 'available', version: '1.2.0' }; }, after: (page) => page.waitForSelector('.banner.update') } },
+  { id: 'banner', state: 'update-failed', desk: { ...DASH, fx: (r) => { r['cmd check_update'] = { status: 'available', version: '1.2.0' }; r['cmd install_update'] = { __reject: { kind: 'update_unverified', message: 'unverified' } }; }, after: (page) => page.getByRole('button', { name: 'Install and restart' }).click().then(() => page.waitForSelector('.banner.update.bad')) } },
+  { id: 'banner', state: 'offline', desk: { hash: '#/dashboard', ready: '.banner', fx: (r) => { r['GET /api/v1/dashboard'] = { status: 503, body: null }; r['GET /api/v1/health/ready'] = { status: 503, body: null }; } } },
 ];

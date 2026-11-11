@@ -76,6 +76,18 @@ describe('styles.css', () => {
     expect(body('.bell .dot')).toMatch(/width: 8px; height: 8px/);
   });
 
+  it('content sits full-bleed on the sheet; banners avoid the warn wash', () => {
+    const body = (sel: string) => blocks(styles).find((x) => x.sel.includes(sel))!.body;
+    expect(body('.sheet')).toMatch(/padding: var\(--space-content-pad\) var\(--space-8\) var\(--space-12\)/);
+    expect(body('.sheet')).not.toMatch(/border|radius|margin/);
+    const banners = blocks(styles).filter((x) => x.sel.some((s) => /\.banner\b/.test(s)));
+    expect(banners.length).toBeGreaterThan(0);
+    for (const b of banners) expect(b.body).not.toMatch(/pill-warn/);
+    const sel = (x: string) => blocks(styles).find((b) => b.sel.includes(x))!.body;
+    expect(sel('.banner.update')).toMatch(/pill-info-bg[\s\S]*banner-info-ink/);
+    expect(sel('.banner.update.bad')).toMatch(/pill-neg-bg[\s\S]*pill-neg-ink/);
+  });
+
   it('avatar is a 32px dark circle', () => {
     const b = blocks(styles).find((x) => x.sel.includes('.avatar'))!.body;
     expect(b).toMatch(/width: 32px/);
@@ -100,6 +112,8 @@ describe('text contrast (AA)', () => {
     ['neg pill', () => [c('pill-neg-ink'), c('pill-neg-bg')]],
     ['neutral pill', () => [c('pill-neutral-ink'), GRAY_OVER_WHITE]],
     ['meta text on sheet', () => [c('faint'), c('sheet')]],
+    ['info banner', () => [c('banner-info-ink'), c('pill-info-bg')]],
+    ['banner on frame', () => [c('ink-2'), c('frame')]],
     ['meta text on frame', () => [c('faint'), c('frame')]],
     ['muted text on frame', () => [c('muted'), c('frame')]],
     ['button ink on secondary fill', () => [c('ink'), GRAY_OVER_WHITE]],

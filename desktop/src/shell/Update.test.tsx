@@ -96,6 +96,7 @@ describe('update banner', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Install and restart' }));
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toBe("The update couldn't be verified. Nothing was changed.");
+    expect(alert.className).toContain('bad');
     expect(screen.getByRole('button', { name: 'Install and restart' })).toBeTruthy();
   });
 

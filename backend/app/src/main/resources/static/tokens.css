@@ -53,7 +53,6 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  --radius-sheet: 0px;
   --radius-full: 9999px;
   --elev-raised: rgba(0, 0, 0, 0.04) 0px 4px 18px, rgba(0, 0, 0, 0.027) 0px 2px 7.85px, rgba(0, 0, 0, 0.02) 0px 0.8px 2.93px, rgba(0, 0, 0, 0.01) 0px 0.175px 1.04px;
   --space-1: 4px;
@@ -63,8 +62,8 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-12: 48px;
   --space-gutter: 16px;
-  --space-sheet-inset: 0px;
   --space-content-pad: 24px;
   --space-sidebar: 240px;
   --space-topbar: 64px;

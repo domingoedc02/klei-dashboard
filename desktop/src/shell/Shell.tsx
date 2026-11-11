@@ -312,7 +312,7 @@ export function Shell({ me: first, onExpired, onSignOut, children }: { me: Me; o
           </nav>
         </div>
         <main id="view" ref={view} tabIndex={-1} className="sheet">
-          {update.failed && <div role="alert" className="banner update">{UNVERIFIED}</div>}
+          {update.failed && <div role="alert" className="banner update bad">{UNVERIFIED}</div>}
           {update.ready && (
             <div role="status" className="banner update">
               <span>Version {update.ready} is ready.</span>

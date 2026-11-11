@@ -109,7 +109,6 @@ rounded:
   sm: 4px
   md: 8px
   lg: 12px
-  sheet: 0px
   full: 9999px
 spacing:
   '1': 4px
@@ -119,8 +118,8 @@ spacing:
   '5': 20px
   '6': 24px
   '8': 32px
+  '12': 48px
   gutter: 16px
-  sheet-inset: 0px
   content-pad: 24px
   sidebar: 240px
   topbar: 64px
@@ -139,10 +138,7 @@ components:
     background: '{colors.frame}'
   sheet:
     background: '{colors.sheet}'
-    border: '1px solid {colors.sheet-edge}'
-    radius: '{rounded.sheet}'
-    inset: '{spacing.sheet-inset}'
-    padding: '{spacing.content-pad}'
+    padding: '{spacing.content-pad} {spacing.8} {spacing.12}'
   nav-item:
     foreground: '{colors.ink-2}'
     typography: '{typography.sm}'
@@ -360,7 +356,7 @@ Flat by default. A surface has a border or a shadow, never both. Shadows are onl
 
 ## Shapes
 
-Radius follows importance, not uniformity: sheet 16, dialog and drawer 12, panels and cards 8, controls 6, tags 4, pills and chips full. Photos inside a mosaic use 8 on the outer corners only. Avatars are circles.
+Radius follows importance, not uniformity: dialog and drawer 12, panels and cards 8, controls 6, tags 4, pills and chips full. Photos inside a mosaic use 8 on the outer corners only. Avatars are circles.
 
 ## Components
 

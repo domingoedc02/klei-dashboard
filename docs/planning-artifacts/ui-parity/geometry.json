@@ -38,24 +38,7 @@
     "detail": "27x8px at (542,857)"
    }
   ],
-  "desktop": [
-   {
-    "kind": "overlap",
-    "sel": "span.name",
-    "text": "Rosalind",
-    "with": "span.hint",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "66x17px at (273,815)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pos",
-    "text": "High",
-    "with": "span.hint",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "24x15px at (542,815)"
-   }
-  ]
+  "desktop": []
  },
  "upload-error": {
   "prototype": [],
@@ -80,24 +63,7 @@
     "detail": "27x8px at (542,857)"
    }
   ],
-  "desktop": [
-   {
-    "kind": "overlap",
-    "sel": "span.name",
-    "text": "Rosalind",
-    "with": "span.hint",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "66x17px at (273,815)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pos",
-    "text": "High",
-    "with": "span.hint",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "24x15px at (542,815)"
-   }
-  ]
+  "desktop": []
  },
  "upload-review-photos-selected": {
   "prototype": [
@@ -139,24 +105,7 @@
     "detail": "27x8px at (542,857)"
    }
   ],
-  "desktop": [
-   {
-    "kind": "overlap",
-    "sel": "span.name",
-    "text": "Rosalind",
-    "with": "span.hint",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "66x17px at (273,815)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pos",
-    "text": "High",
-    "with": "span.hint",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "24x15px at (542,815)"
-   }
-  ]
+  "desktop": []
  },
  "upload-review-discard-dialog": {
   "prototype": [
@@ -177,24 +126,7 @@
     "detail": "27x8px at (542,857)"
    }
   ],
-  "desktop": [
-   {
-    "kind": "overlap",
-    "sel": "span.name",
-    "text": "Rosalind",
-    "with": "span.hint",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "66x17px at (273,815)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pos",
-    "text": "High",
-    "with": "span.hint",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "24x15px at (542,815)"
-   }
-  ]
+  "desktop": []
  },
  "upload-review-scrolled": {
   "prototype": [],
@@ -1027,11 +959,29 @@
  },
  "settings-ai-default": {
   "prototype": [],
-  "desktop": []
+  "desktop": [
+   {
+    "kind": "overlap",
+    "sel": "label",
+    "text": "Chat model",
+    "with": "button.btn.primary",
+    "withText": "Save AI settings",
+    "detail": "70x17px at (289,812)"
+   }
+  ]
  },
  "settings-ai-provider-fail": {
   "prototype": [],
-  "desktop": []
+  "desktop": [
+   {
+    "kind": "overlap",
+    "sel": "label",
+    "text": "Chat model",
+    "with": "button.btn.primary",
+    "withText": "Save AI settings",
+    "detail": "70x17px at (289,812)"
+   }
+  ]
  },
  "settings-audit-default": {
   "prototype": [],
@@ -1255,7 +1205,7 @@
     "text": "Marguerite Eleonora Valentina Seraphina ",
     "with": "li.chip",
     "withText": "V-neck",
-    "detail": "54x13px at (621,595)"
+    "detail": "54x13px at (628,594)"
    },
    {
     "kind": "overlap",
@@ -1263,15 +1213,15 @@
     "text": "Marguerite Eleonora Valentina Seraphina ",
     "with": "button",
     "withText": "×",
-    "detail": "11x13px at (687,595)"
+    "detail": "11x13px at (694,594)"
    },
    {
     "kind": "overlap",
-    "sel": "span.name",
-    "text": "Rosalind",
-    "with": "span.hint",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "66x17px at (273,815)"
+    "sel": "span.pill.pos",
+    "text": "High",
+    "with": "button.btn",
+    "withText": "Discard batch",
+    "detail": "27x15px at (816,813)"
    },
    {
     "kind": "covered",
@@ -1304,5 +1254,11 @@
     "detail": "painted over by ul.chips"
    }
   ]
+ },
+ "banner-update-failed": {
+  "desktop": []
+ },
+ "banner-offline": {
+  "desktop": []
  }
 }
