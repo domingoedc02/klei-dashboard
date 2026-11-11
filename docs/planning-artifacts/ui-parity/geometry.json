@@ -28,14 +28,6 @@
     "with": "span.sm.muted",
     "withText": "10 gowns · 30 photos will be added to Ga",
     "detail": "71x8px at (287,857)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pill-green",
-    "text": "High",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "27x8px at (542,857)"
    }
   ],
   "desktop": []
@@ -53,14 +45,6 @@
     "with": "span.sm.muted",
     "withText": "10 gowns · 30 photos will be added to Ga",
     "detail": "71x8px at (287,857)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pill-green",
-    "text": "High",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "27x8px at (542,857)"
    }
   ],
   "desktop": []
@@ -74,14 +58,6 @@
     "with": "span.sm.muted",
     "withText": "10 gowns · 30 photos will be added to Ga",
     "detail": "71x8px at (287,857)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pill-green",
-    "text": "High",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "27x8px at (542,857)"
    }
   ],
   "desktop": []
@@ -95,14 +71,6 @@
     "with": "span.sm.muted",
     "withText": "10 gowns · 30 photos will be added to Ga",
     "detail": "71x8px at (287,857)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pill-green",
-    "text": "High",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "27x8px at (542,857)"
    }
   ],
   "desktop": []
@@ -116,14 +84,6 @@
     "with": "span.sm.muted",
     "withText": "10 gowns · 30 photos will be added to Ga",
     "detail": "71x8px at (287,857)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pill-green",
-    "text": "High",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "27x8px at (542,857)"
    }
   ],
   "desktop": []
@@ -171,7 +131,7 @@
     "kind": "dialog-scroll",
     "sel": "div.dialog",
     "text": "",
-    "detail": "content 980px > box 866px, footer/controls need an inner scroll"
+    "detail": "content 1058px > box 866px, footer/controls need an inner scroll"
    }
   ]
  },
@@ -182,7 +142,7 @@
     "kind": "dialog-scroll",
     "sel": "div.dialog",
     "text": "",
-    "detail": "content 1004px > box 866px, footer/controls need an inner scroll"
+    "detail": "content 1082px > box 866px, footer/controls need an inner scroll"
    }
   ]
  },
@@ -1188,62 +1148,14 @@
     "with": "span.sm.muted",
     "withText": "10 gowns · 30 photos will be added to Ga",
     "detail": "71x8px at (287,857)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pill-green",
-    "text": "High",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "27x8px at (542,857)"
    }
   ],
   "desktop": [
    {
-    "kind": "overlap",
+    "kind": "text-ellipsis",
     "sel": "span.name",
     "text": "Marguerite Eleonora Valentina Seraphina ",
-    "with": "li.chip",
-    "withText": "V-neck",
-    "detail": "54x13px at (628,602)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.name",
-    "text": "Marguerite Eleonora Valentina Seraphina ",
-    "with": "button",
-    "withText": "×",
-    "detail": "11x13px at (694,602)"
-   },
-   {
-    "kind": "covered",
-    "sel": "span.pill.warn",
-    "text": "Low · check",
-    "detail": "painted over by div.editor.form"
-   },
-   {
-    "kind": "covered",
-    "sel": "span.pill.pos",
-    "text": "High",
-    "detail": "painted over by label \"Silhouette\""
-   },
-   {
-    "kind": "covered",
-    "sel": "span.pill.neutral",
-    "text": "Medium",
-    "detail": "painted over by div.tagfield"
-   },
-   {
-    "kind": "covered",
-    "sel": "span.pill.warn",
-    "text": "Low · check",
-    "detail": "painted over by ul.chips"
-   },
-   {
-    "kind": "covered",
-    "sel": "span.pill.pos",
-    "text": "High",
-    "detail": "painted over by ul.chips"
+    "detail": "scroll 417x21 > client 196x21"
    }
   ]
  },

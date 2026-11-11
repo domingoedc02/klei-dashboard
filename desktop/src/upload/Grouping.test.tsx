@@ -98,7 +98,7 @@ describe('Start grouping and the Processing screen', () => {
     };
     await act(async () => { await vi.advanceTimersByTimeAsync(2100); });
     expect(polls).toBeGreaterThan(before);
-    expect(await screen.findByRole('heading', { name: '2 groups found' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Gown groups' })).toBeTruthy();
     const settled = polls;
     await act(async () => { await vi.advanceTimersByTimeAsync(6000); });
     expect(polls).toBe(settled);

@@ -34,3 +34,12 @@
 - Tile fill is asserted at one percentage only; tiles are decorative and `aria-hidden`.
 - Long rejection lists are not capped or collapsed: revisit in 13.16.
 - Hard-coded `#fff` and `rgba()` in the upload block match the prototype; no dark theme in this epic.
+
+## Deferred from: code review of 13.7-review-layout (2026-11-11)
+
+- Confidence number has no keyboard or touch path until the editor header (13.8) shows `Confidence N%`.
+- `.rv` and `.tags-grid` have no narrow-window fallback; minimum window is 1100px, recheck in 13.16.
+- `.savebar` bleed margins hard-code the sheet padding; add a token if a second container needs it.
+- The "Gown groups" heading no longer announces the group count; the banner states the totals.
+- Row meta uses the literal tag types `silhouette` and `fabric`.
+- Prototype inline tagbox combobox (chips and input in one box) not built; native select kept.

@@ -2,8 +2,8 @@
 import { PENDING, uploadRoutes, NOW, BATCH, LONG_NAME } from '../fixtures.mjs';
 
 const H = '#/upload';
-const review = { hash: H, ready: '.review .grouplist .row', fx: (r) => Object.assign(r, uploadRoutes('review')) };
-const pickGroup = (n) => (page) => page.locator('.grouplist .row').nth(n).click();
+const review = { hash: H, ready: '.review .rv-list .gl', fx: (r) => Object.assign(r, uploadRoutes('review')) };
+const pickGroup = (n) => (page) => page.locator('.rv-list .gl').nth(n).click();
 const scrollEnd = (page) => page.evaluate(() => { for (const e of document.querySelectorAll('.sheet, main')) e.scrollTop = e.scrollHeight; });
 
 // Prototype "error" = empty drop zone + rejected files; the desktop twin is upload_files answering with `rejected`.

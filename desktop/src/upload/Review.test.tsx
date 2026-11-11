@@ -61,7 +61,7 @@ beforeEach(() => {
 const open = async () => {
   window.location.hash = '#/upload';
   const view = render(<Shell me={STAFF} onExpired={vi.fn()} onSignOut={vi.fn()} />);
-  await screen.findByRole('heading', { name: '2 groups found' });
+  await screen.findByRole('heading', { name: 'Gown groups' });
   await screen.findByRole('list', { name: 'Fabric tags' });
   return view;
 };
@@ -78,23 +78,21 @@ const choose = async (label: string, confirm: string) => {
   await userEvent.selectOptions(within(box).getByLabelText('Group'), label);
   await userEvent.click(within(box).getByRole('button', { name: confirm }));
 };
-const names = () => [...document.querySelectorAll('.grouplist .name')].map((n) => n.textContent);
+const names = () => [...document.querySelectorAll('.gl .name')].map((n) => n.textContent);
 const undo = () => screen.getByRole('button', { name: 'Undo' }) as HTMLButtonElement;
 const confirmButton = (n: number) => screen.getByRole('button', { name: `Confirm and save ${n} ${n === 1 ? 'gown' : 'gowns'}` });
 const commits = () => sent.filter((s) => s.path.endsWith('/commit'));
 
 describe('Review groups', () => {
-  it('shows the banner, a confidence bar, pill and thumbnails per group, and the save bar', async () => {
+  it('shows the banner, a pill and thumbnails per group, and the save bar', async () => {
     const { container } = await open();
     expect(screen.getByText(/3 photos → 2 gowns\./).closest('.banner')?.textContent).toContain('1 group with low confidence, worth a look. Nothing is saved until you confirm.');
     const rows = within(screen.getByRole('list', { name: 'Groups' })).getAllByRole('listitem');
-    expect(rows.map((r) => r.textContent)).toEqual(['Group 1Low · check2 photos', 'Group 2High1 photo']);
+    expect(rows.map((r) => r.textContent)).toEqual(['Group 1Low · check2 photos', 'Group 2High1 photo · Lace']);
     expect(within(rows[0]).getByText('Low · check').getAttribute('title')).toBe('40% confidence');
     expect(within(rows[0]).getByText('Low · check').className).toContain('warn');
     expect(within(rows[1]).getByText('High').className).toContain('pos');
-    expect(rows[0].querySelector('.confbar.low i')?.getAttribute('style')).toContain('40%');
-    expect(rows[1].querySelector('.confbar.high i')?.getAttribute('style')).toContain('95%');
-    expect(rows[0].querySelectorAll('.gl-strip img').length).toBe(2);
+    expect(rows[0].querySelectorAll('.strip img').length).toBe(2);
     expect(rows[0].querySelector('button')?.getAttribute('aria-current')).toBe('true');
     expect(screen.getByText('2 gowns · 3 photos will be added to Gallery')).toBeTruthy();
     expect(confirmButton(2)).toBeTruthy();
@@ -108,7 +106,7 @@ describe('Review groups', () => {
     many[0].photoIds = [1, 2, 3, 4, 5, 6, 7].map(photo);
     served = () => many;
     await open();
-    expect(document.querySelectorAll('.grouplist li')[0].querySelectorAll('.gl-strip img').length).toBe(5);
+    expect(document.querySelectorAll('.rv-list li')[0].querySelectorAll('.strip img').length).toBe(5);
     expect(screen.getByText('7 photos')).toBeTruthy();
   });
 
@@ -123,7 +121,7 @@ describe('Review groups', () => {
   it('shows the selected group in the editor', async () => {
     await open();
     await userEvent.click(screen.getByRole('button', { name: /Group 2/ }));
-    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('Group 2');
+    expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('Group 2');
     expect((screen.getByLabelText('AI-written description') as HTMLTextAreaElement).value).toBe('A soft lace gown.');
     expect(within(await screen.findByRole('list', { name: 'Fabric tags' })).getByText('Lace')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Group 2/ }).getAttribute('aria-current')).toBe('true');
@@ -157,10 +155,16 @@ describe('Review groups', () => {
     expect(screen.getByRole('dialog', { name: 'Photo 1 of 2' })).toBeTruthy();
   });
 
-  it('shows the description count and where a missing tag comes from', async () => {
+  it('shows the description count and no missing-tag hint', async () => {
     await open();
     expect(screen.getByText('0 / 2,000')).toBeTruthy();
-    expect(screen.getByText('Missing a tag? An admin can add it in Settings.')).toBeTruthy();
+    expect(screen.queryByText(/Missing a tag/)).toBeNull();
+  });
+
+  it('lists the photo count, silhouette and every fabric in the row meta', async () => {
+    served = () => [{ ...groups()[1], photoIds: [photo(1), photo(2), photo(3)], tags: [{ type: 'silhouette', value: 'A-line' }, { type: 'fabric', value: 'Lace' }, { type: 'fabric', value: 'Mikado' }] }];
+    await open();
+    expect(within(screen.getByRole('list', { name: 'Groups' })).getByRole('listitem').textContent).toBe('Group 2High3 photos · A-line · Lace, Mikado');
   });
 });
 
@@ -168,7 +172,7 @@ describe('Staged edits', () => {
   it('rename, retag and describe send nothing, mark the screen dirty, and Undo steps back one edit at a time', async () => {
     await open();
     expect(mocks.setDirty).not.toHaveBeenCalledWith(true);
-    const name = screen.getByLabelText('Name') as HTMLInputElement;
+    const name = screen.getByLabelText(/^Gown name/) as HTMLInputElement;
     await userEvent.clear(name);
     await userEvent.type(name, 'Ivory Lace');
     expect(name.value).toBe('Ivory Lace');
@@ -185,7 +189,7 @@ describe('Staged edits', () => {
     await userEvent.click(undo());
     expect(within(screen.getByRole('list', { name: 'Silhouette tags' })).queryByText('Mermaid')).toBeNull();
     await userEvent.click(undo());
-    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('Group 1');
+    expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('Group 1');
     expect(undo().disabled).toBe(true);
     await waitFor(() => expect(mocks.setDirty).toHaveBeenLastCalledWith(false));
     expect((await screen.findAllByText('Undone')).length).toBeGreaterThan(0);
@@ -238,11 +242,11 @@ describe('Staged edits', () => {
     await menu('Photo 1 actions', 'Move to…');
     await choose('New group', 'Move');
     expect(names()).toEqual(['Group 1', 'Group 2', 'New group']);
-    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('New group');
+    expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('New group');
     expect(sent).toEqual([]);
     await userEvent.click(undo());
     expect(names()).toEqual(['Group 1', 'Group 2']);
-    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('Group 1');
+    expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('Group 1');
   });
 
   it('splits one photo into a new gown and says to check its tags; Undo merges it back', async () => {
@@ -250,7 +254,7 @@ describe('Staged edits', () => {
     await menu('Photo 2 actions', 'Split into new gown');
     expect(await screen.findByText('Split into a new gown. Check its tags.')).toBeTruthy();
     expect(names()).toEqual(['Group 1', 'Group 1 II', 'Group 2']);
-    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('Group 1 II');
+    expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('Group 1 II');
     expect(sent).toEqual([]);
     await userEvent.click(undo());
     expect(names()).toEqual(['Group 1', 'Group 2']);
@@ -350,7 +354,7 @@ describe('Confirm and save', () => {
   it('sends every staged edit in the one request: renamed, split, merged-away, discarded', async () => {
     commitReply = () => ({ status: 200, body: { saved: 2 } });
     await open();
-    const name = screen.getByLabelText('Name');
+    const name = screen.getByLabelText(/^Gown name/);
     await userEvent.clear(name);
     await userEvent.type(name, 'Ivory');
     await userEvent.selectOptions(screen.getByLabelText('Silhouette'), 'A-line');
@@ -387,7 +391,7 @@ describe('Confirm and save', () => {
   it('says the batch changed elsewhere on 409, keeps the edits, and Reload loads the batch again', async () => {
     await open();
     const before = currentLoads;
-    const name = screen.getByLabelText('Name') as HTMLInputElement;
+    const name = screen.getByLabelText(/^Gown name/) as HTMLInputElement;
     await userEvent.type(name, '!');
     commitReply = () => ({ status: 409 });
     await userEvent.click(confirmButton(2));
@@ -401,11 +405,11 @@ describe('Confirm and save', () => {
 
   it('says it could not save on a server error or a dropped connection, keeps the edits, and a retry saves', async () => {
     await open();
-    await userEvent.type(screen.getByLabelText('Name'), '!');
+    await userEvent.type(screen.getByLabelText(/^Gown name/), '!');
     commitReply = () => ({ status: 500 });
     await userEvent.click(confirmButton(2));
     expect((await screen.findByRole('alert')).textContent).toContain("Couldn't save. Try again.");
-    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('Group 1!');
+    expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('Group 1!');
     expect(undo().disabled).toBe(false);
     commitReply = () => { throw new Error('down'); };
     await userEvent.click(confirmButton(2));
@@ -460,7 +464,7 @@ describe('Leave without saving', () => {
 
   it('asks when staged edits exist: Keep reviewing stays with the edits and the page, Leave goes', async () => {
     const { container } = await open();
-    await userEvent.type(screen.getByLabelText('Name'), '!');
+    await userEvent.type(screen.getByLabelText(/^Gown name/), '!');
     const dlg = await leave();
     expect(within(dlg).getByText('Your changes to this batch will be lost.')).toBeTruthy();
     expect(document.activeElement).toBe(within(dlg).getByRole('button', { name: 'Keep reviewing' }));
@@ -470,28 +474,28 @@ describe('Leave without saving', () => {
 
     await userEvent.click(within(dlg).getByRole('button', { name: 'Keep reviewing' }));
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('Group 1!');
+    expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('Group 1!');
 
     await leave();
     await userEvent.click(screen.getByRole('button', { name: 'Leave' }));
-    await waitFor(() => expect(screen.queryByRole('heading', { name: '2 groups found' })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Gown groups' })).toBeNull());
     expect(window.location.hash).toBe('#/inquiries');
     expect(sent).toEqual([]);
   });
 
   it('does not ask once Undo is back at the loaded state', async () => {
     await open();
-    await userEvent.type(screen.getByLabelText('Name'), '!');
+    await userEvent.type(screen.getByLabelText(/^Gown name/), '!');
     await userEvent.click(undo());
     window.location.hash = '#/inquiries';
-    await waitFor(() => expect(screen.queryByRole('heading', { name: '2 groups found' })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Gown groups' })).toBeNull());
     expect(screen.queryByRole('dialog', { name: 'Leave without saving?' })).toBeNull();
   });
 
   it('does not ask when nothing was edited', async () => {
     await open();
     window.location.hash = '#/inquiries';
-    await waitFor(() => expect(screen.queryByRole('heading', { name: '2 groups found' })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Gown groups' })).toBeNull());
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
@@ -500,7 +504,7 @@ describe('Leave without saving', () => {
     const idle = new Event('beforeunload', { cancelable: true });
     window.dispatchEvent(idle);
     expect(idle.defaultPrevented).toBe(false);
-    await userEvent.type(screen.getByLabelText('Name'), '!');
+    await userEvent.type(screen.getByLabelText(/^Gown name/), '!');
     const dirty = new Event('beforeunload', { cancelable: true });
     window.dispatchEvent(dirty);
     expect(dirty.defaultPrevented).toBe(true);

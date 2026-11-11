@@ -27,6 +27,8 @@ const BAND: Record<string, [label: string, tone: string]> = { high: ['High', 'po
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 const photosIn = (gs: Staged[]) => gs.reduce((n, g) => n + g.photoIds.length, 0);
+const meta = (g: Staged) =>
+  [plural(g.photoIds.length, 'photo', 'photos'), ...['silhouette', 'fabric'].map((t) => g.tags.filter((x) => x.type === t).map((x) => x.value).join(', ')).filter(Boolean)].join(' · ');
 
 const start = (groups: Group[]): History => ({
   cur: {
@@ -223,24 +225,23 @@ export function Review({ batchId, groups: first, onReload }: { batchId: string; 
           {low ? `${plural(low, 'group', 'groups')} with low confidence, worth a look.` : 'All groups look confident.'} Nothing is saved until you confirm.
         </span>
       </div>
-      <div className="split">
+      <div className="rv">
         <div>
-          <h2>{plural(cur.groups.length, 'group', 'groups')} found</h2>
-          <ul className="grouplist" aria-label="Groups">
+          <h2>Gown groups</h2>
+          <ul className="rv-list" aria-label="Groups">
             {cur.groups.map((g) => {
               const [label, tone] = BAND[g.band] ?? BAND.low;
               return (
                 <li key={g.id}>
-                  <button type="button" className="row" aria-current={g.id === group?.id ? 'true' : undefined} onClick={() => select(g.id)}>
-                    <span className="top">
+                  <button type="button" className="gl" aria-current={g.id === group?.id ? 'true' : undefined} onClick={() => select(g.id)}>
+                    <span className="gl-top">
                       <span className="name">{g.name}</span>
                       <span className={`pill ${tone}`} title={`${g.confidence}% confidence`}>{label}</span>
                     </span>
-                    <span className={`confbar ${g.band}`} aria-hidden="true"><i style={{ width: `${g.confidence}%` }} /></span>
-                    <span className="gl-strip" aria-hidden="true">
-                      {g.photoIds.slice(0, 5).map((p) => <img key={p} src={thumbUrl(batchId, p)} alt="" width={32} height={32} loading="lazy" />)}
+                    <span className="strip" aria-hidden="true">
+                      {g.photoIds.slice(0, 5).map((p) => <img key={p} src={thumbUrl(batchId, p)} alt="" width={40} height={53} loading="lazy" />)}
                     </span>
-                    <span className="hint">{plural(g.photoIds.length, 'photo', 'photos')}</span>
+                    <span className="gl-meta">{meta(g)}</span>
                   </button>
                 </li>
               );
@@ -261,7 +262,7 @@ export function Review({ batchId, groups: first, onReload }: { batchId: string; 
           {problem === 'stale' && <> <button type="button" className="link" onClick={onReload}>Reload</button></>}
         </p>
       )}
-      <div className="footer">
+      <div className="savebar">
         <span className="hint">{plural(cur.groups.length, 'gown', 'gowns')} · {plural(live, 'photo', 'photos')} will be added to Gallery</span>
         <div className="actions">
           <button type="button" className="btn" disabled={!dirty || locked} onClick={undo}>Undo</button>
@@ -291,40 +292,44 @@ function Editor({ batchId, group, others, taxonomy, onRetryTaxonomy, onEdit, onO
 
   return (
     <div className="editor form">
-      <div className="tools">
+      <div className="editor-head">
+        <div className="field">
+          <label htmlFor="g-name">Gown name <span className="hint">(auto-named, editable)</span></label>
+          <input id="g-name" value={group.name} maxLength={80} onChange={(e) => onEdit({ name: e.target.value }, `name:${group.id}`)} />
+        </div>
         <Menu label="Group actions" text="Actions" items={[
           { label: 'Merge into…', disabled: others.length === 0, run: () => pick('Merge into…', 'Group', 'Merge', groupOptions, (into) => onOp({ kind: 'merge', from: group.id, into })) },
         ]} />
       </div>
-      <label htmlFor="g-name">Name</label>
-      <input id="g-name" value={group.name} maxLength={80} onChange={(e) => onEdit({ name: e.target.value }, `name:${group.id}`)} />
 
       {taxonomy === 'loading' && <Skeleton rows={2} height={40} />}
       {taxonomy === 'failed' && <ErrorBlock what="tag taxonomy" onRetry={onRetryTaxonomy} />}
-      {typeof taxonomy === 'object' && taxonomy.groups.map((t) => {
-        const mine = group.tags.filter((x) => x.type === t.type);
-        const left = t.values.filter((v) => !mine.some((x) => x.value === v.value));
-        const label = cap(t.type);
-        return (
-          <div key={t.type} className="tagfield">
-            <label htmlFor={`g-${t.type}`}>{label}</label>
-            <ul className="chips" aria-label={`${label} tags`}>
-              {mine.map((x) => (
-                <li key={x.value} className="chip">
-                  {x.value}
-                  <button type="button" aria-label={`Remove ${x.value} from ${label}`} onClick={() => onEdit({ tags: group.tags.filter((y) => y !== x) })}>×</button>
-                </li>
-              ))}
-            </ul>
-            <select id={`g-${t.type}`} value="" disabled={left.length === 0} onChange={(e) => e.target.value && onEdit({ tags: [...group.tags, { type: t.type, value: e.target.value }] })}>
-              <option value="">{left.length ? 'Add…' : 'All added'}</option>
-              {left.map((v) => <option key={v.id} value={v.value}>{v.value}</option>)}
-            </select>
-          </div>
-        );
-      })}
-
-      <p className="hint">Missing a tag? An admin can add it in Settings.</p>
+      {typeof taxonomy === 'object' && (
+        <div className="tags-grid">
+          {taxonomy.groups.map((t) => {
+            const mine = group.tags.filter((x) => x.type === t.type);
+            const left = t.values.filter((v) => !mine.some((x) => x.value === v.value));
+            const label = cap(t.type);
+            return (
+              <div key={t.type} className="tagfield">
+                <label htmlFor={`g-${t.type}`}>{label}</label>
+                <ul className="chips" aria-label={`${label} tags`}>
+                  {mine.map((x) => (
+                    <li key={x.value} className="chip">
+                      {x.value}
+                      <button type="button" aria-label={`Remove ${x.value} from ${label}`} onClick={() => onEdit({ tags: group.tags.filter((y) => y !== x) })}>×</button>
+                    </li>
+                  ))}
+                </ul>
+                <select id={`g-${t.type}`} value="" disabled={left.length === 0} onChange={(e) => e.target.value && onEdit({ tags: [...group.tags, { type: t.type, value: e.target.value }] })}>
+                  <option value="">{left.length ? 'Add…' : 'All added'}</option>
+                  {left.map((v) => <option key={v.id} value={v.value}>{v.value}</option>)}
+                </select>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="desc-head">
         <label htmlFor="g-desc">AI-written description</label>

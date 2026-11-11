@@ -100,6 +100,19 @@ describe('styles.css', () => {
     expect(body('.assist-chips .chip-btn')).toMatch(/padding: 4px var\(--space-3\)/);
   });
 
+  it('review: 320 + fluid grid, list scrolls past 600, bordered cards with accent ring, full-bleed sticky savebar, 3-col tags', () => {
+    const body = (sel: string) => blocks(styles).find((x) => x.sel.includes(sel))!.body;
+    expect(body('.rv')).toMatch(/grid-template-columns: 320px minmax\(0, 1fr\)/);
+    expect(body('.rv-list')).toMatch(/max-height: 600px; overflow-y: auto/);
+    expect(body('.gl')).toMatch(/border: 1px solid/);
+    expect(body(".gl[aria-current='true']")).toMatch(/box-shadow: 0 0 0 1px var\(--color-accent\)/);
+    expect(body('.strip img')).toMatch(/width: 40px/);
+    expect(body('.gl:focus-visible')).toMatch(/outline-offset: -2px/);
+    expect(body('.savebar')).toMatch(/padding: var\(--space-4\) var\(--space-8\)/);
+    expect(body('.savebar')).toMatch(/position: sticky; bottom: 0[\s\S]*border-top[\s\S]*calc\(var\(--space-8\) \* -1\)/);
+    expect(body('.tags-grid')).toMatch(/repeat\(3, minmax\(0, 1fr\)\)/);
+  });
+
   it('avatar is a 32px dark circle', () => {
     const b = blocks(styles).find((x) => x.sel.includes('.avatar'))!.body;
     expect(b).toMatch(/width: 32px/);
