@@ -27,3 +27,10 @@
 - Processing with `total` 0 shows 0% instead of an indeterminate meter; the backend sends `total` with `processing`.
 - Loading cards carry no `aria-busy`: 13.16 axe pass.
 - Skeleton row height (53px) is the prototype `skelRows` value, not the real `Mosaic` row height.
+
+## Deferred from: code review of 13.6-upload-states (2026-11-11)
+
+- Rejections are hidden outside the adding phases (`empty`, `error`); no test covers it.
+- Tile fill is asserted at one percentage only; tiles are decorative and `aria-hidden`.
+- Long rejection lists are not capped or collapsed: revisit in 13.16.
+- Hard-coded `#fff` and `rgba()` in the upload block match the prototype; no dark theme in this epic.

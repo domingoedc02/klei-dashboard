@@ -16,7 +16,7 @@ export default {
   'upload-error': {
     hash: H, ready: '.dropzone',
     fx: (r) => { Object.assign(r, uploadRoutes('empty')); r['cmd upload_files'] = REJECTED; },
-    after: async (page) => { await page.getByRole('button', { name: 'Choose photos' }).click(); await page.waitForSelector('.rejected'); },
+    after: async (page) => { await page.getByRole('button', { name: 'Choose photos' }).click(); await page.waitForSelector('.err-summary'); },
   },
   'upload-review-low-group': { ...review, after: pickGroup(3) },
   'upload-review-long': {

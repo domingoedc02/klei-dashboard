@@ -1,8 +1,11 @@
 import type { components } from '../api/schema';
 import { formatDateTime } from '../format';
 import { useShell } from '../shell/context';
+import { Icon } from '../shell/icons';
 
 export type Status = components['schemas']['StatusView'];
+
+const TILES = 30;
 
 export const STEPS = ['Reading', 'Grouping', 'Tagging', 'Writing'] as const;
 
@@ -29,7 +32,7 @@ export function stepLabel(n: number, total: number): string {
 
 /** The share of the whole run that is done: four equal steps, the current one by its own count. */
 export function overallPct(step: number, done: number, total: number): number {
-  return Math.floor((100 * (step - 1 + Math.min(done / Math.max(total, 1), 1))) / STEPS.length);
+  return Math.min(100, Math.max(0, Math.floor((100 * (step - 1 + Math.min(done / Math.max(total, 1), 1))) / STEPS.length)));
 }
 
 /** U1: the four steps with the current one marked and earlier ones checked; one bar for the whole run. */
@@ -61,9 +64,14 @@ export function Processing({ status, photos, onDiscarded }: { status: Status; ph
     });
   return (
     <div className="processing">
-      <div className="proc-head">
-        <h2>AI is grouping images</h2>
-        <span className="pct">{pct}%</span>
+      <div className="proc-top">
+        <div className="proc-head">
+          <h2>AI is grouping images</h2>
+          <span className="pct">{pct}%</span>
+        </div>
+        <div className="proc-bar" role="progressbar" aria-label="Overall progress" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+          <i style={{ width: `${pct}%` }} />
+        </div>
       </div>
       <ol className="steps" aria-label="Grouping steps">
         {STEPS.map((name, i) => {
@@ -71,16 +79,15 @@ export function Processing({ status, photos, onDiscarded }: { status: Status; ph
           const state = n < step ? 'done' : n === step ? 'current' : 'todo';
           return (
             <li key={name} className={state} aria-current={state === 'current' ? 'step' : undefined}>
-              <span aria-hidden="true" className="mark">{state === 'done' ? '✓' : state === 'current' ? '●' : '○'}</span>
+              <span aria-hidden="true" className="mark">{state === 'done' ? <Icon name="check" /> : state === 'current' ? <i /> : null}</span>
               {stepLabel(n, total)}
               {state === 'done' && <span className="sr-only"> (done)</span>}
             </li>
           );
         })}
       </ol>
-      <progress aria-label="Overall progress" max={100} value={pct} />
       <div className="proc-grid" aria-hidden="true">
-        {Array.from({ length: 6 }, (_, i) => <div key={i} className="skeleton" />)}
+        {Array.from({ length: TILES }, (_, i) => <span key={i} className={i < pct * TILES / 100 ? 'tile filled' : 'tile'} />)}
       </div>
       <p className="hint">You can leave this screen. Progress shows on the Dashboard.</p>
       <p className="hint">Photo thumbnails are sent to your AI provider.</p>

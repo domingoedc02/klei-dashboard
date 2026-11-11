@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { components } from '../api/schema';
 import { asBridgeError, bridge, type RejectReason, type UploadEvent, type UploadKind, type UploadProgress } from '../bridge';
+import art from '../assets/empty/empty-gown-3.png';
 import { thumbUrl } from '../platform';
-import { Icon } from '../shell/icons';
 import { useShell } from '../shell/context';
 import { ErrorBlock, Skeleton } from '../shell/ui';
 import { Processing, Stopped, type Status } from './Processing';
@@ -19,6 +19,13 @@ const WHY: Record<RejectReason, string> = {
   dimensions: 'Image is too large: over 40 megapixels',
   unreadable: "Couldn't read the file",
 };
+
+const HEAD = (
+  <header className="upload-head">
+    <h1>AI Upload</h1>
+    <p className="hint">Drop photos. AI groups the same gown, tags it, and drafts a description.</p>
+  </header>
+);
 
 const BATCHES = '/api/v1/uploads';
 const POLL_MS = 2000;
@@ -105,6 +112,7 @@ export function Upload() {
     const id = batchId.current;
     if (!id || starting) return;
     setStarting(true);
+    setRejected([]);
     try {
       const r = await request<Status>('POST', `${BATCHES}/${id}/start`);
       if (!alive.current) return;
@@ -180,24 +188,40 @@ export function Upload() {
     };
   }, [load]);
 
-  if (batch === 'loading') return <section className="upload"><h1>AI Upload</h1><Skeleton rows={2} height={120} /></section>;
-  if (batch === 'failed') return <section className="upload"><h1>AI Upload</h1><ErrorBlock what="the upload batch" onRetry={() => void load()} /></section>;
+  if (batch === 'loading') return <section className="upload">{HEAD}<Skeleton rows={2} height={120} /></section>;
+  if (batch === 'failed') return <section className="upload">{HEAD}<ErrorBlock what="the upload batch" onRetry={() => void load()} /></section>;
 
   const waiting = running && progress?.waiting;
   const adding = phase === 'empty' || phase === 'error';
+  const canRetry = rejected.some((r) => r.reason !== 'full');
   return (
     <section className="upload">
-      <h1>AI Upload</h1>
+      {HEAD}
       {phase === 'processing' && status && <Processing status={status} photos={batch.ids.length} onDiscarded={() => void load()} />}
       {phase === 'error' && status && <Stopped status={status} retrying={starting || batch.ids.length === 0} onRetry={() => void start()} />}
       {phase === 'review' && status && <Review key={loads} batchId={batch.id} groups={status.groups ?? []} onReload={() => void load()} />}
+      {adding && rejected.length > 0 && (
+        <div className="err-summary" role="alert">
+          <b>{rejected.length === 1 ? '1 file' : `${rejected.length} files`} couldn’t be uploaded.</b>{' '}
+          <ul role="list" aria-label="Files not uploaded">
+            {rejected.map((r, i) => (
+              <li key={`${r.name}-${i}`}><span className="name">{r.name}</span> <span className="hint">{WHY[r.reason]}</span></li>
+            ))}
+          </ul>
+          {canRetry && <span> Remove them or convert to JPG or PNG, then retry.</span>}
+        </div>
+      )}
       {adding && (
-      <div className={`dropzone${over ? ' over' : ''}`}>
-        <Icon name="upload-cloud" large />
-        <h2>Drop gown photos here</h2>
-        <p className="hint">JPG, PNG or WebP up to 25 MB each. Upload up to {MAX_PHOTOS} at once and AI groups them.</p>
-        <button type="button" className="btn primary" disabled={running} onClick={() => void send('photo')}>Choose photos</button>
-      </div>
+        <div className={`dropzone${over ? ' over' : ''}`}>
+          <div className="drop-inner">
+            <img className="illo" src={art} alt="" />
+            <h2>Drop gown photos here</h2>
+            <p className="lede">JPG, PNG or WebP up to 25 MB each. Upload up to {MAX_PHOTOS} at once and AI groups them.</p>
+            <button type="button" className="btn primary" disabled={running} onClick={() => { setRejected([]); void send('photo'); }}>
+              {canRetry ? 'Retry upload' : 'Choose photos'}
+            </button>
+          </div>
+        </div>
       )}
 
       {running && (
@@ -213,24 +237,7 @@ export function Upload() {
         </div>
       )}
 
-      {rejected.length > 0 && (
-        <div className="rejected">
-          <p role="alert" className="error">{rejected.length === 1 ? '1 file' : `${rejected.length} files`} couldn’t be uploaded.</p>
-          <ul aria-label="Files not uploaded">
-            {rejected.map((r, i) => (
-              <li key={`${r.name}-${i}`}><span className="name">{r.name}</span> <span className="hint">{WHY[r.reason]}</span></li>
-            ))}
-          </ul>
-          <div className="actions">
-            {rejected.some((r) => r.reason !== 'full') && (
-              <button type="button" className="btn" disabled={running} onClick={() => { setRejected([]); void send('photo'); }}>Retry upload</button>
-            )}
-            <button type="button" className="link" onClick={() => setRejected([])}>Dismiss</button>
-          </div>
-        </div>
-      )}
-
-      {batch.ids.length > 0 && (
+      {adding && batch.ids.length > 0 && (
         <div className="stored">
           <h2>In this batch</h2>
           <p className="hint">{batch.ids.length} of {MAX_PHOTOS} photos stored</p>
@@ -241,7 +248,7 @@ export function Upload() {
             {batch.ids.map((p, i) => (
               <li key={p}>
                 <img src={thumbUrl(batch.id, p)} alt={`Photo ${i + 1}`} loading="lazy" width={96} height={96} />
-                {adding && !running && (
+                {!running && (
                   <button type="button" className="strip-remove" aria-label={`Remove photo ${i + 1}`} onClick={() => void remove(p)}>×</button>
                 )}
               </li>

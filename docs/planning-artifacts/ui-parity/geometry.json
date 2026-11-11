@@ -1205,7 +1205,7 @@
     "text": "Marguerite Eleonora Valentina Seraphina ",
     "with": "li.chip",
     "withText": "V-neck",
-    "detail": "54x13px at (628,594)"
+    "detail": "54x13px at (628,602)"
    },
    {
     "kind": "overlap",
@@ -1213,15 +1213,7 @@
     "text": "Marguerite Eleonora Valentina Seraphina ",
     "with": "button",
     "withText": "×",
-    "detail": "11x13px at (694,594)"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.pill.pos",
-    "text": "High",
-    "with": "button.btn",
-    "withText": "Discard batch",
-    "detail": "27x15px at (816,813)"
+    "detail": "11x13px at (694,602)"
    },
    {
     "kind": "covered",

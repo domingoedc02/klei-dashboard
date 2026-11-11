@@ -4,6 +4,7 @@ import axe from 'axe-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UploadEvent, UploadKind, UploadSummary } from '../bridge';
 import { Shell } from '../shell/Shell';
+import { overallPct } from './Processing';
 import type { Me } from '../shell/context';
 
 const mocks = vi.hoisted(() => ({ request: vi.fn(), setDirty: vi.fn(), uploadFiles: vi.fn() }));
@@ -128,25 +129,28 @@ describe('Start grouping and the Processing screen', () => {
     expect(steps.querySelector('[aria-current="step"]')?.textContent).toContain('Tagging');
     expect(steps.querySelectorAll('li.done').length).toBe(2);
     const bar = screen.getByRole('progressbar', { name: 'Overall progress' });
-    expect(bar.getAttribute('max')).toBe('100');
-    expect(bar.getAttribute('value')).toBe('62');
+    expect(bar.getAttribute('aria-valuemax')).toBe('100');
+    expect(bar.getAttribute('aria-valuenow')).toBe('62');
   });
 
-  it('shows the overall percentage, the prototype step labels and a hidden skeleton grid', async () => {
+  it('shows the overall percentage, the prototype step labels and a hidden tile grid', async () => {
     batch = { id: B, phase: 'processing', photoIds: Array.from({ length: 30 }, (_, i) => photo(i + 1)), rejected: 0 };
     status = { id: B, phase: 'processing', step: 2, done: 15, total: 30 };
     backend();
     const { container } = open();
     expect((await screen.findByRole('heading', { name: 'AI is grouping images' })).parentElement?.textContent).toContain('37%');
     const steps = screen.getByRole('list', { name: 'Grouping steps' });
-    expect([...steps.querySelectorAll('li')].map((l) => l.textContent?.replace(' (done)', '').replace(/^[✓●○]/, ''))).toEqual([
+    expect([...steps.querySelectorAll('li')].map((l) => l.textContent?.replace(' (done)', ''))).toEqual([
       'Reading 30 photos', 'Grouping images of the same gown', 'Tagging silhouette, fabric, neckline', 'Writing descriptions',
     ]);
     expect(steps.querySelectorAll('li.done')).toHaveLength(1);
     expect(steps.querySelector('li.current')?.textContent).toContain('Grouping images');
     const grid = container.querySelector('.proc-grid');
     expect(grid?.getAttribute('aria-hidden')).toBe('true');
-    expect(grid?.children).toHaveLength(6);
+    expect(grid?.children).toHaveLength(30);
+    expect(grid?.querySelectorAll('.filled')).toHaveLength(12);
+    expect(screen.queryByText(/photos stored/)).toBeNull();
+    expect(screen.queryByRole('list', { name: 'Stored photos' })).toBeNull();
     const r = await axe.run(container, noisy);
     expect(r.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
   });
@@ -201,5 +205,17 @@ describe('Start grouping and the Processing screen', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Start grouping' }));
     expect(await screen.findByText('Add at least one photo before grouping.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Start grouping' })).toBeTruthy();
+  });
+});
+
+describe('overallPct', () => {
+  it.each([
+    [1, 0, 0, 0],
+    [3, 1, 2, 62],
+    [4, 30, 30, 100],
+    [0, 0, 10, 0],
+    [9, 5, 5, 100],
+  ])('step %i done %i of %i is %i%%', (step, done, total, pct) => {
+    expect(overallPct(step, done, total)).toBe(pct);
   });
 });

@@ -54,7 +54,8 @@ describe('Upload screen', () => {
     const { container } = await open();
     expect(await screen.findByRole('heading', { name: 'Drop gown photos here' })).toBeTruthy();
     expect(screen.getByText('JPG, PNG or WebP up to 25 MB each. Upload up to 200 at once and AI groups them.')).toBeTruthy();
-    expect(document.querySelector('.dropzone svg.icon')).toBeTruthy();
+    expect(document.querySelector('.dropzone img.illo')).toBeTruthy();
+    expect(screen.getByText('Drop photos. AI groups the same gown, tags it, and drafts a description.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Choose photos' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /start grouping/i })).toBeNull();
     const r = await axe.run(container, noisy);
@@ -134,9 +135,10 @@ describe('Upload screen', () => {
       "e.jpg Couldn't read the file",
     ]);
     expect(screen.getByText('2 of 200 photos stored')).toBeTruthy();
-    expect(screen.getByRole('alert').textContent).toBe('5 files couldn’t be uploaded.');
+    expect(screen.getByRole('alert').textContent).toContain('5 files couldn’t be uploaded.');
     expect(mocks.setDirty).toHaveBeenLastCalledWith(false);
-    await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+    expect(screen.queryByRole('button', { name: 'Dismiss' })).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Retry upload' }));
     expect(screen.queryByRole('list', { name: 'Files not uploaded' })).toBeNull();
   });
 
@@ -146,9 +148,12 @@ describe('Upload screen', () => {
     runs = (_k) => Promise.resolve(summary({ rejected: [...rejected] }));
     const { container } = await open();
     await userEvent.click(await screen.findByRole('button', { name: 'Choose photos' }));
-    expect((await screen.findByRole('alert')).textContent).toBe('3 files couldn’t be uploaded.');
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('3 files couldn’t be uploaded.');
+    expect(alert.textContent).toContain('Remove them or convert to JPG or PNG, then retry.');
+    expect(alert.compareDocumentPosition(container.querySelector('.dropzone')!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(within(screen.getByRole('list', { name: 'Files not uploaded' })).getAllByRole('listitem')).toHaveLength(3);
-    expect(screen.getByRole('button', { name: 'Dismiss' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Dismiss' })).toBeNull();
     const r = await axe.run(container, noisy);
     expect(r.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
     runs = () => Promise.resolve(summary());
@@ -163,9 +168,11 @@ describe('Upload screen', () => {
     runs = () => Promise.resolve(summary({ rejected: [{ name: 'c.jpg', reason: 'full' }] }));
     await open();
     await userEvent.click(await screen.findByRole('button', { name: 'Choose photos' }));
-    expect((await screen.findByRole('alert')).textContent).toBe('1 file couldn’t be uploaded.');
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('1 file couldn’t be uploaded.');
+    expect(alert.textContent).not.toContain('Remove them or convert');
     expect(screen.queryByRole('button', { name: 'Retry upload' })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Dismiss' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Choose photos' })).toBeTruthy();
   });
 
   it('Cancel asks the shell to stop and the stored photos stay', async () => {

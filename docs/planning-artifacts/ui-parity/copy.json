@@ -310,6 +310,7 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "Drop gown photos here",
    "JPG, PNG or WebP up to 25 MB each. Upload up to 200 at once and AI groups them.",
    "Choose photos"
@@ -356,21 +357,16 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "AI is grouping images",
    "60 %",
    "Reading 30 photos",
-   "✓",
    "Grouping images of the same gown",
-   "✓",
    "Tagging silhouette, fabric, neckline",
-   "●",
    "Writing descriptions",
-   "○",
    "You can leave this screen. Progress shows on the Dashboard.",
    "Photo thumbnails are sent to your AI provider.",
-   "Cancel",
-   "In this batch",
-   "30 of 200 photos stored"
+   "Cancel"
   ]
  },
  "upload-review": {
@@ -480,6 +476,7 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "3 groups with low confidence, worth a look. Nothing is saved until you confirm.",
    "30 photos → 10 gowns .",
    "10 groups found",
@@ -543,9 +540,7 @@
    "10 gowns · 30 photos will be added to Gallery",
    "Undo",
    "Discard batch",
-   "Confirm and save 10 gowns",
-   "In this batch",
-   "30 of 200 photos stored"
+   "Confirm and save 10 gowns"
   ]
  },
  "upload-error": {
@@ -588,16 +583,16 @@
    "2 new",
    "Settings",
    "AI Upload",
-   "Drop gown photos here",
-   "JPG, PNG or WebP up to 25 MB each. Upload up to 200 at once and AI groups them.",
-   "Choose photos",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "2 files couldn’t be uploaded.",
    "wedding-fitting.heic",
    "Over 25 MB",
    "notes.pdf",
    "Not a JPEG, PNG or WebP",
-   "Retry upload",
-   "Dismiss"
+   "Remove them or convert to JPG or PNG, then retry.",
+   "Drop gown photos here",
+   "JPG, PNG or WebP up to 25 MB each. Upload up to 200 at once and AI groups them.",
+   "Retry upload"
   ]
  },
  "upload-review-low-group": {
@@ -706,6 +701,7 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "3 groups with low confidence, worth a look. Nothing is saved until you confirm.",
    "30 photos → 10 gowns .",
    "10 groups found",
@@ -767,9 +763,7 @@
    "10 gowns · 30 photos will be added to Gallery",
    "Undo",
    "Discard batch",
-   "Confirm and save 10 gowns",
-   "In this batch",
-   "30 of 200 photos stored"
+   "Confirm and save 10 gowns"
   ]
  },
  "upload-review-photos-selected": {
@@ -879,6 +873,7 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "3 groups with low confidence, worth a look. Nothing is saved until you confirm.",
    "30 photos → 10 gowns .",
    "10 groups found",
@@ -945,9 +940,7 @@
    "10 gowns · 30 photos will be added to Gallery",
    "Undo",
    "Discard batch",
-   "Confirm and save 10 gowns",
-   "In this batch",
-   "30 of 200 photos stored"
+   "Confirm and save 10 gowns"
   ]
  },
  "upload-review-combo-open": {
@@ -1057,6 +1050,7 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "3 groups with low confidence, worth a look. Nothing is saved until you confirm.",
    "30 photos → 10 gowns .",
    "10 groups found",
@@ -1121,9 +1115,7 @@
    "10 gowns · 30 photos will be added to Gallery",
    "Undo",
    "Discard batch",
-   "Confirm and save 10 gowns",
-   "In this batch",
-   "30 of 200 photos stored"
+   "Confirm and save 10 gowns"
   ]
  },
  "upload-review-discard-dialog": {
@@ -1237,6 +1229,7 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "3 groups with low confidence, worth a look. Nothing is saved until you confirm.",
    "30 photos → 10 gowns .",
    "10 groups found",
@@ -1301,8 +1294,6 @@
    "Undo",
    "Discard batch",
    "Confirm and save 10 gowns",
-   "In this batch",
-   "30 of 200 photos stored",
    "Discard this batch?",
    "The 30 uploaded photos and every AI group will be removed. This can’t be undone.",
    "Keep reviewing",
@@ -1415,6 +1406,7 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "3 groups with low confidence, worth a look. Nothing is saved until you confirm.",
    "30 photos → 10 gowns .",
    "10 groups found",
@@ -1476,9 +1468,7 @@
    "10 gowns · 30 photos will be added to Gallery",
    "Undo",
    "Discard batch",
-   "Confirm and save 10 gowns",
-   "In this batch",
-   "30 of 200 photos stored"
+   "Confirm and save 10 gowns"
   ]
  },
  "gallery-default": {
@@ -6690,7 +6680,8 @@
    "Inquiries",
    "2 new",
    "Settings",
-   "AI Upload"
+   "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description."
   ]
  },
  "upload-stopped": {
@@ -6710,6 +6701,7 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "Grouping stopped at step 2 ( Grouping ). Last good 11/07/2026, 10:00 AM.",
    "The AI provider took too long to answer.",
    "Retry",
@@ -7292,6 +7284,7 @@
    "2 new",
    "Settings",
    "AI Upload",
+   "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "3 groups with low confidence, worth a look. Nothing is saved until you confirm.",
    "30 photos → 10 gowns .",
    "10 groups found",
@@ -7353,9 +7346,7 @@
    "10 gowns · 30 photos will be added to Gallery",
    "Undo",
    "Discard batch",
-   "Confirm and save 10 gowns",
-   "In this batch",
-   "30 of 200 photos stored"
+   "Confirm and save 10 gowns"
   ]
  },
  "banner-update-failed": {

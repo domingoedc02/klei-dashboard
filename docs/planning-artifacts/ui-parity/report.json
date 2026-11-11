@@ -158,23 +158,23 @@
   },
   {
    "name": "upload-empty",
-   "pct": 1.98
+   "pct": 0.61
   },
   {
    "name": "upload-error",
-   "pct": 2.46
+   "pct": 1.43
   },
   {
    "name": "upload-processing",
-   "pct": 6.48
+   "pct": 1.27
   },
   {
    "name": "upload-review",
-   "pct": 4.65
+   "pct": 4.64
   },
   {
    "name": "upload-review-combo-open",
-   "pct": 4.66,
+   "pct": 4.65,
    "pending": "13.8"
   },
   {
@@ -183,20 +183,20 @@
   },
   {
    "name": "upload-review-long",
-   "pct": 5.2
+   "pct": 5.19
   },
   {
    "name": "upload-review-low-group",
-   "pct": 4.58
+   "pct": 4.57
   },
   {
    "name": "upload-review-photos-selected",
-   "pct": 4.99,
+   "pct": 5.14,
    "pending": "13.8"
   },
   {
    "name": "upload-review-scrolled",
-   "pct": 4.58
+   "pct": 4.94
   },
   {
    "name": "viewer-default",
@@ -278,7 +278,7 @@
    "overlap": 2
   },
   "upload-review-long": {
-   "overlap": 3,
+   "overlap": 2,
    "covered": 5
   }
  },
