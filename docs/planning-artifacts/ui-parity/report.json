@@ -6,15 +6,15 @@
   },
   {
    "name": "dashboard-default",
-   "pct": 2.37
+   "pct": 1.77
   },
   {
    "name": "dashboard-empty",
-   "pct": 2.71
+   "pct": 1.42
   },
   {
    "name": "dashboard-loading",
-   "pct": 0.89
+   "pct": 0.76
   },
   {
    "name": "gallery-default",
@@ -74,31 +74,31 @@
   },
   {
    "name": "overlay-assistant-busy",
-   "pct": 3.18
+   "pct": 2.9
   },
   {
    "name": "overlay-assistant-greeting",
-   "pct": 2.41
+   "pct": 2.13
   },
   {
    "name": "overlay-notifications-default",
-   "pct": 2.89
+   "pct": 2.4
   },
   {
    "name": "overlay-notifications-empty",
-   "pct": 2.83
+   "pct": 2.62
   },
   {
    "name": "overlay-profile-menu-default",
-   "pct": 2.46
+   "pct": 1.9
   },
   {
    "name": "overlay-search-none",
-   "pct": 2.41
+   "pct": 1.92
   },
   {
    "name": "overlay-search-results",
-   "pct": 2.35
+   "pct": 1.75
   },
   {
    "name": "settings-2fa-on",

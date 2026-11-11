@@ -84,7 +84,7 @@ export function inquiryRoutes(items = INQ) {
 
 const dashboard = () => ({
   recentGowns: GOWNS.slice(0, 4).map(card), totalGowns: 128, newThisWeek: 10, photosThisMonth: 412, gownsThisMonth: 96,
-  aiStatus: { phase: 'review', step: 4, done: 30, total: 30, groups: 10, lowConfidence: 3 },
+  aiStatus: { phase: 'review', step: null, done: null, total: null, groups: 10, lowConfidence: 3 },
   inquiries: { unread: 2, latest: INQ.slice(0, 2).map(inqItem), oldestUnreadAt: at('08:15') },
   avgReplySeconds: 8640, prevAvgReplySeconds: 11160, errors: [],
 });

@@ -20,3 +20,10 @@
 - `DrawerHost` focus effect reruns on content swap: no second drawer kind today.
 - Bell Escape swallows the key if a dialog is open at the same time: the scrim blocks the trigger, so not reachable.
 - `aria-controls="ai-panel"` target is absent while the drawer is closed (prototype export parity): 13.16 axe pass.
+
+## Deferred from: code review of 13.5-dashboard (2026-11-11)
+
+- Skeleton shapes are asserted by presence, not row count.
+- Processing with `total` 0 shows 0% instead of an indeterminate meter; the backend sends `total` with `processing`.
+- Loading cards carry no `aria-busy`: 13.16 axe pass.
+- Skeleton row height (53px) is the prototype `skelRows` value, not the real `Mosaic` row height.

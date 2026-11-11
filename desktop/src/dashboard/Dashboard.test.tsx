@@ -161,7 +161,8 @@ describe('Dashboard stats', () => {
     const inbox = await card('Unread inquiries');
     expect(within(inbox).getByText('No new inquiries')).toBeTruthy();
     expect(within(inbox).getByText('New website inquiries will appear here.')).toBeTruthy();
-    expect(within(inbox).getByRole('link', { name: 'Open inbox' }).getAttribute('href')).toBe('#/inquiries');
+    expect(within(inbox).getAllByRole('link', { name: 'Open inbox' }).map((a) => a.getAttribute('href'))).toEqual(['#/inquiries', '#/inquiries']);
+    expect(within(recent).getByRole('link', { name: 'View gallery' }).getAttribute('href')).toBe('#/gallery');
   });
 
   it('a Viewer with an empty workspace gets the sentence and no Upload photos button', async () => {
@@ -183,6 +184,7 @@ describe('Dashboard widgets', () => {
     expect(within(rows[0]).getByText('Gown 1')).toBeTruthy();
     expect(within(rows[0]).getByText('A-line · 3 photos')).toBeTruthy();
     expect(within(rows[0]).getByText('New').className).toContain('info');
+    expect(within(rows[0]).getByText('Nov 1').getAttribute('datetime')).toBe('2026-11-01T10:00:00Z');
     expect(within(rows[1]).getByText('1 photo')).toBeTruthy();
     expect(within(rows[1]).queryByText('New')).toBeNull();
     expect(within(rows[0]).getByRole('link').getAttribute('href')).toBe(`#/gallery/${id(1)}`);
@@ -192,7 +194,7 @@ describe('Dashboard widgets', () => {
   it('Unread inquiries lists the latest rows and links each one', async () => {
     mount();
     const inbox = await card('Unread inquiries');
-    expect(within(inbox).getAllByRole('link').map((a) => a.textContent)).toEqual(['Open inbox', 'Client 1Subject 1', 'Client 2Subject 2', 'Client 3Subject 3']);
+    expect(within(inbox).getAllByRole('link').map((a) => a.textContent)).toEqual(['Open inbox', 'Client 1Subject 1Nov 1', 'Client 2Subject 2Nov 1', 'Client 3Subject 3Nov 1']);
     expect(within(inbox).getByRole('link', { name: /Client 2/ }).getAttribute('href')).toBe(`#/inquiries/${id(202)}`);
   });
 
@@ -201,13 +203,21 @@ describe('Dashboard widgets', () => {
     let ai = await card('AI processing');
     expect(within(ai).getByText('Checking…').className).toContain('info');
     expect(within(ai).getByText('Grouping · 3 of 8 photos')).toBeTruthy();
-    expect((within(ai).getByRole('progressbar', { name: 'Grouping progress' }) as HTMLProgressElement).value).toBe(3);
+    expect(within(ai).getByRole('progressbar', { name: 'Grouping progress' }).getAttribute('aria-valuenow')).toBe('38');
+    expect(within(ai).getByText('Batch of 8 photos')).toBeTruthy();
+    expect(within(ai).getByText('38%')).toBeTruthy();
     unmount();
 
-    dash = { status: 200, body: { ...FULL, aiStatus: { phase: 'review', groups: 10, lowConfidence: 3 } } };
+    expect((within(ai).getByRole('progressbar').firstElementChild as HTMLElement).style.width).toBe('38%');
+    unmount();
+
+    dash = { status: 200, body: { ...FULL, aiStatus: { phase: 'review', step: null, done: null, total: null, groups: 10, lowConfidence: 3 } } };
     const second = mount();
     ai = await card('AI processing');
     expect(within(ai).getByText('Ready for review').className).toContain('pos');
+    expect(within(ai).getByText('Batch')).toBeTruthy();
+    expect(within(ai).getByText('100%')).toBeTruthy();
+    expect(within(ai).getByRole('progressbar', { name: 'Batch progress' }).getAttribute('aria-valuenow')).toBe('100');
     expect(within(ai).getByText('Grouped into 10 gowns · 3 need a quick look.')).toBeTruthy();
     expect(within(ai).getByRole('link', { name: 'Review groups' }).getAttribute('href')).toBe('#/upload');
     second.unmount();
@@ -278,6 +288,10 @@ describe('Dashboard widgets', () => {
     const regions = screen.getAllByRole('region');
     expect(regions).toHaveLength(3);
     regions.forEach((r) => expect(r.querySelector('.skeleton')).toBeTruthy());
+    expect(within(recent).getByRole('link', { name: 'View gallery' })).toBeTruthy();
+    expect(within(screen.getByRole('region', { name: 'Unread inquiries' })).getByRole('link', { name: 'Open inbox' })).toBeTruthy();
+    expect(within(screen.getByRole('region', { name: 'AI processing' })).getByText('Checking…').className).toContain('info');
+    expect(document.querySelectorAll('.dash-stat .stat-label')).toHaveLength(4);
     await act(async () => { release({ status: 200, body: FULL }); });
     await waitFor(() => expect(within(recent).getByText('Gown 1')).toBeTruthy());
     expect(document.querySelector('.dashboard .skeleton')).toBeNull();
