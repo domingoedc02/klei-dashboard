@@ -52,7 +52,7 @@ describe('Assistant drawer', () => {
   it('opens with the avatar header, disclosure, greeting, three chips and the prototype input copy; axe finds nothing', async () => {
     await open();
     const drawer = screen.getByRole('complementary', { name: 'AI Assistant' });
-    expect(drawer.querySelector('header .drawer-av')).toBeTruthy();
+    expect(drawer.querySelector('.assist-head .drawer-av')).toBeTruthy();
     expect(within(drawer).getByRole('heading', { name: 'AI Assistant' })).toBeTruthy();
     expect(within(drawer).getByText(/sent to your AI provider\. Nothing is sent by email or changed for you\./)).toBeTruthy();
     expect(within(drawer).getByText('Hi! I can summarize inquiries, draft replies and suggest gowns from your gallery.')).toBeTruthy();
@@ -151,10 +151,90 @@ describe('Assistant drawer', () => {
     expect(screen.queryByText(/is typing…/)).toBeNull();
     expect((screen.getByRole('button', { name: 'Send' }) as HTMLButtonElement).disabled).toBe(true);
     await userEvent.type(screen.getByLabelText('Message'), ' more');
-    expect((screen.getByLabelText('Message') as HTMLTextAreaElement).value).toBe('Hello more');
+    expect((screen.getByLabelText('Message') as HTMLTextAreaElement).value).toBe(' more');
     release(null);
     expect(await screen.findByText('Here is a short answer.')).toBeTruthy();
-    await waitFor(() => expect((screen.getByLabelText('Message') as HTMLTextAreaElement).value).toBe(''));
+  });
+
+  it('shows the user bubble and the dots before the reply lands, and Retry when the send fails', async () => {
+    let release: (v: unknown) => void = () => {};
+    const wait = new Promise((r) => { release = r; });
+    const base = post;
+    mocks.request.mockImplementation(async (m: string, p: string, b?: unknown) => {
+      if (p === '/api/v1/assistant/chat/messages') { await wait; return base(b); }
+      if (p === '/api/v1/assistant/chat' && m === 'GET') return { status: 200, body: { messages: [] } };
+      return { status: 200, body: { items: [], unread: 0 } };
+    });
+    const log = await open();
+    await userEvent.type(screen.getByLabelText('Message'), 'Hello');
+    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    expect(within(log).getByText('Hello')).toBeTruthy();
+    expect(screen.getByRole('status', { name: 'The assistant is typing' })).toBeTruthy();
+    expect((screen.getByLabelText('Message') as HTMLTextAreaElement).value).toBe('');
+    release(null);
+    expect(await screen.findByText('Here is a short answer.')).toBeTruthy();
+    expect(within(log).getAllByText('Hello')).toHaveLength(1);
+    expect(within(log).queryByRole('button', { name: 'Retry' })).toBeNull();
+  });
+
+  it('a failed send keeps the bubble, hides the chips and Retry sends the same body again', async () => {
+    let fail = true;
+    const ok = post;
+    post = (b) => (fail ? { status: 502, body: null } : ok(b));
+    const log = await open();
+    await userEvent.click(screen.getByRole('button', { name: /^Draft a reply/ }));
+    await screen.findByRole('alert');
+    expect(within(log).getByText(/^Draft a reply/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Summarize new inquiries' })).toBeNull();
+    expect((screen.getByRole('button', { name: 'New chat' }) as HTMLButtonElement).disabled).toBe(false);
+    fail = false;
+    await userEvent.click(within(log).getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByText('Here is a short answer.')).toBeTruthy();
+    const bodies = sent() as { text: string; inquiryId?: string }[];
+    expect(bodies).toHaveLength(2);
+    expect(bodies[1]).toEqual(bodies[0]);
+    expect(within(log).queryByRole('button', { name: 'Retry' })).toBeNull();
+  });
+
+  it('a failed text goes back into an empty box, and New chat drops the failed bubble', async () => {
+    post = () => ({ status: 502, body: null });
+    const log = await open();
+    await userEvent.type(screen.getByLabelText('Message'), 'Hello');
+    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await screen.findByRole('alert');
+    expect((screen.getByLabelText('Message') as HTMLTextAreaElement).value).toBe('Hello');
+    await userEvent.click(screen.getByRole('button', { name: 'New chat' }));
+    await waitFor(() => expect(within(log).queryByText('Hello')).toBeNull());
+  });
+
+  it('a 201 with no messages reloads the conversation instead of dropping the bubble', async () => {
+    post = () => ({ status: 201, body: { messages: [] } });
+    const log = await open();
+    stored = [{ id: 'u1', role: 'user', text: 'Hello', createdAt: '2026-11-01T10:00:00Z' }];
+    await userEvent.type(screen.getByLabelText('Message'), 'Hello');
+    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await waitFor(() => expect(within(log).getAllByText('Hello')).toHaveLength(1));
+    expect(calls.filter((c) => c.m === 'GET' && c.p === '/api/v1/assistant/chat').length).toBeGreaterThan(1);
+  });
+
+  it('Escape in the notifications menu or the search popover leaves the Assistant open', async () => {
+    mocks.request.mockImplementation(async (m: string, p: string) => {
+      if (p === '/api/v1/notifications') return { status: 200, body: { items: [], unread: 0 } };
+      if (p === '/api/v1/assistant/chat' && m === 'GET') return { status: 200, body: { messages: [] } };
+      if (p === '/api/v1/search') return { status: 200, body: { items: [{ kind: 'inquiry', id: INQ, title: 'Mia Client', subtitle: 'Fitting' }] } };
+      return { status: 200, body: null };
+    });
+    await open();
+    await userEvent.click(screen.getByRole('button', { name: /^Notifications/ }));
+    await screen.findByText('You’re all caught up');
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByText('You’re all caught up')).toBeNull();
+    expect(screen.getByRole('complementary', { name: 'AI Assistant' })).toBeTruthy();
+    await userEvent.type(screen.getByRole('searchbox'), 'mia');
+    await screen.findByRole('listbox', { name: 'Search results' });
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('listbox')).toBeNull();
+    expect(screen.getByRole('complementary', { name: 'AI Assistant' })).toBeTruthy();
   });
 
   it('suggested gowns are link rows to the gallery', async () => {
@@ -230,8 +310,8 @@ describe('Assistant drawer', () => {
 
   it('user turns are solid accent bubbles, assistant turns grey; the dots stand still under reduced motion', () => {
     const css = readFileSync(resolve(__dirname, '../styles.css'), 'utf8');
-    expect(css).toMatch(/\.assist-line\[data-role='user'\] \{[^}]*background: var\(--color-primary\); color: var\(--color-primary-text\)/);
-    expect(css).toMatch(/\.assist-line \{[^}]*background: var\(--color-hover\)[^}]*border-radius: var\(--radius-lg\)|\.assist-line \{[^}]*border-radius: var\(--radius-lg\)[^}]*background: var\(--color-hover\)/);
+    expect(css).toMatch(/\.assist-line\[data-role='user'\] \.assist-b \{[^}]*background: var\(--color-primary\); color: var\(--color-primary-text\)/);
+    expect(css).toMatch(/\.assist-b \{[^}]*border-radius: var\(--radius-lg\)[^}]*background: rgba\(0, 0, 0, 0\.05\)/);
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\) \{ \.assist-typing i \{ animation: none; \} \}/);
   });
 });

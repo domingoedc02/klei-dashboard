@@ -15,7 +15,7 @@ const chat = (r) => { r['GET /api/v1/assistant/chat'] = () => ({ messages: [] })
 export default {
   'overlay-notifications-default': open(async (page) => { await bell(page); await page.waitForSelector('[role=menu][aria-label=Notifications] .notice'); }),
   'overlay-notifications-empty': open(
-    async (page) => { await bell(page); await page.waitForSelector('[role=menu][aria-label=Notifications]'); },
+    async (page) => { await bell(page); await page.waitForSelector('.bell-menu .empty-state'); },
     (r) => { r['GET /api/v1/notifications'] = () => ({ items: [], unread: 0 }); },
   ),
   'overlay-profile-menu-default': open(async (page) => { await page.locator('.profile-btn').click(); await page.waitForSelector('.profile [role=menu]'); }),

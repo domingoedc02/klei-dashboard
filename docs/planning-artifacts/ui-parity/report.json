@@ -6,15 +6,15 @@
   },
   {
    "name": "dashboard-default",
-   "pct": 2.38
+   "pct": 2.37
   },
   {
    "name": "dashboard-empty",
-   "pct": 2.72
+   "pct": 2.71
   },
   {
    "name": "dashboard-loading",
-   "pct": 0.9
+   "pct": 0.89
   },
   {
    "name": "gallery-default",
@@ -66,7 +66,7 @@
   },
   {
    "name": "inquiries-thread-closed",
-   "pct": 3.82
+   "pct": 3.81
   },
   {
    "name": "inquiries-thread-replied",
@@ -74,15 +74,15 @@
   },
   {
    "name": "overlay-assistant-busy",
-   "pct": 2.98
+   "pct": 3.18
   },
   {
    "name": "overlay-assistant-greeting",
-   "pct": 2.79
+   "pct": 2.41
   },
   {
    "name": "overlay-notifications-default",
-   "pct": 2.9
+   "pct": 2.89
   },
   {
    "name": "overlay-notifications-empty",
@@ -90,15 +90,15 @@
   },
   {
    "name": "overlay-profile-menu-default",
-   "pct": 2.5
+   "pct": 2.46
   },
   {
    "name": "overlay-search-none",
-   "pct": 2.35
+   "pct": 2.41
   },
   {
    "name": "overlay-search-results",
-   "pct": 2.37
+   "pct": 2.35
   },
   {
    "name": "settings-2fa-on",
@@ -118,7 +118,7 @@
   },
   {
    "name": "settings-notifications-default",
-   "pct": 2.12
+   "pct": 2.11
   },
   {
    "name": "settings-preferences-default",
@@ -126,11 +126,11 @@
   },
   {
    "name": "settings-profile-default",
-   "pct": 3.17
+   "pct": 3.16
   },
   {
    "name": "settings-profile-staff-role",
-   "pct": 2.98
+   "pct": 2.97
   },
   {
    "name": "settings-roles-default",
@@ -146,7 +146,7 @@
   },
   {
    "name": "settings-staff-add-dialog",
-   "pct": 5.38
+   "pct": 5.37
   },
   {
    "name": "settings-staff-default",
@@ -187,7 +187,7 @@
   },
   {
    "name": "upload-review-low-group",
-   "pct": 4.59
+   "pct": 4.58
   },
   {
    "name": "upload-review-photos-selected",
@@ -208,7 +208,7 @@
   },
   {
    "name": "viewer-edit-dialog",
-   "pct": 7.6
+   "pct": 7.59
   },
   {
    "name": "viewer-edit-error",
@@ -216,7 +216,7 @@
   },
   {
    "name": "viewer-photo-3",
-   "pct": 2.47
+   "pct": 2.46
   }
  ],
  "protoOnly": [],

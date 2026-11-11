@@ -43,7 +43,8 @@ export function Bell() {
     if (!open) return;
     void load();
     const away = (e: MouseEvent) => { if (!box.current?.contains(e.target as Node)) setOpen(false); };
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    // The key stops here so it does not also close the Assistant behind the menu.
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false); } };
     document.addEventListener('mousedown', away);
     document.addEventListener('keydown', esc);
     return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc); };
@@ -74,7 +75,7 @@ export function Bell() {
     <div ref={box} className="bell">
       <button
         type="button"
-        className="btn icon-btn"
+        className="icon-btn"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
@@ -84,29 +85,31 @@ export function Bell() {
         {unread > 0 && <span className="dot" aria-hidden="true" />}
       </button>
       {open && (
-        <div role="menu" aria-label="Notifications" className="menu bell-menu">
+        <div className="menu bell-menu">
           <div className="menu-head">
-            <strong>Notifications</strong>
+            <h3>Notifications</h3>
             {view.status === 'ready' && view.items.length > 0 && (
-              <button type="button" role="menuitem" className="link" onClick={() => void clear()}>Clear all</button>
+              <button type="button" className="btn ghost sm" onClick={() => void clear()}>Clear all</button>
             )}
           </div>
+          <div {...(view.status === 'ready' && view.items.length > 0 ? { role: 'menu', 'aria-label': 'Notifications' } : {})}>
           {view.status === 'loading' && <Skeleton rows={3} height={40} />}
           {view.status === 'error' && <ErrorBlock what="notifications" onRetry={() => { setView({ status: 'loading' }); void load(); }} />}
           {view.status === 'ready' && view.items.length === 0 && (
             <EmptyState art={art} compact title="You’re all caught up" text="New inquiries and AI results will show up here.">
-              {shell.can(INQUIRY_NEEDS) && <a role="menuitem" className="btn primary" href="#/inquiries" onClick={() => setOpen(false)}>Go to Inquiries</a>}
+              {shell.can(INQUIRY_NEEDS) && <a className="btn primary" href="#/inquiries" onClick={() => setOpen(false)}>Go to Inquiries</a>}
             </EmptyState>
           )}
           {view.status === 'ready' && view.items.map((n) => (
             <button key={n.id} type="button" role="menuitem" className={`notice${n.read ? '' : ' unread'}`} onClick={() => void go(n)}>
-              <span className="notice-title">{n.title}</span>
-              <time className="hint" dateTime={n.createdAt}>{formatRelative(n.createdAt ?? '')}</time>
+              <span className={n.read ? 'spacer' : 'unread-dot'} aria-hidden="true" />
+              <span className="notice-body">
+                <span className="notice-title">{n.title}</span>
+                <time className="hint" dateTime={n.createdAt}>{formatRelative(n.createdAt ?? '')}</time>
+              </span>
             </button>
           ))}
-          {shell.can(INQUIRY_NEEDS) && !(view.status === 'ready' && view.items.length === 0) && (
-            <a role="menuitem" className="menu-foot" href="#/inquiries" onClick={() => setOpen(false)}>Go to Inquiries</a>
-          )}
+          </div>
         </div>
       )}
     </div>

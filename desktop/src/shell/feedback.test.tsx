@@ -41,7 +41,7 @@ describe('UI feedback under 100 ms', () => {
     render(<Shell me={ME} onExpired={vi.fn()} onSignOut={vi.fn()} />);
     const bell = await screen.findByRole('button', { name: /^Notifications/ });
     const ms = timed(() => fireEvent.click(bell));
-    expect(screen.getByRole('menu', { name: 'Notifications' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Notifications' })).toBeTruthy();
     expect(ms).toBeLessThan(BUDGET_MS);
   });
 });

@@ -5823,7 +5823,6 @@
    "8:58 AM",
    "Marcus Bell accepted your invite",
    "Yesterday",
-   "Go to Inquiries",
    "EP",
    "Eleanor Park",
    "K",
@@ -6066,8 +6065,9 @@
    "AI Assistant",
    "EP",
    "Eleanor Park",
+   "EP",
    "Eleanor Park",
-   "Admin",
+   "eleanor@kleibridal.com",
    "Profile settings",
    "Sign out",
    "K",
@@ -6182,7 +6182,6 @@
   "desktop": [
    "Skip to main content",
    "[aur]",
-   "Gowns",
    "Aurelia",
    "A-line · Mikado",
    "AI Assistant",
@@ -6473,16 +6472,13 @@
    "Priya Raman",
    "Alterations and timeline question",
    "AI Assistant",
-   "×",
    "Messages and the inquiry and gown text they need are sent to your AI provider. Nothing is sent by email or changed for you.",
    "Hi! I can summarize inquiries, draft replies and suggest gowns from your gallery.",
    "Summarize new inquiries",
    "Draft a reply",
    "Suggest gowns for a beach wedding",
    "[Ask anything about your inquiries or gowns…]",
-   "Ctrl/⌘ + Enter to send",
-   "Send",
-   "New chat"
+   "Ctrl/⌘ + Enter to send"
   ]
  },
  "overlay-assistant-busy": {
@@ -6602,13 +6598,11 @@
    "Priya Raman",
    "Alterations and timeline question",
    "AI Assistant",
-   "×",
    "Messages and the inquiry and gown text they need are sent to your AI provider. Nothing is sent by email or changed for you.",
    "Hi! I can summarize inquiries, draft replies and suggest gowns from your gallery.",
+   "Summarize new inquiries",
    "[Ask anything about your inquiries or gowns…]",
-   "Ctrl/⌘ + Enter to send",
-   "Send",
-   "New chat"
+   "Ctrl/⌘ + Enter to send"
   ]
  },
  "upload-loading": {

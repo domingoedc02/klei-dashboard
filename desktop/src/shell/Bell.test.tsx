@@ -57,30 +57,20 @@ describe('Bell', () => {
     const menu = await screen.findByRole('menu', { name: 'Notifications' });
     const items = within(menu).getAllByRole('menuitem');
     expect(items.map((i) => i.textContent)).toEqual([
-      'Clear all', expect.stringContaining('New inquiry from Client 1'), expect.stringContaining('AI finished grouping 4 images into 2 gowns'),
+      expect.stringContaining('New inquiry from Client 1'), expect.stringContaining('AI finished grouping 4 images into 2 gowns'),
     ]);
-    expect(items[1].className).toContain('unread');
-    expect(items[2].className).not.toContain('unread');
+    expect(items[0].className).toContain('unread');
+    expect(items[1].className).not.toContain('unread');
     const r = await axe.run(container, { rules: { 'color-contrast': { enabled: false }, region: { enabled: false } } });
     expect(r.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
   });
 
-  it('shows the Notifications heading and a Go to Inquiries footer only to a User who may open Inquiries', async () => {
-    const view = mount({ ...ME, permissions: ['PERM_VIEW_GALLERY', 'PERM_REPLY'] });
+  it('shows the Notifications heading and no footer link under a non-empty list', async () => {
+    mount({ ...ME, permissions: ['PERM_VIEW_GALLERY', 'PERM_REPLY'] });
     await userEvent.click(await button());
-    const menu = await screen.findByRole('menu', { name: 'Notifications' });
-    expect(within(menu).getByText('Notifications', { selector: 'strong' })).toBeTruthy();
-    const items = within(menu).getAllByRole('menuitem');
-    const foot = items[items.length - 1];
-    expect(foot.textContent).toBe('Go to Inquiries');
-    expect(foot.getAttribute('href')).toBe('#/inquiries');
-    await userEvent.click(foot);
-    expect(screen.queryByRole('menu', { name: 'Notifications' })).toBeNull();
-    view.unmount();
-    mount();
-    await userEvent.click(await button());
-    await screen.findByRole('menu', { name: 'Notifications' });
-    expect(screen.queryByRole('menuitem', { name: 'Go to Inquiries' })).toBeNull();
+    await screen.findByRole('menuitem', { name: /New inquiry from Client 1/ });
+    expect(screen.getByRole('heading', { name: 'Notifications' })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'Go to Inquiries' })).toBeNull();
   });
 
   it('the empty menu still offers Go to Inquiries', async () => {
@@ -89,8 +79,8 @@ describe('Bell', () => {
     await userEvent.click(await button());
     expect(await screen.findByText('You’re all caught up')).toBeTruthy();
     expect(screen.getByText('New inquiries and AI results will show up here.')).toBeTruthy();
-    expect(screen.getByRole('menuitem', { name: 'Go to Inquiries' }).className).toContain('primary');
-    expect(screen.queryByRole('menuitem', { name: 'Clear all' })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Go to Inquiries' }).className).toContain('primary');
+    expect(screen.queryByRole('button', { name: 'Clear all' })).toBeNull();
   });
 
   it('click marks that line read, goes to its target and closes the menu', async () => {
@@ -114,11 +104,11 @@ describe('Bell', () => {
   it('Clear all deletes, empties the list and toasts', async () => {
     mount();
     await userEvent.click(await button());
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Clear all' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Clear all' }));
     expect(calls.some((c) => c.m === 'DELETE' && c.p === '/api/v1/notifications')).toBe(true);
     expect(await screen.findByText('Notifications cleared')).toBeTruthy();
     expect(await screen.findByText("You’re all caught up")).toBeTruthy();
-    expect(screen.queryByRole('menuitem', { name: 'Clear all' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Clear all' })).toBeNull();
   });
 
   it('shows the empty line for a new User', async () => {

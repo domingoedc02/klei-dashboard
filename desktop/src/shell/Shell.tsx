@@ -26,7 +26,8 @@ const TOAST_MS = 3200;
 const UNDO_MS = 8000;
 
 interface Toast { id: number; text: string; kind: 'info' | 'error'; action?: ToastAction }
-interface Drawer { title: string; content: ReactNode; avatar?: boolean }
+/** `bare`: the content draws its own header (the Assistant), so the host adds none. */
+interface Drawer { title: string; content: ReactNode; bare?: boolean }
 
 async function ping(): Promise<boolean> {
   try {
@@ -95,20 +96,23 @@ function DialogHost({ spec, close }: { spec: DialogSpec; close: () => void }) {
 }
 
 function DrawerHost({ drawer, close }: { drawer: Drawer; close: () => void }) {
-  const x = useRef<HTMLButtonElement>(null);
+  const box = useRef<HTMLElement>(null);
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
-    x.current?.focus();
+    box.current?.querySelector<HTMLElement>('[data-close]')?.focus();
     return () => opener?.focus?.();
   }, []);
   return (
-    <aside className="drawer" aria-label={drawer.title}>
-      <header>
-        {drawer.avatar && <span className="drawer-av" aria-hidden="true"><Icon name="spark" /></span>}
-        <h2>{drawer.title}</h2>
-        <button ref={x} type="button" className="link" aria-label="Close" onClick={close}>×</button>
-      </header>
-      <div>{drawer.content}</div>
+    <aside ref={box} id={drawer.bare ? 'ai-panel' : undefined} className="drawer" aria-label={drawer.title}>
+      {drawer.bare ? drawer.content : (
+        <>
+          <header>
+            <h2>{drawer.title}</h2>
+            <button type="button" className="icon-btn" data-close aria-label="Close" title="Close" onClick={close}><Icon name="close" /></button>
+          </header>
+          <div className="drawer-body">{drawer.content}</div>
+        </>
+      )}
     </aside>
   );
 }
@@ -277,10 +281,13 @@ export function Shell({ me: first, onExpired, onSignOut, children }: { me: Me; o
             {allows(me.permissions, ASSISTANT_NEEDS) && (
               <button
                 type="button"
-                className="btn"
-                onClick={() => setDrawer({ title: 'AI Assistant', avatar: true, content: <Assistant /> })}
+                className="btn sm ai-btn"
+                aria-haspopup="dialog"
+                aria-expanded={!!drawer?.bare}
+                aria-controls="ai-panel"
+                onClick={() => setDrawer((d) => (d?.bare ? null : { title: 'AI Assistant', bare: true, content: <Assistant /> }))}
               >
-                AI Assistant
+                <Icon name="spark" />AI Assistant
               </button>
             )}
             <Bell />
@@ -290,9 +297,14 @@ export function Shell({ me: first, onExpired, onSignOut, children }: { me: Me; o
               </button>
               {menu && (
                 <div role="menu" className="menu">
-                  <p className="who">{me.name}<br /><span className="hint">{me.role}</span></p>
-                  <a role="menuitem" href="#/settings/profile" onClick={() => setMenu(false)}>Profile settings</a>
-                  <button role="menuitem" type="button" onClick={() => { setMenu(false); onSignOut(); }}>Sign out</button>
+                  <div className="menu-who">
+                    <Avatar name={me.name ?? ''} revision={me.avatar} />
+                    <span><strong>{me.name}</strong><span className="hint">{me.email}</span></span>
+                  </div>
+                  <hr />
+                  <a role="menuitem" href="#/settings/profile" onClick={() => setMenu(false)}><Icon name="user" />Profile settings</a>
+                  <hr />
+                  <button role="menuitem" type="button" onClick={() => { setMenu(false); onSignOut(); }}><Icon name="logout" />Sign out</button>
                 </div>
               )}
             </div>

@@ -38,31 +38,40 @@ const box = () => screen.getByRole('searchbox');
 const find = async (text: string) => { await userEvent.type(box(), text); return screen.findByRole('listbox', { name: 'Search results' }); };
 
 describe('SearchBox', () => {
-  it('asks once after typing stops, with the words in the body, and lists Gowns before Inquiries', async () => {
+  it('asks once after typing stops, with the words in the body, and lists the hits in one flat list in server order', async () => {
     mount();
     const list = await find('aurora');
     expect(searches).toEqual([{ q: 'aurora' }]);
-    const groups = within(list).getAllByRole('group').map((g) => g.getAttribute('aria-label'));
-    expect(groups).toEqual(['Gowns', 'Inquiries']);
+    expect(within(list).queryAllByRole('group')).toHaveLength(0);
     const options = within(list).getAllByRole('option');
     expect(options[0].textContent).toContain('Aurora');
     expect(options[0].textContent).toContain('A-line, Silk');
-    expect(options[0].querySelectorAll('img')).toHaveLength(2);
+    expect(options[0].querySelector('svg')).toBeTruthy();
+    expect(options[0].querySelectorAll('img')).toHaveLength(0);
     expect(options[1].textContent).toContain('Mia Client');
     expect(options[1].textContent).toContain('Aurora fitting');
+  });
+
+  it('shows at most six hits', async () => {
+    answer = async () => ({ status: 200, body: { items: Array.from({ length: 8 }, (_, i) => ({ kind: 'inquiry', id: `0b1c2d3e-0000-4000-8000-0000000001${i}0`, title: `Client ${i}`, subtitle: 'Fitting' })) } });
+    mount();
+    const list = await find('client');
+    expect(within(list).getAllByRole('option')).toHaveLength(6);
   });
 
   it('arrow keys move and Enter opens the Gown or the Inquiry', async () => {
     mount();
     await find('aurora');
-    expect(box().getAttribute('aria-activedescendant')).toBe(screen.getAllByRole('option')[0].id);
+    expect(box().hasAttribute('aria-activedescendant')).toBe(false);
     await userEvent.keyboard('{Enter}');
     expect(window.location.hash).toBe(`#/gallery/${G1}`);
     expect(screen.queryByRole('listbox')).toBeNull();
     expect((box() as HTMLInputElement).value).toBe('');
 
     await find('aurora');
-    await userEvent.keyboard('{ArrowDown}{Enter}');
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    expect(box().getAttribute('aria-activedescendant')).toBe(screen.getAllByRole('option')[1].id);
+    await userEvent.keyboard('{Enter}');
     expect(window.location.hash).toBe(`#/inquiries/${I1}`);
   });
 

@@ -67,7 +67,7 @@ describe('frame', () => {
     expect(document.getElementById('view')?.tagName).toBe('MAIN');
   });
 
-  it('the profile menu shows name, role, Profile settings and Sign out behind a pill trigger with an avatar', async () => {
+  it('the profile menu shows name, email, Profile settings and Sign out behind a pill trigger with an avatar', async () => {
     mount(ADMIN);
     const trigger = screen.getByRole('button', { name: 'Ada Admin' });
     expect(trigger.className).toContain('profile-btn');
@@ -76,7 +76,8 @@ describe('frame', () => {
     await userEvent.click(trigger);
     const menu = screen.getByRole('menu');
     expect(menu.textContent).toContain('Ada Admin');
-    expect(menu.textContent).toContain('Admin');
+    expect(menu.textContent).toContain('ada@example.test');
+    expect(menu.querySelector('.avatar')?.textContent).toBe('AA');
     expect(screen.getAllByRole('menuitem').map((m) => m.textContent)).toEqual(['Profile settings', 'Sign out']);
   });
 
@@ -252,6 +253,22 @@ describe('toasts, dialog, drawer', () => {
     mount(ADMIN);
     await userEvent.click(screen.getByRole('button', { name: 'AI Assistant' }));
     expect(screen.getByRole('complementary', { name: 'AI Assistant' })).toBeTruthy();
+  });
+
+  it('the Assistant button toggles the drawer, wires aria-expanded and aria-controls, and focuses Close', async () => {
+    mount(ADMIN);
+    const ai = screen.getByRole('button', { name: 'AI Assistant' });
+    expect(ai.getAttribute('aria-expanded')).toBe('false');
+    await userEvent.click(ai);
+    expect(ai.getAttribute('aria-expanded')).toBe('true');
+    expect(document.getElementById(ai.getAttribute('aria-controls') ?? '')).toBe(screen.getByRole('complementary', { name: 'AI Assistant' }));
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('complementary', { name: 'AI Assistant' })).toBeNull();
+    expect(ai.getAttribute('aria-expanded')).toBe('false');
+    await userEvent.click(ai);
+    await userEvent.click(ai);
+    expect(screen.queryByRole('complementary', { name: 'AI Assistant' })).toBeNull();
   });
 });
 

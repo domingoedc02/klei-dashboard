@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { components } from '../api/schema';
 import { Mosaic } from '../gallery/Gallery';
 import { useShell } from '../shell/context';
+import { Icon } from '../shell/icons';
 import { useRoute, useRouteArg } from '../shell/route';
 import { ErrorBlock, Skeleton } from '../shell/ui';
 
@@ -22,6 +23,7 @@ export function Assistant() {
   const [text, setText] = useState('');
   const [problem, setProblem] = useState<string | null>(null);
   const [first, setFirst] = useState<string | null>(null);
+  const [pending, setPending] = useState<{ text: string; inquiryId?: string } | null>(null);
   const log = useRef<HTMLDivElement>(null);
   const req = useRef(shell.request);
   req.current = shell.request;
@@ -52,15 +54,22 @@ export function Assistant() {
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { if (log.current) log.current.scrollTop = log.current.scrollHeight; }, [lines, busy]);
 
+  // The User's own line shows at once; it is replaced by the stored lines when the reply arrives, or stays with Retry when it fails.
+  // The failed text goes back into an empty box, so sending something else never loses it.
+  const fail = (line: string, t: string) => { setProblem(line); setText((c) => c || t); };
+
   const send = async (said: string, inquiryId?: string) => {
     const t = said.trim();
     if (!t || busy) return;
-    setBusy(true); setProblem(null);
+    setBusy(true); setProblem(null); setText((c) => (c.trim() === t ? '' : c)); setPending({ text: t, inquiryId });
     try {
       const r = await req.current<View>('POST', '/api/v1/assistant/chat/messages', inquiryId ? { text: t, inquiryId } : { text: t });
-      if (r.status === 201) { setLines((l) => [...(l ?? []), ...(r.body?.messages ?? [])]); setText(''); }
-      else setProblem(r.status === 409 || r.status === 502 ? UNREACHABLE : "Couldn't send that. Try again.");
-    } catch { setProblem("Couldn't send that. Try again."); } finally { setBusy(false); }
+      if (r.status === 201) {
+        const added = r.body?.messages ?? [];
+        if (added.length > 0) setLines((l) => [...(l ?? []), ...added]); else await load();
+        setPending(null);
+      } else fail(r.status === 409 || r.status === 502 ? UNREACHABLE : "Couldn't send that. Try again.", t);
+    } catch { fail("Couldn't send that. Try again.", t); } finally { setBusy(false); }
   };
 
   const draft = first ? `Draft a reply to ${first}` : 'Draft a reply';
@@ -69,7 +78,7 @@ export function Assistant() {
 
   const fresh = async () => {
     const r = await req.current('DELETE', '/api/v1/assistant/chat');
-    if (r.status === 204) { setLines([]); setProblem(null); } else shell.toast("Couldn't start a new chat.", 'error');
+    if (r.status === 204) { setLines([]); setPending(null); setProblem(null); } else shell.toast("Couldn't start a new chat.", 'error');
   };
 
   const copy = async (s: string) => {
@@ -81,17 +90,28 @@ export function Assistant() {
     if (e.metaKey || e.ctrlKey || (shell.me.preferences?.enterToSend && !e.shiftKey)) { e.preventDefault(); void send(text); }
   };
 
+  const av = <span className="drawer-av" aria-hidden="true"><Icon name="spark" /></span>;
+  const who = (role: string | undefined, body: React.ReactNode, key?: string) => (
+    <div key={key} className="assist-line" data-role={role}>{role === 'assistant' && av}<div className="assist-b">{body}</div></div>
+  );
+
   return (
     <div className="assist">
+      <header className="assist-head">
+        {av}
+        <h2>AI Assistant</h2>
+        <button type="button" className="icon-btn" aria-label="New chat" title="New chat" disabled={busy || !lines || (lines.length === 0 && !pending)} onClick={() => void fresh()}><Icon name="refresh" /></button>
+        <button type="button" className="icon-btn" data-close aria-label="Close" title="Close" onClick={shell.closeDrawer}><Icon name="close" /></button>
+      </header>
       <p className="hint assist-note">Messages and the inquiry and gown text they need are sent to your AI provider. Nothing is sent by email or changed for you.</p>
       {lines === null && !failed && <Skeleton rows={3} height={40} />}
       {failed && <ErrorBlock what="the conversation" onRetry={() => void load()} />}
       {lines && (
         <>
           <div ref={log} className="assist-log" role="log" aria-label="Conversation" aria-live="polite">
-            <div className="assist-line" data-role="assistant"><p>{GREETING}</p></div>
-            {lines.map((l) => (
-              <div key={l.id} className="assist-line" data-role={l.role}>
+            {who('assistant', <p>{GREETING}</p>)}
+            {lines.map((l) => who(l.role, (
+              <>
                 <p>{l.text}</p>
                 {l.gowns && l.gowns.length > 0 && (
                   <ul className="assist-gowns">
@@ -104,9 +124,15 @@ export function Assistant() {
                   </ul>
                 )}
                 {l.role === 'assistant' && <button type="button" className="link" onClick={() => void copy(l.text ?? '')}>Copy</button>}
-              </div>
+              </>
+            ), l.id))}
+            {pending && who('user', (
+              <>
+                <p>{pending.text}</p>
+                {!busy && <button type="button" className="link" onClick={() => void send(pending.text, pending.inquiryId)}>Retry</button>}
+              </>
             ))}
-            {busy && <div className="assist-line assist-typing" data-role="assistant" role="status" aria-label="The assistant is typing"><i /><i /><i /></div>}
+            {busy && <div className="assist-line assist-typing" data-role="assistant" role="status" aria-label="The assistant is typing">{av}<div className="assist-b"><i /><i /><i /></div></div>}
           </div>
           {problem && (
             <p role="alert" className="error">
@@ -114,18 +140,17 @@ export function Assistant() {
               {problem === UNREACHABLE && shell.can(['PERM_AI_SETTINGS']) && <a href="#/settings" onClick={shell.closeDrawer}>Open settings</a>}
             </p>
           )}
-          {!busy && !lines.some((l) => l.role === 'user') && (
+          {!busy && !pending && !lines.some((l) => l.role === 'user') && (
             <div className="assist-chips">
               {chips.map((c) => <button key={c} type="button" className="chip-btn" onClick={() => void send(c, c === draft ? thread ?? undefined : undefined)}>{c}</button>)}
             </div>
           )}
-          <form className="assist-form" onSubmit={(e) => { e.preventDefault(); void send(text); }}>
-            <textarea aria-label="Message" placeholder="Ask anything about your inquiries or gowns…" rows={2} value={text} maxLength={4000} onChange={(e) => setText(e.target.value)} onKeyDown={keys} />
-            <p className="hint assist-keys">{enter ? 'Enter to send · Shift+Enter for a new line' : 'Ctrl/⌘ + Enter to send'}</p>
-            <div className="actions">
-              <button type="submit" className="btn primary" disabled={busy || !text.trim()}>Send</button>
-              <button type="button" className="link" disabled={busy || lines.length === 0} onClick={() => void fresh()}>New chat</button>
+          <form className="assist-foot" onSubmit={(e) => { e.preventDefault(); void send(text); }}>
+            <div className="assist-row">
+              <textarea aria-label="Message" placeholder="Ask anything about your inquiries or gowns…" rows={2} value={text} maxLength={4000} onChange={(e) => setText(e.target.value)} onKeyDown={keys} />
+              <button type="submit" className="btn primary" aria-label="Send" disabled={busy || !text.trim()}><Icon name="send" /></button>
             </div>
+            <p className="hint assist-keys">{enter ? 'Enter to send · Shift+Enter for a new line' : 'Ctrl/⌘ + Enter to send'}</p>
           </form>
         </>
       )}
