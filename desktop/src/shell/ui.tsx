@@ -6,6 +6,18 @@ export function Pill({ tone = 'neutral', children, title }: { tone?: PillTone; c
   return <span className={`pill ${tone}`} title={title}>{children}</span>;
 }
 
+/** Centred illustration, heading, line and optional action; `compact` is the 144 px version for menus and panes. */
+export function EmptyState({ art, title, text, compact, children }: { art: string; title: string; text: string; compact?: boolean; children?: ReactNode }) {
+  return (
+    <div className={`empty-state${compact ? ' compact' : ''}`}>
+      <img className="illo" src={art} alt="" />
+      <h2>{title}</h2>
+      <p>{text}</p>
+      {children}
+    </div>
+  );
+}
+
 export function Skeleton({ rows = 3, height = 48 }: { rows?: number; height?: number }) {
   return (
     <div aria-hidden="true" className="skeletons">

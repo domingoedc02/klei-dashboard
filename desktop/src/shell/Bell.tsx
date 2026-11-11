@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { components } from '../api/schema';
-import { formatDateTime } from '../format';
+import art from '../assets/empty/empty-gown-5.png';
+import { formatRelative } from '../format';
 import { POLL_MS } from '../inquiries/events';
 import { useShell } from './context';
 import { Icon } from './icons';
-import { ErrorBlock, Skeleton } from './ui';
+import { EmptyState, ErrorBlock, Skeleton } from './ui';
 
 const INQUIRY_NEEDS = ['PERM_REPLY', 'PERM_CLOSE_INQUIRY'];
 type Bell = components['schemas']['NotificationList'];
@@ -92,14 +93,18 @@ export function Bell() {
           </div>
           {view.status === 'loading' && <Skeleton rows={3} height={40} />}
           {view.status === 'error' && <ErrorBlock what="notifications" onRetry={() => { setView({ status: 'loading' }); void load(); }} />}
-          {view.status === 'ready' && view.items.length === 0 && <p className="hint bell-empty">You’re all caught up</p>}
+          {view.status === 'ready' && view.items.length === 0 && (
+            <EmptyState art={art} compact title="You’re all caught up" text="New inquiries and AI results will show up here.">
+              {shell.can(INQUIRY_NEEDS) && <a role="menuitem" className="btn primary" href="#/inquiries" onClick={() => setOpen(false)}>Go to Inquiries</a>}
+            </EmptyState>
+          )}
           {view.status === 'ready' && view.items.map((n) => (
             <button key={n.id} type="button" role="menuitem" className={`notice${n.read ? '' : ' unread'}`} onClick={() => void go(n)}>
               <span className="notice-title">{n.title}</span>
-              <time className="hint" dateTime={n.createdAt}>{formatDateTime(n.createdAt ?? '')}</time>
+              <time className="hint" dateTime={n.createdAt}>{formatRelative(n.createdAt ?? '')}</time>
             </button>
           ))}
-          {shell.can(INQUIRY_NEEDS) && (
+          {shell.can(INQUIRY_NEEDS) && !(view.status === 'ready' && view.items.length === 0) && (
             <a role="menuitem" className="menu-foot" href="#/inquiries" onClick={() => setOpen(false)}>Go to Inquiries</a>
           )}
         </div>

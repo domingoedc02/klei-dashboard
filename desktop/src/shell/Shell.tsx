@@ -285,8 +285,8 @@ export function Shell({ me: first, onExpired, onSignOut, children }: { me: Me; o
             )}
             <Bell />
             <div ref={menuBox} className="profile">
-              <button type="button" className="btn profile-btn" aria-haspopup="menu" aria-expanded={menu} onClick={() => setMenu(!menu)}>
-                <Avatar name={me.name ?? ''} revision={me.avatar} />{me.name}
+              <button type="button" className="profile-btn" aria-haspopup="menu" aria-expanded={menu} onClick={() => setMenu(!menu)}>
+                <Avatar name={me.name ?? ''} revision={me.avatar} small /><span className="profile-name">{me.name}</span><Icon name="chevron-down" />
               </button>
               {menu && (
                 <div role="menu" className="menu">

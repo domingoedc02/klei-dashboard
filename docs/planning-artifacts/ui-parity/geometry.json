@@ -171,7 +171,7 @@
     "kind": "dialog-scroll",
     "sel": "div.dialog",
     "text": "",
-    "detail": "content 974px > box 866px, footer/controls need an inner scroll"
+    "detail": "content 980px > box 866px, footer/controls need an inner scroll"
    }
   ]
  },
@@ -182,7 +182,7 @@
     "kind": "dialog-scroll",
     "sel": "div.dialog",
     "text": "",
-    "detail": "content 998px > box 866px, footer/controls need an inner scroll"
+    "detail": "content 1004px > box 866px, footer/controls need an inner scroll"
    }
   ]
  },
@@ -966,7 +966,7 @@
     "text": "Chat model",
     "with": "button.btn.primary",
     "withText": "Save AI settings",
-    "detail": "70x17px at (289,812)"
+    "detail": "70x14px at (289,812)"
    }
   ]
  },
@@ -979,7 +979,7 @@
     "text": "Chat model",
     "with": "button.btn.primary",
     "withText": "Save AI settings",
-    "detail": "70x17px at (289,812)"
+    "detail": "70x14px at (289,812)"
    }
   ]
  },
@@ -1149,7 +1149,7 @@
     "text": "Try again",
     "with": "p.hint",
     "withText": "You will sign in again the next time you",
-    "detail": "63x4px at (550,535)"
+    "detail": "63x4px at (550,533)"
    },
    {
     "kind": "overlap",
@@ -1157,7 +1157,7 @@
     "text": "Continue without saving",
     "with": "p.hint",
     "withText": "You will sign in again the next time you",
-    "detail": "164x4px at (647,535)"
+    "detail": "164x4px at (647,533)"
    }
   ]
  },
@@ -1225,7 +1225,7 @@
    },
    {
     "kind": "covered",
-    "sel": "span.pill.neg",
+    "sel": "span.pill.warn",
     "text": "Low · check",
     "detail": "painted over by div.editor.form"
    },
@@ -1237,13 +1237,13 @@
    },
    {
     "kind": "covered",
-    "sel": "span.pill.warn",
+    "sel": "span.pill.neutral",
     "text": "Medium",
     "detail": "painted over by div.tagfield"
    },
    {
     "kind": "covered",
-    "sel": "span.pill.neg",
+    "sel": "span.pill.warn",
     "text": "Low · check",
     "detail": "painted over by ul.chips"
    },

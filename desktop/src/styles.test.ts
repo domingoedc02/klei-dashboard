@@ -88,6 +88,18 @@ describe('styles.css', () => {
     expect(sel('.banner.update.bad')).toMatch(/pill-neg-bg[\s\S]*pill-neg-ink/);
   });
 
+  it('empty state: 240px art, 144px compact, 44ch line; dialog actions right-aligned; profile pill with small avatar', () => {
+    const body = (sel: string) => blocks(styles).find((x) => x.sel.includes(sel))!.body;
+    expect(body('.empty-state .illo')).toMatch(/height: 240px/);
+    expect(body('.empty-state.compact .illo')).toMatch(/height: 144px/);
+    expect(body('.empty-state p')).toMatch(/max-width: 44ch/);
+    expect(body('.scrim .dialog .actions')).toMatch(/justify-content: flex-end; margin-top: var\(--space-6\)/);
+    expect(body('.btn')).toMatch(/line-height: 1\.33/);
+    expect(body('.profile-btn')).toMatch(/padding: var\(--space-1\) var\(--space-2\) var\(--space-1\) var\(--space-1\)[\s\S]*border-radius: var\(--radius-full\)/);
+    expect(body('.avatar.small')).toMatch(/width: 24px; height: 24px/);
+    expect(body('.assist-chips .chip-btn')).toMatch(/padding: 4px var\(--space-3\)/);
+  });
+
   it('avatar is a 32px dark circle', () => {
     const b = blocks(styles).find((x) => x.sel.includes('.avatar'))!.body;
     expect(b).toMatch(/width: 32px/);

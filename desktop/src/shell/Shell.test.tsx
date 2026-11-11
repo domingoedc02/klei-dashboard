@@ -71,7 +71,8 @@ describe('frame', () => {
     mount(ADMIN);
     const trigger = screen.getByRole('button', { name: 'Ada Admin' });
     expect(trigger.className).toContain('profile-btn');
-    expect(trigger.querySelector('.avatar')).toBeTruthy();
+    expect(trigger.querySelector('.avatar.small')?.textContent).toBe('AA');
+    expect(trigger.querySelector('svg')).toBeTruthy();
     await userEvent.click(trigger);
     const menu = screen.getByRole('menu');
     expect(menu.textContent).toContain('Ada Admin');

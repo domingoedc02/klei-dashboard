@@ -88,7 +88,8 @@ describe('Bell', () => {
     mount({ ...ME, permissions: ['PERM_REPLY'] });
     await userEvent.click(await button());
     expect(await screen.findByText('You’re all caught up')).toBeTruthy();
-    expect(screen.getByRole('menuitem', { name: 'Go to Inquiries' })).toBeTruthy();
+    expect(screen.getByText('New inquiries and AI results will show up here.')).toBeTruthy();
+    expect(screen.getByRole('menuitem', { name: 'Go to Inquiries' }).className).toContain('primary');
     expect(screen.queryByRole('menuitem', { name: 'Clear all' })).toBeNull();
   });
 

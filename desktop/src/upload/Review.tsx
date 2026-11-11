@@ -23,7 +23,7 @@ type Draft = { groups: Staged[]; discarded: string[]; selected?: string };
 type History = { cur: Draft; past: Draft[]; typing: string | null };
 
 const BATCHES = '/api/v1/uploads';
-const BAND: Record<string, [label: string, tone: string]> = { high: ['High', 'pos'], medium: ['Medium', 'warn'], low: ['Low · check', 'neg'] };
+const BAND: Record<string, [label: string, tone: string]> = { high: ['High', 'pos'], medium: ['Medium', 'neutral'], low: ['Low · check', 'warn'] };
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 const photosIn = (gs: Staged[]) => gs.reduce((n, g) => n + g.photoIds.length, 0);

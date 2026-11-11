@@ -2,221 +2,221 @@
  "pairs": [
   {
    "name": "client-profile-default",
-   "pct": 2.04
+   "pct": 1.99
   },
   {
    "name": "dashboard-default",
-   "pct": 2.46
+   "pct": 2.38
   },
   {
    "name": "dashboard-empty",
-   "pct": 2.81
+   "pct": 2.72
   },
   {
    "name": "dashboard-loading",
-   "pct": 0.99
+   "pct": 0.9
   },
   {
    "name": "gallery-default",
-   "pct": 4.27
+   "pct": 4.08
   },
   {
    "name": "gallery-delete-dialog",
-   "pct": 4.56
+   "pct": 3.57
   },
   {
    "name": "gallery-empty",
-   "pct": 2.08
+   "pct": 2.02
   },
   {
    "name": "gallery-loading",
-   "pct": 0.83
+   "pct": 0.75
   },
   {
    "name": "gallery-no-match",
-   "pct": 1.72
+   "pct": 1.64
   },
   {
    "name": "gallery-selected",
-   "pct": 4.94
+   "pct": 4.63
   },
   {
    "name": "inquiries-composer-error",
-   "pct": 4.59
+   "pct": 4.47
   },
   {
    "name": "inquiries-customer-card",
-   "pct": 4.82
+   "pct": 4.75
   },
   {
    "name": "inquiries-default",
-   "pct": 4.88
+   "pct": 4.8
   },
   {
    "name": "inquiries-empty",
-   "pct": 2.45
+   "pct": 2.38
   },
   {
    "name": "inquiries-filtered-empty",
-   "pct": 2.44
+   "pct": 2.39
   },
   {
    "name": "inquiries-loading",
-   "pct": 2.2
+   "pct": 2.15
   },
   {
    "name": "inquiries-thread-closed",
-   "pct": 3.88
+   "pct": 3.82
   },
   {
    "name": "inquiries-thread-replied",
-   "pct": 4.91
+   "pct": 4.85
   },
   {
    "name": "overlay-assistant-busy",
-   "pct": 3.03
+   "pct": 2.98
   },
   {
    "name": "overlay-assistant-greeting",
-   "pct": 2.95
+   "pct": 2.79
   },
   {
    "name": "overlay-notifications-default",
-   "pct": 3.01
+   "pct": 2.9
   },
   {
    "name": "overlay-notifications-empty",
-   "pct": 2.6
-  },
-  {
-   "name": "overlay-profile-menu-default",
-   "pct": 2.54
-  },
-  {
-   "name": "overlay-search-none",
    "pct": 2.83
   },
   {
+   "name": "overlay-profile-menu-default",
+   "pct": 2.5
+  },
+  {
+   "name": "overlay-search-none",
+   "pct": 2.35
+  },
+  {
    "name": "overlay-search-results",
-   "pct": 2.45
+   "pct": 2.37
   },
   {
    "name": "settings-2fa-on",
-   "pct": 3.59
+   "pct": 3.54
   },
   {
    "name": "settings-ai-default",
-   "pct": 3.25
+   "pct": 3.19
   },
   {
    "name": "settings-ai-provider-fail",
-   "pct": 3.22
+   "pct": 3.16
   },
   {
    "name": "settings-audit-default",
-   "pct": 2.61
+   "pct": 2.56
   },
   {
    "name": "settings-notifications-default",
-   "pct": 2.16
+   "pct": 2.12
   },
   {
    "name": "settings-preferences-default",
-   "pct": 2.46
+   "pct": 2.41
   },
   {
    "name": "settings-profile-default",
-   "pct": 3.15
+   "pct": 3.17
   },
   {
    "name": "settings-profile-staff-role",
-   "pct": 2.96
+   "pct": 2.98
   },
   {
    "name": "settings-roles-default",
-   "pct": 2.74
+   "pct": 2.69
   },
   {
    "name": "settings-signature-away-on",
-   "pct": 3.88
+   "pct": 3.86
   },
   {
    "name": "settings-signature-default",
-   "pct": 3.13
+   "pct": 3.09
   },
   {
    "name": "settings-staff-add-dialog",
-   "pct": 5.21
+   "pct": 5.38
   },
   {
    "name": "settings-staff-default",
-   "pct": 3.13
+   "pct": 3.07
   },
   {
    "name": "settings-staff-empty",
-   "pct": 2.68
+   "pct": 2.62
   },
   {
    "name": "upload-empty",
-   "pct": 2.05
+   "pct": 1.98
   },
   {
    "name": "upload-error",
-   "pct": 2.53
+   "pct": 2.46
   },
   {
    "name": "upload-processing",
-   "pct": 6.53
+   "pct": 6.48
   },
   {
    "name": "upload-review",
-   "pct": 4.73
+   "pct": 4.65
   },
   {
    "name": "upload-review-combo-open",
-   "pct": 4.74,
+   "pct": 4.66,
    "pending": "13.8"
   },
   {
    "name": "upload-review-discard-dialog",
-   "pct": 4.81
+   "pct": 3.92
   },
   {
    "name": "upload-review-long",
-   "pct": 5.29
+   "pct": 5.2
   },
   {
    "name": "upload-review-low-group",
-   "pct": 4.67
+   "pct": 4.59
   },
   {
    "name": "upload-review-photos-selected",
-   "pct": 5.1,
+   "pct": 4.99,
    "pending": "13.8"
   },
   {
    "name": "upload-review-scrolled",
-   "pct": 4.57
+   "pct": 4.58
   },
   {
    "name": "viewer-default",
-   "pct": 2.47
+   "pct": 2.45
   },
   {
    "name": "viewer-delete-dialog",
-   "pct": 2.9
+   "pct": 2.09
   },
   {
    "name": "viewer-edit-dialog",
-   "pct": 7.63
+   "pct": 7.6
   },
   {
    "name": "viewer-edit-error",
-   "pct": 7.64
+   "pct": 7.61
   },
   {
    "name": "viewer-photo-3",
-   "pct": 2.49
+   "pct": 2.47
   }
  ],
  "protoOnly": [],

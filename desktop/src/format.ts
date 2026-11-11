@@ -42,6 +42,29 @@ export function formatDateTime(v: string | number | Date): string {
   return `${formatDate(d)}, ${p.hour}:${p.minute} ${p.dayPeriod}`;
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const dayNo = (p: Record<string, string>) => Date.UTC(+p.year, +p.month - 1, +p.day) / 864e5;
+
+/** A date for a list or card: `9:42 AM` today, `Yesterday`, `Nov 3` this year, `Jun 14, 2027` otherwise; the zone is the User's, `now` is injectable for tests. */
+export function formatRelative(v: string | number | Date, now: Date = new Date()): string {
+  const d = when(v);
+  if (!d) return '';
+  const p = parts(d);
+  const ago = dayNo(parts(now)) - dayNo(p);
+  if (ago === 0) return `${p.hour}:${p.minute} ${p.dayPeriod}`;
+  if (ago === 1) return 'Yesterday';
+  const md = `${MONTHS[+p.month - 1]} ${+p.day}`;
+  return p.year === parts(now).year ? md : `${md}, ${p.year}`;
+}
+
+/** Month and year as `Oct 2026`, in the User's zone. */
+export function formatMonthYear(v: string | number | Date): string {
+  const d = when(v);
+  if (!d) return '';
+  const p = parts(d);
+  return `${MONTHS[+p.month - 1]} ${p.year}`;
+}
+
 /** A calendar day given as `YYYY-MM-DD` (a wedding date), in the chosen order; no zone shift because it is not an instant. */
 export function formatDay(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);

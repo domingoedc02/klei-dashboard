@@ -1,9 +1,10 @@
 import { forwardRef, useEffect, useId, useRef, useState } from 'react';
 import type { components } from '../api/schema';
+import art from '../assets/empty/empty-gown-6.png';
 import { Mosaic } from '../gallery/Gallery';
 import { useShell } from './context';
 import { Icon } from './icons';
-import { Skeleton } from './ui';
+import { EmptyState, Skeleton } from './ui';
 
 type Hit = components['schemas']['SearchHit'];
 type View = { status: 'idle' } | { status: 'loading' } | { status: 'error' } | { status: 'ready'; hits: Hit[] };
@@ -100,11 +101,9 @@ export const SearchBox = forwardRef<HTMLInputElement>(function SearchBox(_, ref)
             </p>
           )}
           {view.status === 'ready' && hits.length === 0 && (
-            <div className="search-note">
-              <p><strong>No results for “{q.trim()}”</strong></p>
-              <p className="hint">Check the spelling or try a gown name, fabric, or client.</p>
-              <button type="button" className="btn" onClick={clear}>Clear search</button>
-            </div>
+            <EmptyState art={art} compact title={`No results for “${q.trim()}”`} text="Check the spelling or try a gown name, fabric, or client.">
+              <button type="button" className="btn primary" onClick={clear}>Clear search</button>
+            </EmptyState>
           )}
           {hits.length > 0 && <div role="listbox" aria-label="Search results">{group('gown', 'Gowns')}{group('inquiry', 'Inquiries')}</div>}
           <p className="sr-only" role="status">{view.status === 'ready' ? `${hits.length} results` : ''}</p>

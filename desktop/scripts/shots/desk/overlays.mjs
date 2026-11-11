@@ -20,7 +20,7 @@ export default {
   ),
   'overlay-profile-menu-default': open(async (page) => { await page.locator('.profile-btn').click(); await page.waitForSelector('.profile [role=menu]'); }),
   'overlay-search-results': search('aur', '[role=listbox][aria-label="Search results"]'),
-  'overlay-search-none': search('zzz', '.search-note'),
+  'overlay-search-none': search('zzz', '.search-pop .empty-state'),
   'overlay-assistant-greeting': open(assistant, chat),
   'overlay-assistant-busy': open(
     async (page) => { await assistant(page); await page.getByRole('button', { name: 'Summarize new inquiries' }).click(); await page.waitForSelector('.assist-typing'); },

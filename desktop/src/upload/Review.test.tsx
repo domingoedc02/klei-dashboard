@@ -90,6 +90,8 @@ describe('Review groups', () => {
     const rows = within(screen.getByRole('list', { name: 'Groups' })).getAllByRole('listitem');
     expect(rows.map((r) => r.textContent)).toEqual(['Group 1Low · check2 photos', 'Group 2High1 photo']);
     expect(within(rows[0]).getByText('Low · check').getAttribute('title')).toBe('40% confidence');
+    expect(within(rows[0]).getByText('Low · check').className).toContain('warn');
+    expect(within(rows[1]).getByText('High').className).toContain('pos');
     expect(rows[0].querySelector('.confbar.low i')?.getAttribute('style')).toContain('40%');
     expect(rows[1].querySelector('.confbar.high i')?.getAttribute('style')).toContain('95%');
     expect(rows[0].querySelectorAll('.gl-strip img').length).toBe(2);
