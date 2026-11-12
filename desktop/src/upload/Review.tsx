@@ -11,11 +11,10 @@ type Group = components['schemas']['GroupView'];
 type Tag = { type: string; value: string };
 type Taxonomy = { groups: { type: string; values: { id: string; value: string }[] }[] };
 type Op =
-  | { kind: 'move'; photo: string; to: string | null }
-  | { kind: 'split'; photo: string }
+  | { kind: 'move'; photos: string[]; to: string }
+  | { kind: 'split'; photos: string[] }
   | { kind: 'merge'; from: string; into: string }
-  | { kind: 'discard'; photo: string };
-type Item = { label: string; run: () => void; disabled?: boolean };
+  | { kind: 'discard'; photos: string[] };
 /** A group as the screen holds it. `loaded` ones came from the server with their `version`; the others were made here by Move or Split. */
 type Staged = { id: string; loaded: boolean; version?: number; name: string; tags: Tag[]; description: string; photoIds: string[]; confidence: number; band: string };
 type Draft = { groups: Staged[]; discarded: string[]; selected?: string };
@@ -43,8 +42,10 @@ const start = (groups: Group[]): History => ({
   typing: null,
 });
 
-const made = (name: string, photo: string, from?: Staged): Staged => ({
-  id: crypto.randomUUID(), loaded: false, name, tags: from?.tags ?? [], description: from?.description ?? '', photoIds: [photo], confidence: 70, band: 'low',
+const splitName = (name: string) => `${name.slice(0, 77)} II`;
+
+const made = (name: string, photos: string[], from: Staged): Staged => ({
+  id: crypto.randomUUID(), loaded: false, name, tags: from.tags, description: from.description, photoIds: photos, confidence: 70, band: 'low',
 });
 
 /** The staged edit of Story 11.6: pure, so Undo is a pop. A group left without photos goes; the second value is the toast. */
@@ -59,19 +60,15 @@ function apply(s: Draft, op: Op): [Draft, string] {
     const groups = s.groups.filter((g) => g !== from).map((g) => (g === into ? { ...g, photoIds: [...g.photoIds, ...from.photoIds] } : g));
     return [done(groups, into.id), `Merged into ${into.name}`];
   }
-  const src = s.groups.find((g) => g.photoIds.includes(op.photo))!;
-  const rest = s.groups.map((g) => (g === src ? { ...g, photoIds: g.photoIds.filter((p) => p !== op.photo) } : g));
-  if (op.kind === 'discard') return [done(rest, s.selected, [...s.discarded, op.photo]), 'Photo discarded'];
+  const src = s.groups.find((g) => g.photoIds.includes(op.photos[0]))!;
+  const rest = s.groups.map((g) => (g === src ? { ...g, photoIds: g.photoIds.filter((p) => !op.photos.includes(p)) } : g));
+  if (op.kind === 'discard') return [done(rest, s.selected, [...s.discarded, ...op.photos]), op.photos.length === 1 ? 'Photo discarded' : `${op.photos.length} photos discarded`];
   if (op.kind === 'split') {
-    const born = made(`${src.name} II`.slice(0, 80), op.photo, src);
+    const born = made(splitName(src.name), op.photos, src);
     return [done(rest.flatMap((g) => (g.id === src.id ? [g, born] : [g])), born.id), 'Split into a new gown. Check its tags.'];
   }
-  if (op.to === null) {
-    const born = made('New group', op.photo);
-    return [done([...rest, born], born.id), `Moved 1 photo to ${born.name}`];
-  }
   const to = rest.find((g) => g.id === op.to)!;
-  return [done(rest.map((g) => (g === to ? { ...g, photoIds: [...g.photoIds, op.photo] } : g)), s.selected), `Moved 1 photo to ${to.name}`];
+  return [done(rest.map((g) => (g === to ? { ...g, photoIds: [...g.photoIds, ...op.photos] } : g)), s.selected), `Moved ${plural(op.photos.length, 'photo', 'photos')} to ${to.name}`];
 }
 
 /**
@@ -135,7 +132,7 @@ export function Review({ batchId, groups: first, onReload }: { batchId: string; 
     setH((p) => {
       const prev = p.past[p.past.length - 1];
       if (!prev) return p;
-      return { cur: { ...prev, selected: prev.groups.some((g) => g.id === p.cur.selected) ? p.cur.selected : prev.selected }, past: p.past.slice(0, -1), typing: null };
+      return { cur: prev, past: p.past.slice(0, -1), typing: null };
     });
     toast('Undone');
   };
@@ -252,7 +249,7 @@ export function Review({ batchId, groups: first, onReload }: { batchId: string; 
           <Editor
             key={group.id} batchId={batchId} group={group} others={cur.groups.filter((g) => g.id !== group.id)} taxonomy={taxonomy}
             onRetryTaxonomy={() => void loadTaxonomy()} onEdit={(patch, typing) => edit(group.id, patch, typing)} onOp={stage}
-            onRewrite={() => void rewrite(group)} rewriting={busy === 'rewrite'}
+            onRewrite={() => void rewrite(group)} rewriting={busy === 'rewrite'} locked={locked}
           />
         ) : <p className="hint">No photos left. Undo the last change or discard the batch.</p>}
       </div>
@@ -278,17 +275,35 @@ export function Review({ batchId, groups: first, onReload }: { batchId: string; 
 }
 
 /** The editor holds no text of its own: every change goes up as a staged edit, and nothing is sent until Confirm and save. */
-function Editor({ batchId, group, others, taxonomy, onRetryTaxonomy, onEdit, onOp, onRewrite, rewriting }: {
+function Editor({ batchId, group, others, taxonomy, onRetryTaxonomy, onEdit, onOp, onRewrite, rewriting, locked }: {
   batchId: string; group: Staged; others: Staged[]; taxonomy: Taxonomy | 'loading' | 'failed'; onRetryTaxonomy: () => void;
-  onEdit: (patch: Partial<Staged>, typing?: string) => void; onOp: (op: Op) => void; onRewrite: () => void; rewriting: boolean;
+  onEdit: (patch: Partial<Staged>, typing?: string) => void; onOp: (op: Op) => void; onRewrite: () => void; rewriting: boolean; locked: boolean;
 }) {
-  const { openDialog } = useShell();
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const [sel, setSel] = useState<string[]>([]);
+  const [mvto, setMvto] = useState('');
+  const [mgto, setMgto] = useState('');
   const opener = useRef<HTMLElement | null>(null);
-  const pick = (title: string, label: string, confirm: string, options: { value: string; label: string }[], run: (value: string) => void) =>
-    openDialog({ title, custom: (close) => <Picker label={label} confirm={confirm} options={options} close={close} onPick={run} /> });
-  const groupOptions = others.map((g) => ({ value: g.id, label: g.name }));
   const photos = group.photoIds;
+  const picked = photos.filter((p) => sel.includes(p));
+  const n = picked.length;
+  const target = (id: string) => (others.some((o) => o.id === id) ? id : '');
+  const [label, tone] = BAND[group.band] ?? BAND.low;
+  const run = (op: Op) => {
+    onOp(op);
+    setSel([]);
+    setMvto('');
+    setMgto('');
+    // The pressed button disables and Merge/Split remount the editor: park focus on the photos heading so the keyboard keeps its place.
+    setTimeout(() => document.getElementById('g-photos')?.focus(), 0);
+  };
+  const toggle = (p: string) => setSel((s) => (s.includes(p) ? s.filter((x) => x !== p) : [...s, p]));
+  const gowns = (value: string, set: (v: string) => void, id: string) => (
+    <select id={id} aria-describedby={`${id}-h`} value={target(value)} disabled={others.length === 0} onChange={(e) => set(e.target.value)}>
+      <option value="">{others.length ? 'Choose a gown…' : 'No other gowns yet'}</option>
+      {others.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+    </select>
+  );
 
   return (
     <div className="editor form">
@@ -297,9 +312,70 @@ function Editor({ batchId, group, others, taxonomy, onRetryTaxonomy, onEdit, onO
           <label htmlFor="g-name">Gown name <span className="hint">(auto-named, editable)</span></label>
           <input id="g-name" value={group.name} maxLength={80} onChange={(e) => onEdit({ name: e.target.value }, `name:${group.id}`)} />
         </div>
-        <Menu label="Group actions" text="Actions" items={[
-          { label: 'Merge into…', disabled: others.length === 0, run: () => pick('Merge into…', 'Group', 'Merge', groupOptions, (into) => onOp({ kind: 'merge', from: group.id, into })) },
-        ]} />
+        <div className="conf">
+          <span>Confidence {group.confidence}%</span>
+          <div className={group.confidence < 80 ? 'meter gray' : 'meter'} role="img" aria-label={`AI confidence ${group.confidence} percent, ${label}`}>
+            <i style={{ width: `${group.confidence}%` }} />
+          </div>
+          <span className={`pill ${tone}`}>{label}</span>
+        </div>
+      </div>
+
+      <div>
+        <div className="sec-head">
+          <h3 id="g-photos" tabIndex={-1}>Photos in this group ({photos.length})</h3>
+          <span className="hint">Select photos to move or split</span>
+        </div>
+        <ul className="thumbs" aria-labelledby="g-photos">
+          {photos.map((p, i) => (
+            <li key={p} className="th-cell">
+              <button type="button" className="th" aria-pressed={sel.includes(p)} aria-label={`Photo ${i + 1}`} onClick={() => toggle(p)}>
+                <img src={thumbUrl(batchId, p)} alt="" width={96} height={128} loading="lazy" />
+                <span className="tick" aria-hidden="true">{sel.includes(p) && <Icon name="check" />}</span>
+              </button>
+              <button type="button" className="th-open" aria-label={`Open photo ${i + 1} of ${photos.length}`} onClick={(e) => { opener.current = e.currentTarget; setLightbox(i); }}>
+                <Icon name="eye" />
+              </button>
+            </li>
+          ))}
+        </ul>
+        <span className="sr-only" aria-live="polite">{n ? `${plural(n, 'photo', 'photos')} selected.` : ''}</span>
+        <div className="org" role="group" aria-label="Organize this group">
+          <div className="org-row">
+            <label className="lbl" htmlFor="mvto">Move selected photos to</label>
+            <span className="help" id="mvto-h">{n ? `${plural(n, 'photo', 'photos')} selected. Choose a gown.` : 'Select photos above first, then choose a gown.'}</span>
+            <div className="org-ctl">
+              {gowns(mvto, setMvto, 'mvto')}
+              <button type="button" className="btn" disabled={locked || !n || !target(mvto)} onClick={() => run({ kind: 'move', photos: picked, to: target(mvto) })}>
+                <Icon name="move" />Move{n ? ` ${n}` : ''}
+              </button>
+            </div>
+          </div>
+          <div className="org-row">
+            <label className="lbl" htmlFor="mgto">Merge this whole gown into</label>
+            <span className="help" id="mgto-h">Moves all {plural(photos.length, 'photo', 'photos')} into the gown you pick and removes this group.</span>
+            <div className="org-ctl">
+              {gowns(mgto, setMgto, 'mgto')}
+              <button type="button" className="btn" disabled={locked || !target(mgto)} onClick={() => run({ kind: 'merge', from: group.id, into: target(mgto) })}>
+                <Icon name="merge" />Merge
+              </button>
+            </div>
+          </div>
+          <div className="org-row">
+            <span className="lbl">Split selected photos into a new gown</span>
+            <span className="help" id="split-h">
+              {n >= photos.length ? 'Leave at least one photo in this gown.' : n ? `Creates “${splitName(group.name)}” from the ${n} selected.` : 'Select photos above first. They become a separate gown.'}
+            </span>
+            <div className="org-actions">
+              <button type="button" className="btn" aria-describedby="split-h" disabled={locked || !n || n >= photos.length} onClick={() => run({ kind: 'split', photos: picked })}>
+                <Icon name="split" />Split into new gown
+              </button>
+              <button type="button" className="btn" disabled={locked || !n} onClick={() => run({ kind: 'discard', photos: picked })}>
+                <Icon name="trash" />Discard selected
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {taxonomy === 'loading' && <Skeleton rows={2} height={40} />}
@@ -309,15 +385,15 @@ function Editor({ batchId, group, others, taxonomy, onRetryTaxonomy, onEdit, onO
           {taxonomy.groups.map((t) => {
             const mine = group.tags.filter((x) => x.type === t.type);
             const left = t.values.filter((v) => !mine.some((x) => x.value === v.value));
-            const label = cap(t.type);
+            const name = cap(t.type);
             return (
               <div key={t.type} className="tagfield">
-                <label htmlFor={`g-${t.type}`}>{label}</label>
-                <ul className="chips" aria-label={`${label} tags`}>
+                <label htmlFor={`g-${t.type}`}>{name}</label>
+                <ul className="chips" aria-label={`${name} tags`}>
                   {mine.map((x) => (
                     <li key={x.value} className="chip">
                       {x.value}
-                      <button type="button" aria-label={`Remove ${x.value} from ${label}`} onClick={() => onEdit({ tags: group.tags.filter((y) => y !== x) })}>×</button>
+                      <button type="button" aria-label={`Remove ${x.value} from ${name}`} onClick={() => onEdit({ tags: group.tags.filter((y) => y !== x) })}>×</button>
                     </li>
                   ))}
                 </ul>
@@ -340,86 +416,12 @@ function Editor({ batchId, group, others, taxonomy, onRetryTaxonomy, onEdit, onO
       </div>
       <textarea id="g-desc" rows={5} value={group.description} maxLength={2000} onChange={(e) => onEdit({ description: e.target.value }, `desc:${group.id}`)} />
 
+      <p className="hint">Edit freely. Your changes are kept when you save.</p>
       <p className="hint" aria-live="off">{group.description.length.toLocaleString('en-US')} / 2,000</p>
 
-      <ul className="photos" aria-label="Photos in this group">
-        {photos.map((p, i) => (
-          <li key={p}>
-            <button type="button" className="open" aria-label={`Open photo ${i + 1} of ${photos.length}`} onClick={(e) => { opener.current = e.currentTarget; setLightbox(i); }}>
-              <img src={thumbUrl(batchId, p)} alt="" width={96} height={96} loading="lazy" />
-            </button>
-            <Menu label={`Photo ${i + 1} actions`} text="⋯" items={[
-              { label: 'Move to…', run: () => pick('Move photo to…', 'Group', 'Move', [...groupOptions, { value: '', label: 'New group' }], (to) => onOp({ kind: 'move', photo: p, to: to || null })) },
-              { label: 'Split into new gown', disabled: photos.length < 2, run: () => onOp({ kind: 'split', photo: p }) },
-              { label: 'Discard photo', run: () => onOp({ kind: 'discard', photo: p }) },
-            ]} />
-          </li>
-        ))}
-      </ul>
       {lightbox !== null && photos[lightbox] && (
         <Lightbox batchId={batchId} photo={photos[lightbox]} index={lightbox} total={photos.length} onMove={(d) => setLightbox((i) => (i === null ? i : i + d))} onClose={() => { setLightbox(null); opener.current?.focus(); }} />
       )}
-    </div>
-  );
-}
-
-/** A button with a list of actions: arrows move, Esc closes and returns focus, a click elsewhere closes. */
-function Menu({ label, text, items }: { label: string; text: string; items: Item[] }) {
-  const [open, setOpen] = useState(false);
-  const wrap = useRef<HTMLDivElement>(null);
-  const opener = useRef<HTMLButtonElement>(null);
-  const live = () => [...(wrap.current?.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)') ?? [])];
-
-  useEffect(() => {
-    if (!open) return;
-    live()[0]?.focus();
-    const away = (e: MouseEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', away);
-    return () => document.removeEventListener('mousedown', away);
-  }, [open]);
-
-  const key = (e: ReactKey) => {
-    if (e.key === 'Escape') {
-      e.stopPropagation();
-      setOpen(false);
-      opener.current?.focus();
-    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      const all = live();
-      const at = all.indexOf(document.activeElement as HTMLElement);
-      all[(at + (e.key === 'ArrowDown' ? 1 : all.length - 1)) % all.length]?.focus();
-    } else if (e.key === 'Tab') setOpen(false);
-  };
-
-  return (
-    <div className="menuwrap" ref={wrap} onKeyDown={key}>
-      <button ref={opener} type="button" className="menubtn" aria-label={label} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>{text}</button>
-      {open && (
-        <div role="menu" aria-label={label} className="menu">
-          {items.map((it) => (
-            <button key={it.label} role="menuitem" type="button" disabled={it.disabled} onClick={() => { opener.current?.focus(); setOpen(false); it.run(); }}>{it.label}</button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Picks one group (or New group) for Move and Merge; the dialog host focuses the select. */
-function Picker({ label, confirm, options, close, onPick }: { label: string; confirm: string; options: { value: string; label: string }[]; close: () => void; onPick: (value: string) => void }) {
-  const [value, setValue] = useState(options[0]?.value ?? '');
-  return (
-    <div className="form">
-      <label htmlFor="pick">{label}</label>
-      <select id="pick" value={value} onChange={(e) => setValue(e.target.value)}>
-        {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
-      <div className="actions">
-        <button type="button" className="btn" onClick={close}>Cancel</button>
-        <button type="button" className="btn primary" onClick={() => { close(); onPick(value); }}>{confirm}</button>
-      </div>
     </div>
   );
 }

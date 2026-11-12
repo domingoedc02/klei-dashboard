@@ -18,7 +18,7 @@
   },
   {
    "name": "gallery-default",
-   "pct": 4.08
+   "pct": 4.07
   },
   {
    "name": "gallery-delete-dialog",
@@ -34,7 +34,7 @@
   },
   {
    "name": "gallery-no-match",
-   "pct": 1.64
+   "pct": 1.63
   },
   {
    "name": "gallery-selected",
@@ -66,7 +66,7 @@
   },
   {
    "name": "inquiries-thread-closed",
-   "pct": 3.81
+   "pct": 3.82
   },
   {
    "name": "inquiries-thread-replied",
@@ -170,33 +170,31 @@
   },
   {
    "name": "upload-review",
-   "pct": 4.83
+   "pct": 4.52
   },
   {
    "name": "upload-review-combo-open",
-   "pct": 4.85,
-   "pending": "13.8"
+   "pct": 4.52
   },
   {
    "name": "upload-review-discard-dialog",
-   "pct": 4.02
+   "pct": 4.01
   },
   {
    "name": "upload-review-long",
-   "pct": 5.21
+   "pct": 5.26
   },
   {
    "name": "upload-review-low-group",
-   "pct": 5.01
+   "pct": 5.06
   },
   {
    "name": "upload-review-photos-selected",
-   "pct": 5.38,
-   "pending": "13.8"
+   "pct": 4.59
   },
   {
    "name": "upload-review-scrolled",
-   "pct": 5.03
+   "pct": 4.79
   },
   {
    "name": "viewer-default",
@@ -265,12 +263,6 @@
   "settings-notifications-default": {
    "glued-text": 3
   },
-  "settings-ai-default": {
-   "overlap": 1
-  },
-  "settings-ai-provider-fail": {
-   "overlap": 1
-  },
   "inquiries-no-selection": {
    "text-ellipsis": 14
   },
@@ -281,14 +273,5 @@
    "text-ellipsis": 1
   }
  },
- "pending": [
-  {
-   "name": "upload-review-photos-selected",
-   "story": "13.8"
-  },
-  {
-   "name": "upload-review-combo-open",
-   "story": "13.8"
-  }
- ]
+ "pending": []
 }

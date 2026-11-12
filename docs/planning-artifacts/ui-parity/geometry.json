@@ -20,16 +20,7 @@
   "desktop": []
  },
  "upload-review": {
-  "prototype": [
-   {
-    "kind": "overlap",
-    "sel": "span.sm.semi",
-    "text": "Genevieve",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "71x8px at (287,857)"
-   }
-  ],
+  "prototype": [],
   "desktop": []
  },
  "upload-error": {
@@ -37,55 +28,19 @@
   "desktop": []
  },
  "upload-review-low-group": {
-  "prototype": [
-   {
-    "kind": "overlap",
-    "sel": "span.sm.semi",
-    "text": "Genevieve",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "71x8px at (287,857)"
-   }
-  ],
+  "prototype": [],
   "desktop": []
  },
  "upload-review-photos-selected": {
-  "prototype": [
-   {
-    "kind": "overlap",
-    "sel": "span.sm.semi",
-    "text": "Genevieve",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "71x8px at (287,857)"
-   }
-  ],
+  "prototype": [],
   "desktop": []
  },
  "upload-review-combo-open": {
-  "prototype": [
-   {
-    "kind": "overlap",
-    "sel": "span.sm.semi",
-    "text": "Genevieve",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "71x8px at (287,857)"
-   }
-  ],
+  "prototype": [],
   "desktop": []
  },
  "upload-review-discard-dialog": {
-  "prototype": [
-   {
-    "kind": "overlap",
-    "sel": "span.sm.semi",
-    "text": "Genevieve",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "71x8px at (287,857)"
-   }
-  ],
+  "prototype": [],
   "desktop": []
  },
  "upload-review-scrolled": {
@@ -919,29 +874,11 @@
  },
  "settings-ai-default": {
   "prototype": [],
-  "desktop": [
-   {
-    "kind": "overlap",
-    "sel": "label",
-    "text": "Chat model",
-    "with": "button.btn.primary",
-    "withText": "Save AI settings",
-    "detail": "70x14px at (289,812)"
-   }
-  ]
+  "desktop": []
  },
  "settings-ai-provider-fail": {
   "prototype": [],
-  "desktop": [
-   {
-    "kind": "overlap",
-    "sel": "label",
-    "text": "Chat model",
-    "with": "button.btn.primary",
-    "withText": "Save AI settings",
-    "detail": "70x14px at (289,812)"
-   }
-  ]
+  "desktop": []
  },
  "settings-audit-default": {
   "prototype": [],
@@ -1140,14 +1077,6 @@
     "sel": "span.sm.semi",
     "text": "Marguerite Eleonora Valentina Seraphina ",
     "detail": "scroll 417x20 > client 196x20"
-   },
-   {
-    "kind": "overlap",
-    "sel": "span.sm.semi",
-    "text": "Genevieve",
-    "with": "span.sm.muted",
-    "withText": "10 gowns · 30 photos will be added to Ga",
-    "detail": "71x8px at (287,857)"
    }
   ],
   "desktop": [

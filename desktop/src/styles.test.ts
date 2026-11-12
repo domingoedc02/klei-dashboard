@@ -113,6 +113,17 @@ describe('styles.css', () => {
     expect(body('.tags-grid')).toMatch(/repeat\(3, minmax\(0, 1fr\)\)/);
   });
 
+  it('review editor: 6-col photo toggles, 2-col organizer, 64px confidence meter, no menu chrome', () => {
+    const body = (sel: string) => blocks(styles).find((x) => x.sel.includes(sel))!.body;
+    expect(body('.thumbs')).toMatch(/grid-template-columns: repeat\(6, minmax\(0, 1fr\)\)[\s\S]*gap: var\(--space-2\)/);
+    expect(body(".th[aria-pressed='true']")).toMatch(/border-color: var\(--color-accent\)/);
+    expect(body('.tick')).toMatch(/width: 20px; height: 20px/);
+    expect(body('.org')).toMatch(/repeat\(2, minmax\(0, 1fr\)\)/);
+    expect(body('.org-row:last-child')).toMatch(/grid-column: 1 \/ -1/);
+    expect(body('.conf .meter')).toMatch(/width: 64px/);
+    expect(styles).not.toMatch(/\.menuwrap|\.menubtn|\.photos\b/);
+  });
+
   it('avatar is a 32px dark circle', () => {
     const b = blocks(styles).find((x) => x.sel.includes('.avatar'))!.body;
     expect(b).toMatch(/width: 32px/);

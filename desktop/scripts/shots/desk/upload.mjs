@@ -28,10 +28,9 @@ export default {
     },
     after: pickGroup(3),
   },
-  // no checkbox selection on desktop: nearest state is a photo's action menu open. Pending 13.8 (inline select + Move/Merge/Split).
-  'upload-review-photos-selected': { ...review, pending: '13.8', after: async (page) => { await page.getByRole('button', { name: 'Photo 1 actions' }).click(); } },
-  // no inline combobox on desktop: nearest state is the group Actions menu open. Pending 13.8.
-  'upload-review-combo-open': { ...review, pending: '13.8', after: async (page) => { await page.getByRole('button', { name: 'Group actions' }).click(); } },
+  'upload-review-photos-selected': { ...review, after: async (page) => { await page.getByRole('button', { name: 'Photo 1', exact: true }).click(); await page.getByRole('button', { name: 'Photo 2', exact: true }).click(); await page.getByLabel('Move selected photos to').selectOption({ index: 1 }); } },
+  // native select: its popup is not part of the page screenshot, so the state is the focused control
+  'upload-review-combo-open': { ...review, after: async (page) => { await page.getByLabel('Move selected photos to').focus(); } },
   'upload-review-discard-dialog': { ...review, after: async (page) => { await page.getByRole('button', { name: 'Discard batch' }).click(); await page.waitForSelector('[role=dialog]'); } },
   'upload-review-scrolled': { ...review, after: async (page) => { await pickGroup(9)(page); await scrollEnd(page); } },
 };

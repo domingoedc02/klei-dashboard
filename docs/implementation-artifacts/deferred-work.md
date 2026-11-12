@@ -43,3 +43,15 @@
 - The "Gown groups" heading no longer announces the group count; the banner states the totals.
 - Row meta uses the literal tag types `silhouette` and `fabric`.
 - Prototype inline tagbox combobox (chips and input in one box) not built; native select kept.
+
+## Deferred from: code review of 13.8-review-behaviour (2026-11-12)
+
+- Rewrite output over 2,000 characters is not truncated; the save error then reads "Every gown needs a name". Needs a backend length contract.
+- Lightbox Next/Prev disable at the ends and drop focus; close returns focus to the first opener, not the last photo viewed.
+- Each photo tile has two tab stops (toggle and open); add a roving tabindex if a group can hold more than 12 photos.
+- Confidence is unclamped and the meter's gray cutoff (80) is separate from `band`; the server owns both.
+- Empty-batch copy ("All groups look confident.", "0 gowns · 0 photos") is not reachable from the API.
+- Meter track and `.th-open` colours are hard-coded; revisit if a dark theme is added.
+- Split of a split yields two groups with the same name.
+- Missing boundary tests: stale Move target, Merge with nothing selected, split at n = len-1, multi-photo Move toast, meter at 79/80; styles.test.ts is string-grep.
+- Duplicate photo ids across groups resolve to the first owner.

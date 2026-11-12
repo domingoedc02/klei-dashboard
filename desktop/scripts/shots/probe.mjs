@@ -82,7 +82,7 @@ function inPage() {
       if (a.e.closest(TRANSIENT) !== b.e.closest(TRANSIENT)) continue; // popups/dialogs sit above the page by design
       // content below the fold of a pane that can still scroll, seen through a sticky bar, is not an overlap (the `covered` rule below keeps the same exemption)
       const bar = [a, b].find((x) => stuck(x.e)), under = bar && (bar === a ? b : a);
-      if (bar && under && !stuck(under.e) && under.r.top >= bar.r.top - 1) { const sc = scrollBox(bar.e); if (sc && sc.scrollTop + sc.clientHeight < sc.scrollHeight - 1) continue; }
+      if (bar && under && !stuck(under.e) && under.r.bottom > bar.r.top) { const sc = scrollBox(bar.e); if (sc && sc.scrollTop + sc.clientHeight < sc.scrollHeight - 1) continue; }
       const sa = scrollBox(a.e), sb = scrollBox(b.e);
       if (sa !== sb && (sa ? !sa.contains(b.e) : true) && (sb ? !sb.contains(a.e) : true) && (sa || sb)) continue; // content scrolled under a bar of an inner scroller
       const w = Math.min(a.clip.right, b.clip.right) - Math.max(a.clip.left, b.clip.left);

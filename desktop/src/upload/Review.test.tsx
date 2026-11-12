@@ -69,14 +69,20 @@ const noViolations = async (container: HTMLElement) => {
   const r = await axe.run(container, noisy);
   expect(r.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([]);
 };
-const menu = async (name: string, item: string) => {
-  await userEvent.click(screen.getByRole('button', { name }));
-  await userEvent.click(screen.getByRole('menuitem', { name: item }));
+const pick = async (...n: number[]) => {
+  for (const k of n) await userEvent.click(screen.getByRole('button', { name: `Photo ${k}` }));
 };
-const choose = async (label: string, confirm: string) => {
-  const box = screen.getByRole('dialog');
-  await userEvent.selectOptions(within(box).getByLabelText('Group'), label);
-  await userEvent.click(within(box).getByRole('button', { name: confirm }));
+const moveBtn = () => screen.getByRole('button', { name: /^Move( \d+)?$/ }) as HTMLButtonElement;
+const mergeBtn = () => screen.getByRole('button', { name: 'Merge' }) as HTMLButtonElement;
+const splitBtn = () => screen.getByRole('button', { name: 'Split into new gown' }) as HTMLButtonElement;
+const discardBtn = () => screen.getByRole('button', { name: 'Discard selected' }) as HTMLButtonElement;
+const moveTo = async (label: string) => {
+  await userEvent.selectOptions(screen.getByLabelText('Move selected photos to'), label);
+  await userEvent.click(moveBtn());
+};
+const mergeInto = async (label: string) => {
+  await userEvent.selectOptions(screen.getByLabelText('Merge this whole gown into'), label);
+  await userEvent.click(mergeBtn());
 };
 const names = () => [...document.querySelectorAll('.gl .name')].map((n) => n.textContent);
 const undo = () => screen.getByRole('button', { name: 'Undo' }) as HTMLButtonElement;
@@ -158,6 +164,7 @@ describe('Review groups', () => {
   it('shows the description count and no missing-tag hint', async () => {
     await open();
     expect(screen.getByText('0 / 2,000')).toBeTruthy();
+    expect(screen.getByText('Edit freely. Your changes are kept when you save.')).toBeTruthy();
     expect(screen.queryByText(/Missing a tag/)).toBeNull();
   });
 
@@ -206,55 +213,95 @@ describe('Staged edits', () => {
     expect(sent).toEqual([]);
   });
 
-  it('opens a photo menu with Move, Split and Discard; Split waits for a second photo; arrows and Esc work', async () => {
-    const { container } = await open();
-    const opener = screen.getByRole('button', { name: 'Photo 1 actions' });
-    await userEvent.click(opener);
-    expect(screen.getAllByRole('menuitem').map((m) => m.textContent)).toEqual(['Move to…', 'Split into new gown', 'Discard photo']);
-    expect(document.activeElement?.textContent).toBe('Move to…');
-    await userEvent.keyboard('{ArrowDown}');
-    expect(document.activeElement?.textContent).toBe('Split into new gown');
-    await noViolations(container);
-    await userEvent.keyboard('{Escape}');
-    expect(screen.queryByRole('menu')).toBeNull();
-    expect(document.activeElement).toBe(opener);
-    await userEvent.click(screen.getByRole('button', { name: /Group 2/ }));
-    await userEvent.click(screen.getByRole('button', { name: 'Photo 1 actions' }));
-    expect((screen.getByRole('menuitem', { name: 'Split into new gown' }) as HTMLButtonElement).disabled).toBe(true);
+  it('toggles photos with a click or Space, shows a tick, and announces the count', async () => {
+    await open();
+    const one = screen.getByRole('button', { name: 'Photo 1' });
+    expect(one.getAttribute('aria-pressed')).toBe('false');
+    await userEvent.click(one);
+    expect(one.getAttribute('aria-pressed')).toBe('true');
+    expect(one.querySelector('.tick svg')).not.toBeNull();
+    expect(screen.getByText('1 photo selected.')).toBeTruthy();
+    one.focus();
+    await userEvent.keyboard(' ');
+    expect(one.getAttribute('aria-pressed')).toBe('false');
+    expect(one.querySelector('.tick svg')).toBeNull();
+    await pick(1, 2);
+    expect(screen.getByText('2 photos selected.').getAttribute('aria-live')).toBe('polite');
+    expect(screen.getByRole('heading', { name: 'Photos in this group (2)' })).toBeTruthy();
+    expect(screen.getByText('Select photos to move or split')).toBeTruthy();
   });
 
-  it('moves a photo to another group with no request, then Undo moves it back', async () => {
+  it('the corner button opens the photo without changing the selection', async () => {
     await open();
-    await menu('Photo 1 actions', 'Move to…');
-    expect(within(screen.getByRole('dialog')).getAllByRole('option').map((o) => o.textContent)).toEqual(['Group 2', 'New group']);
-    await choose('Group 2', 'Move');
+    await pick(1);
+    await userEvent.click(screen.getByRole('button', { name: 'Open photo 1 of 2' }));
+    expect(screen.getByRole('dialog', { name: 'Photo 1 of 2' })).toBeTruthy();
+    await userEvent.keyboard('{Escape}');
+    expect(screen.getByRole('button', { name: 'Photo 1' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Photo 2' }).getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('after an action, focus parks on the photos heading and Undo returns to the group it came from', async () => {
+    await open();
+    await mergeInto('Group 2');
+    await waitFor(() => expect(document.activeElement?.id).toBe('g-photos'));
+    expect(screen.getByRole('heading', { name: 'Photos in this group (3)' })).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(screen.getByRole('heading', { name: 'Photos in this group (2)' })).toBeTruthy();
+    expect((screen.getByLabelText('Gown name', { exact: false }) as HTMLInputElement).value).toBe('Group 1');
+  });
+
+  it('Move, Merge, Split and Discard enable by the same rules as the prototype, with its help copy', async () => {
+    const { container } = await open();
+    const org = screen.getByRole('group', { name: 'Organize this group' });
+    expect([moveBtn(), mergeBtn(), splitBtn(), discardBtn()].map((b) => b.disabled)).toEqual([true, true, true, true]);
+    expect(within(org).getByText('Select photos above first, then choose a gown.')).toBeTruthy();
+    expect(within(org).getByText('Moves all 2 photos into the gown you pick and removes this group.')).toBeTruthy();
+    expect(within(org).getByText('Select photos above first. They become a separate gown.')).toBeTruthy();
+    expect([...(screen.getByLabelText('Move selected photos to') as HTMLSelectElement).options].map((o) => o.textContent)).toEqual(['Choose a gown…', 'Group 2']);
+    await noViolations(container);
+
+    await pick(1);
+    expect(within(org).getByText('1 photo selected. Choose a gown.')).toBeTruthy();
+    expect(within(org).getByText('Creates “Group 1 II” from the 1 selected.')).toBeTruthy();
+    expect(moveBtn().textContent).toBe('Move 1');
+    expect([moveBtn(), splitBtn(), discardBtn()].map((b) => b.disabled)).toEqual([true, false, false]);
+    await userEvent.selectOptions(screen.getByLabelText('Move selected photos to'), 'Group 2');
+    expect(moveBtn().disabled).toBe(false);
+    await noViolations(container);
+
+    await pick(2);
+    expect(within(org).getByText('Leave at least one photo in this gown.')).toBeTruthy();
+    expect([splitBtn(), discardBtn()].map((b) => b.disabled)).toEqual([true, false]);
+
+    await userEvent.selectOptions(screen.getByLabelText('Merge this whole gown into'), 'Group 2');
+    expect(mergeBtn().disabled).toBe(false);
+    await noViolations(container);
+  });
+
+  it('moves the selected photos with no request, then Undo moves them back', async () => {
+    await open();
+    await pick(1);
+    await moveTo('Group 2');
     expect(await screen.findByText('Moved 1 photo to Group 2')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Group 2/ }).textContent).toContain('2 photos');
     expect(screen.getByText('2 gowns · 3 photos will be added to Gallery')).toBeTruthy();
+    expect(moveBtn().textContent).toBe('Move');
+    expect(moveBtn().disabled).toBe(true);
     expect(sent).toEqual([]);
     await userEvent.click(undo());
     expect(screen.getByRole('button', { name: /Group 2/ }).textContent).toContain('1 photo');
     expect(screen.getByRole('button', { name: /Group 1/ }).textContent).toContain('2 photos');
   });
 
-  it('moves a photo to a new group and selects it; Undo removes the new group again', async () => {
+  it('splits the selected photos into a new gown and says to check its tags; Undo merges it back', async () => {
     await open();
-    await menu('Photo 1 actions', 'Move to…');
-    await choose('New group', 'Move');
-    expect(names()).toEqual(['Group 1', 'Group 2', 'New group']);
-    expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('New group');
-    expect(sent).toEqual([]);
-    await userEvent.click(undo());
-    expect(names()).toEqual(['Group 1', 'Group 2']);
-    expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('Group 1');
-  });
-
-  it('splits one photo into a new gown and says to check its tags; Undo merges it back', async () => {
-    await open();
-    await menu('Photo 2 actions', 'Split into new gown');
+    await pick(2);
+    await userEvent.click(splitBtn());
     expect(await screen.findByText('Split into a new gown. Check its tags.')).toBeTruthy();
     expect(names()).toEqual(['Group 1', 'Group 1 II', 'Group 2']);
     expect((screen.getByLabelText(/^Gown name/) as HTMLInputElement).value).toBe('Group 1 II');
+    expect(screen.getByLabelText('Confidence', { exact: false, selector: '[role=img]' }).getAttribute('aria-label')).toBe('AI confidence 70 percent, Low · check');
     expect(sent).toEqual([]);
     await userEvent.click(undo());
     expect(names()).toEqual(['Group 1', 'Group 2']);
@@ -262,8 +309,7 @@ describe('Staged edits', () => {
 
   it('merges the group into another, the target keeps its name; Undo splits them out again', async () => {
     await open();
-    await menu('Group actions', 'Merge into…');
-    await choose('Group 2', 'Merge');
+    await mergeInto('Group 2');
     expect(await screen.findByText('Merged into Group 2')).toBeTruthy();
     expect(names()).toEqual(['Group 2']);
     expect(screen.getByRole('button', { name: /Group 2/ }).textContent).toContain('3 photos');
@@ -273,10 +319,11 @@ describe('Staged edits', () => {
     expect(names()).toEqual(['Group 1', 'Group 2']);
   });
 
-  it('discards a photo with a plain toast; the last photo of a group takes the group with it; Undo restores both', async () => {
+  it('discards the selected photos with a plain toast; the last photo takes its group; Undo restores both', async () => {
     await open();
     await userEvent.click(screen.getByRole('button', { name: /Group 2/ }));
-    await menu('Photo 1 actions', 'Discard photo');
+    await pick(1);
+    await userEvent.click(discardBtn());
     expect(await screen.findByText('Photo discarded')).toBeTruthy();
     expect(document.querySelector('.toast button.link:not([aria-label])')).toBeNull();
     expect(names()).toEqual(['Group 1']);
@@ -288,12 +335,34 @@ describe('Staged edits', () => {
 
   it('shows an empty state when every photo is discarded and Confirm is off', async () => {
     await open();
-    await menu('Photo 1 actions', 'Discard photo');
-    await menu('Photo 1 actions', 'Discard photo');
+    await pick(1, 2);
+    await userEvent.click(discardBtn());
+    expect(await screen.findByText('2 photos discarded')).toBeTruthy();
     expect(names()).toEqual(['Group 2']);
-    await menu('Photo 1 actions', 'Discard photo');
+    await pick(1);
+    await userEvent.click(discardBtn());
     expect(screen.getByText('No photos left. Undo the last change or discard the batch.')).toBeTruthy();
     expect((screen.getByRole('button', { name: 'Confirm and save 0 gowns' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('shows confidence as text, a 64px meter and a pill; the meter is an image with a spoken value', async () => {
+    await open();
+    expect(screen.getByText('Confidence 40%')).toBeTruthy();
+    const meter = screen.getByRole('img', { name: 'AI confidence 40 percent, Low · check' });
+    expect(meter.className).toBe('meter gray');
+    expect((meter.firstElementChild as HTMLElement).style.width).toBe('40%');
+    await userEvent.click(screen.getByRole('button', { name: /Group 2/ }));
+    expect(screen.getByRole('img', { name: 'AI confidence 95 percent, High' }).className).toBe('meter');
+  });
+
+  it('says there are no other gowns and disables Move and Merge when the batch has one group', async () => {
+    served = () => [groups()[0]];
+    await open();
+    for (const l of ['Move selected photos to', 'Merge this whole gown into']) {
+      const sel = screen.getByLabelText(l) as HTMLSelectElement;
+      expect(sel.disabled).toBe(true);
+      expect(sel.options[0].textContent).toBe('No other gowns yet');
+    }
   });
 });
 
@@ -358,9 +427,11 @@ describe('Confirm and save', () => {
     await userEvent.clear(name);
     await userEvent.type(name, 'Ivory');
     await userEvent.selectOptions(screen.getByLabelText('Silhouette'), 'A-line');
-    await menu('Photo 2 actions', 'Split into new gown');
+    await pick(2);
+    await userEvent.click(splitBtn());
     await userEvent.click(screen.getByRole('button', { name: /^Group 2/ }));
-    await menu('Photo 1 actions', 'Discard photo');
+    await pick(1);
+    await userEvent.click(discardBtn());
     expect(sent).toEqual([]);
     await userEvent.click(confirmButton(2));
     await waitFor(() => expect(commits().length).toBe(1));
