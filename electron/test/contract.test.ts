@@ -5,7 +5,9 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { createBridge } from '../src/preload/bridge.ts'
-import { handlers } from '../src/main/commands.ts'
+import { createHandlers } from '../src/main/commands.ts'
+import { Session } from '../src/main/session.ts'
+import { MemoryKeychain } from '../src/main/keychain.ts'
 import { CSP } from '../src/main/csp.ts'
 import { MAIN_WINDOW } from '../src/main/identity.ts'
 import { CHANNEL_COMMANDS, COMMANDS } from '../src/shared/commands.ts'
@@ -31,7 +33,8 @@ test('the nine commands and no others: Tauri, shared list, preload allow list an
   const rust = [...(/pub const NAMES: \[&str; 9\] = \[([^\]]+)\]/.exec(read('../../desktop/src-tauri/src/commands.rs'))?.[1] ?? '').matchAll(/"(\w+)"/g)].map((m) => m[1]!).sort()
   assert.deepEqual(rust, WANT)
   assert.deepEqual([...COMMANDS].sort(), WANT)
-  assert.deepEqual(Object.keys(handlers).sort(), WANT)
+  const cfg = { api: 'http://127.0.0.1:1', auth: 'http://127.0.0.1:1', signInTimeoutMs: 1, requestTimeoutMs: 1, uploadTimeoutMs: 1, retryDelayMs: 1, loopback: false, smoke: false }
+  assert.deepEqual(Object.keys(createHandlers({ session: new Session(cfg, new MemoryKeychain()), exit() {} })).sort(), WANT)
   const noIpc = { invoke: async () => ({ ok: null }), on() {}, removeListener() {} }
   assert.deepEqual(Object.keys(createBridge(noIpc)).sort(), WANT)
   assert.deepEqual([...CHANNEL_COMMANDS].sort(), ['export_gowns', 'upload_files'])
@@ -75,8 +78,8 @@ test('no remote URL in main, shared or preload sources (the config and 18.3 cons
 })
 
 test('writes: only the modules the plan names may touch the file system, and none yet', () => {
-  // 16.3 keychain.ts, 17.1 uploads.ts (read), 17.4 export.ts (the one chosen file); app-files.ts only reads the renderer bundle.
-  const allow: Record<string, RegExp> = { 'main/app-files.ts': /^(readFile|realpath|stat)$/ }
+  // config.ts reads the baked build-config.json; 17.1 uploads.ts (read), 17.4 export.ts (the one chosen file); app-files.ts only reads the renderer bundle.
+  const allow: Record<string, RegExp> = { 'main/app-files.ts': /^(readFile|realpath|stat)$/, 'main/config.ts': /^readFileSync$/ }
   const WRITE = /\b(writeFile|appendFile|createWriteStream|mkdir|rm|rmdir|unlink|rename|copyFile|cp|truncate|open|symlink|link|writeSync|openSync)\b/
   for (const f of mainFiles) {
     const t = abs(f)

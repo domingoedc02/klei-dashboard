@@ -81,7 +81,8 @@ test('non-BridgeError failures become failed/request failed; seeded secrets neve
 })
 
 test('every stub rejects failed / not implemented', async () => {
-  const { handlers } = await import('../src/main/commands.ts')
+  const { createHandlers } = await import('../src/main/commands.ts')
+  const handlers = createHandlers({ session: {} as never, exit() {} })
   assert.deepEqual(Object.keys(handlers).sort(), [...COMMANDS].sort())
   const { bridge } = loopback(handlers)
   assert.deepEqual(await bridge.sign_in().then(() => assert.fail(), (x) => x), { kind: 'failed', message: 'not implemented' })

@@ -1,0 +1,184 @@
+// Port of desktop/src-tauri/src/session.rs (token state, request path). Sign-in and sign-out arrive with 16.3/16.4.
+import { BridgeError } from '../shared/errors.ts'
+import type { ApiCall } from '../shared/commands.ts'
+import type { ApiResponse } from '../shared/events.ts'
+import type { Config } from './config.ts'
+import type { Keychain } from './keychain.ts'
+
+const HEALTH = '/health/ready'
+
+// Test connection makes up to three provider calls of 60 s each on the backend, and loading models one call plus a retry; every other call keeps the short limit.
+// shortcut: slow paths by name, upgrade to a per-call option when a third slow call exists.
+const SLOW_PATHS = ['/api/v1/admin/ai/test', '/api/v1/admin/ai/models']
+const SLOW_TIMEOUT_MS = 200_000
+
+export const timeoutFor = (path: string, defaultMs: number) => (SLOW_PATHS.includes(path) ? Math.max(SLOW_TIMEOUT_MS, defaultMs) : defaultMs)
+
+const failed = (msg: string) => new BridgeError('failed', msg)
+const badPath = () => new BridgeError('bad_request', 'path must stay under /api/v1/')
+const guard = <T>(f: () => T): T => {
+  try {
+    return f()
+  } catch {
+    throw new BridgeError('keychain_unavailable', 'keychain unavailable')
+  }
+}
+
+export function checkPath(p: string): void {
+  if (!(p.startsWith('/api/v1/') && !p.includes('..') && !p.includes('//') && /^[\x21-\x7e]+$/.test(p) && !p.includes('\\'))) throw badPath()
+}
+
+const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+export function parseMethod(m: string): string {
+  const up = m.toUpperCase()
+  if (!METHODS.includes(up)) throw new BridgeError('bad_request', 'method not allowed')
+  return up
+}
+
+/** What a call sends besides the headers: nothing, or JSON with its Idempotency-Key (empty: none). 17.1 adds the multipart file. */
+export type Payload = { json: unknown; key: string } | null
+
+export interface Raw { status: number; bytes: Buffer }
+
+const parseJson = (bytes: Buffer): unknown => {
+  try {
+    return JSON.parse(bytes.toString('utf8'))
+  } catch {
+    return null
+  }
+}
+
+interface TokenPair { accessToken: string; refreshToken: string }
+const parsePair = (body: unknown): TokenPair => {
+  const b = body as Partial<TokenPair> | null
+  if (typeof b === 'object' && b !== null && typeof b.accessToken === 'string' && b.accessToken !== '' && typeof b.refreshToken === 'string' && b.refreshToken !== '') {
+    return { accessToken: b.accessToken, refreshToken: b.refreshToken }
+  }
+  throw failed('bad token response')
+}
+
+const isTimeout = (e: unknown) => (e as { name?: unknown } | null)?.name === 'TimeoutError'
+
+/** Token state of the signed-in User. The access token lives in memory only; the refresh token only in the keychain. */
+export class Session {
+  readonly cfg: Config
+  readonly keychain: Keychain
+  #access: string | null = null
+  #gate: Promise<unknown> = Promise.resolve()
+  #dirty = false
+  readonly #origin: string
+  readonly #prefix: string
+
+  constructor(cfg: Config, keychain: Keychain) {
+    this.cfg = cfg
+    this.keychain = keychain
+    const base = new URL(cfg.api)
+    this.#origin = base.origin
+    this.#prefix = `${base.pathname.replace(/\/+$/, '')}/api/v1/`
+  }
+
+  setDirty(dirty: boolean) { this.#dirty = dirty }
+  isDirty() { return this.#dirty }
+
+  /** `ifMatch` is the row version the screen last read (AD-18); an integer, so no other header can ride along. `idempotencyKey` is the key of a call the server may see twice (Reply). */
+  async requestIf({ method, path, body, ifMatch, idempotencyKey }: ApiCall): Promise<ApiResponse> {
+    const m = parseMethod(method)
+    const idem = idempotencyKey ?? ''
+    if (idem.length > 128 || !/^[\x21-\x7e]*$/.test(idem)) throw new BridgeError('bad_request', 'bad idempotency key')
+    if (path === HEALTH) {
+      // The connection monitor pings this while offline; it needs no sign-in and must not carry a token.
+      if (m !== 'GET') throw new BridgeError('bad_request', 'health is read-only')
+      return this.#send(m, path, null, null)
+    }
+    checkPath(path)
+    this.#url(path)
+    const payload: Payload = body === null || body === undefined ? null : { json: body, key: idem }
+    const { raw, refreshed } = await this.#authed(m, path, payload, ifMatch, timeoutFor(path, this.cfg.requestTimeoutMs))
+    return { status: raw.status, body: parseJson(raw.bytes), refreshed }
+  }
+
+  async #authed(method: string, path: string, payload: Payload, ifMatch: number | null, timeoutMs: number): Promise<{ raw: Raw; refreshed: boolean }> {
+    let token = this.#access ?? (await this.#refresh(null))
+    const first = await this.#sendRaw(method, path, payload, token, ifMatch, timeoutMs)
+    if (first.status !== 401) return { raw: first, refreshed: false }
+    token = await this.#refresh(token)
+    const second = await this.#sendRaw(method, path, payload, token, ifMatch, timeoutMs)
+    if (second.status === 401) throw this.#expire()
+    return { raw: second, refreshed: true }
+  }
+
+  /** Single flight: callers that saw the same rejected token queue behind one refresh and reuse its result. */
+  #refresh(rejected: string | null): Promise<string> {
+    const run = this.#gate.then(() => this.#refreshLocked(rejected))
+    this.#gate = run.catch(() => {})
+    return run
+  }
+
+  async #refreshLocked(rejected: string | null): Promise<string> {
+    if (this.#access !== null && this.#access !== rejected) return this.#access
+    const rt = guard(() => this.keychain.load())
+    if (rt === null) throw new BridgeError('signed_out', 'signed out')
+    const { status, body } = await this.#post('/api/v1/auth/refresh', { refreshToken: rt })
+    switch (status) {
+      case 200: return this.#accept(parsePair(body))
+      case 401: throw this.#expire()
+      case 403: this.#expire(); throw new BridgeError('no_access', 'no access')
+      default: throw failed('refresh failed')
+    }
+  }
+
+  /** Refresh token first: if the keychain refuses it, no access token is kept (fail closed). */
+  #accept(pair: TokenPair): string {
+    guard(() => this.keychain.store(pair.refreshToken))
+    this.#access = pair.accessToken
+    return pair.accessToken
+  }
+
+  #expire(): BridgeError {
+    this.#access = null
+    try { this.keychain.clear() } catch { /* the session is over either way */ }
+    return new BridgeError('session_expired', 'session expired')
+  }
+
+  /** The URL parser folds encoded dot segments (%2e%2e), so the string checks alone do not keep a path under the prefix. */
+  #url(path: string): URL {
+    const url = new URL(`${this.cfg.api}${path}`)
+    if (url.origin !== this.#origin || (path !== HEALTH && !url.pathname.startsWith(this.#prefix))) throw badPath()
+    return url
+  }
+
+  async #post(path: string, body: unknown) {
+    return this.#send('POST', path, { json: body, key: '' }, null)
+  }
+
+  async #send(method: string, path: string, payload: Payload, bearer: string | null): Promise<ApiResponse> {
+    const raw = await this.#sendRaw(method, path, payload, bearer, null, timeoutFor(path, this.cfg.requestTimeoutMs))
+    return { status: raw.status, body: parseJson(raw.bytes), refreshed: false }
+  }
+
+  async #sendRaw(method: string, path: string, payload: Payload, bearer: string | null, ifMatch: number | null, timeoutMs: number): Promise<Raw> {
+    const url = new URL(`${this.cfg.api}${path}`)
+    if (url.origin !== this.#origin || (path !== HEALTH && !url.pathname.startsWith(this.#prefix))) throw badPath()
+    const headers: Record<string, string> = {}
+    if (bearer !== null) headers.authorization = `Bearer ${bearer}`
+    if (ifMatch !== null) headers['if-match'] = String(ifMatch)
+    let body: string | undefined
+    if (payload !== null) {
+      headers['content-type'] = 'application/json'
+      if (payload.key !== '') headers['idempotency-key'] = payload.key
+      body = JSON.stringify(payload.json)
+    }
+    const signal = AbortSignal.timeout(timeoutMs)
+    let res: Response
+    try {
+      res = await fetch(url, { method, headers, body, redirect: 'manual', signal })
+    } catch (e) {
+      throw isTimeout(e) ? new BridgeError('timeout', 'request timed out') : new BridgeError('offline', 'server unreachable')
+    }
+    try {
+      return { status: res.status, bytes: Buffer.from(await res.arrayBuffer()) }
+    } catch (e) {
+      throw isTimeout(e) ? new BridgeError('timeout', 'request timed out') : failed('request failed')
+    }
+  }
+}
