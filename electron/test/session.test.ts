@@ -10,9 +10,9 @@ import { Session, timeoutFor } from '../src/main/session.ts'
 import { cfg, mock, pair } from './mock-api.ts'
 
 const call = (method: string, path: string, over: object = {}) => ({ method, path, body: null, ifMatch: null, idempotencyKey: null, ...over })
-const signedIn = (api: string, over = {}) => {
+const signedIn = async (api: string, over = {}) => {
   const kc = new MemoryKeychain()
-  kc.store('refresh-0')
+  await kc.store('refresh-0')
   return { s: new Session(cfg(api, over), kc), kc }
 }
 const kind = (p: Promise<unknown>) => p.then(() => assert.fail('resolved'), (e: { kind: string }) => e.kind)
@@ -30,7 +30,7 @@ test('requests stay under the api prefix and use an allowed method', async () =>
 
 test('If-Match rides the request and only that one', async () => {
   const m = await mock((r) => (r.path === '/api/v1/auth/refresh' ? [200, pair('access-2', 'refresh-2')] : r.auth === 'Bearer access-2' ? [200, {}] : [401, {}]))
-  const { s } = signedIn(m.api)
+  const { s } = await signedIn(m.api)
   assert.equal((await s.requestIf(call('PATCH', '/api/v1/admin/users/x', { body: { name: 'A' }, ifMatch: 7 }))).status, 200)
   assert.deepEqual(m.log.filter((r) => r.path.endsWith('users/x')).map((r) => r.ifMatch), ['7'])
   assert.equal((await s.requestIf(call('GET', '/api/v1/admin/users/x'))).status, 200)
@@ -40,7 +40,7 @@ test('If-Match rides the request and only that one', async () => {
 
 test('Idempotency-Key rides a JSON call and only a clean one', async () => {
   const m = await mock((r) => (r.path === '/api/v1/auth/refresh' ? [200, pair('access-2', 'refresh-2')] : [201, {}]))
-  const { s } = signedIn(m.api)
+  const { s } = await signedIn(m.api)
   const reply = { body: { body: '<div>x</div>' } }
   const p = '/api/v1/inquiries/x/reply'
   assert.equal((await s.requestIf(call('POST', p, { ...reply, idempotencyKey: 'abc-123' }))).status, 201)
@@ -54,7 +54,7 @@ test('Idempotency-Key rides a JSON call and only a clean one', async () => {
 
 test('a null body sends no body and no content-type; a body sends JSON', async () => {
   const m = await mock((r) => (r.path === '/api/v1/auth/refresh' ? [200, pair('a', 'r')] : [200, { ok: 1 }]))
-  const { s } = signedIn(m.api)
+  const { s } = await signedIn(m.api)
   const res = await s.requestIf(call('GET', '/api/v1/me'))
   assert.deepEqual(res, { status: 200, body: { ok: 1 }, refreshed: false })
   await s.requestIf(call('POST', '/api/v1/x', { body: { a: 1 } }))
@@ -65,17 +65,17 @@ test('a null body sends no body and no content-type; a body sends JSON', async (
 
 test('non-2xx and non-JSON answers come back as data, redirects are not followed', async () => {
   const m = await mock((r) => (r.path === '/api/v1/auth/refresh' ? [200, pair('a', 'r')] : r.path.endsWith('/gone') ? [404, { code: 'not_found' }] : [200, undefined]))
-  const { s } = signedIn(m.api)
+  const { s } = await signedIn(m.api)
   assert.deepEqual(await s.requestIf(call('GET', '/api/v1/gone')), { status: 404, body: { code: 'not_found' }, refreshed: false })
   assert.deepEqual(await s.requestIf(call('GET', '/api/v1/empty')), { status: 200, body: null, refreshed: false })
   m.close()
 })
 
 test('unreachable server reports offline; a slow one reports timeout', async () => {
-  const { s } = signedIn('http://127.0.0.1:1')
+  const { s } = await signedIn('http://127.0.0.1:1')
   assert.equal(await kind(s.requestIf(call('GET', '/api/v1/me'))), 'offline')
   const m = await mock(async (r) => (r.path === '/api/v1/auth/refresh' ? [200, pair('a', 'r')] : (await new Promise((ok) => setTimeout(ok, 400)), [200, {}])))
-  const slow = signedIn(m.api, { requestTimeoutMs: 100 })
+  const slow = await signedIn(m.api, { requestTimeoutMs: 100 })
   assert.equal(await kind(slow.s.requestIf(call('GET', '/api/v1/me'))), 'timeout')
   m.close()
 })
@@ -109,7 +109,7 @@ test('config: build-time URLs lose the trailing slash; flags come from the envir
 test('api_request under KLEI_SMOKE: first answer is signed_out, then the app exits 0 after 1 s', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const exits: number[] = []
-  const handlers = createHandlers({ session: new Session(cfg('http://127.0.0.1:1', { smoke: true }), new MemoryKeychain()), exit: (c) => exits.push(c) })
+  const handlers = createHandlers({ session: new Session(cfg('http://127.0.0.1:1', { smoke: true }), new MemoryKeychain()), useMemory() {}, exit: (c) => exits.push(c) })
   const args = { request: call('GET', '/api/v1/me') } as never
   assert.equal(await kind(handlers.api_request!(args, { signal: new AbortController().signal, emit() {} } as never)), 'signed_out')
   t.mock.timers.tick(999)

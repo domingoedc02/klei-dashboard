@@ -16,9 +16,9 @@ export const timeoutFor = (path: string, defaultMs: number) => (SLOW_PATHS.inclu
 
 const failed = (msg: string) => new BridgeError('failed', msg)
 const badPath = () => new BridgeError('bad_request', 'path must stay under /api/v1/')
-const guard = <T>(f: () => T): T => {
+const guard = async <T>(f: () => Promise<T>): Promise<T> => {
   try {
-    return f()
+    return await f()
   } catch {
     throw new BridgeError('keychain_unavailable', 'keychain unavailable')
   }
@@ -77,6 +77,15 @@ export class Session {
     this.#prefix = `${base.pathname.replace(/\/+$/, '')}/api/v1/`
   }
 
+  /** Drops the access token first, then revokes on the server (best effort: offline works), then clears the credential. */
+  // shortcut: logout is best effort, so offline leaves the server session to expire; upgrade when sessions need a hard revoke.
+  async signOut(): Promise<void> {
+    this.#access = null
+    const rt = await this.keychain.load().catch(() => null)
+    if (rt !== null) await this.#post('/api/v1/auth/logout', { refreshToken: rt }).catch(() => {})
+    await guard(() => this.keychain.clear())
+  }
+
   setDirty(dirty: boolean) { this.#dirty = dirty }
   isDirty() { return this.#dirty }
 
@@ -103,7 +112,7 @@ export class Session {
     if (first.status !== 401) return { raw: first, refreshed: false }
     token = await this.#refresh(token)
     const second = await this.#sendRaw(method, path, payload, token, ifMatch, timeoutMs)
-    if (second.status === 401) throw this.#expire()
+    if (second.status === 401) throw await this.#expire()
     return { raw: second, refreshed: true }
   }
 
@@ -116,27 +125,27 @@ export class Session {
 
   async #refreshLocked(rejected: string | null): Promise<string> {
     if (this.#access !== null && this.#access !== rejected) return this.#access
-    const rt = guard(() => this.keychain.load())
+    const rt = await guard(() => this.keychain.load())
     if (rt === null) throw new BridgeError('signed_out', 'signed out')
     const { status, body } = await this.#post('/api/v1/auth/refresh', { refreshToken: rt })
     switch (status) {
-      case 200: return this.#accept(parsePair(body))
-      case 401: throw this.#expire()
-      case 403: this.#expire(); throw new BridgeError('no_access', 'no access')
+      case 200: return await this.#accept(parsePair(body))
+      case 401: throw await this.#expire()
+      case 403: await this.#expire(); throw new BridgeError('no_access', 'no access')
       default: throw failed('refresh failed')
     }
   }
 
   /** Refresh token first: if the keychain refuses it, no access token is kept (fail closed). */
-  #accept(pair: TokenPair): string {
-    guard(() => this.keychain.store(pair.refreshToken))
+  async #accept(pair: TokenPair): Promise<string> {
+    await guard(() => this.keychain.store(pair.refreshToken))
     this.#access = pair.accessToken
     return pair.accessToken
   }
 
-  #expire(): BridgeError {
+  async #expire(): Promise<BridgeError> {
     this.#access = null
-    try { this.keychain.clear() } catch { /* the session is over either way */ }
+    try { await this.keychain.clear() } catch { /* the session is over either way */ }
     return new BridgeError('session_expired', 'session expired')
   }
 

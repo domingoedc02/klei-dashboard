@@ -7,12 +7,22 @@ const notImplemented = () => Promise.reject(new BridgeError('failed', 'not imple
 
 export interface Deps {
   session: Session
+  /** Switches the credential store to process memory ("Continue without saving"). */
+  useMemory(): void
   exit(code: number): void
 }
 
 // One entry per command; Epics 16 and 17 replace the stubs. Keyed by COMMANDS so a tenth name cannot be added here alone.
-export const createHandlers = ({ session, exit }: Deps): Handlers => ({
+export const createHandlers = ({ session, useMemory, exit }: Deps): Handlers => ({
   ...(Object.fromEntries(COMMANDS.map((c) => [c, notImplemented])) as unknown as Handlers),
+  async sign_out() {
+    await session.signOut()
+    return null
+  },
+  session_only() {
+    useMemory()
+    return Promise.resolve(null)
+  },
   async api_request({ request }) {
     try {
       return await session.requestIf(request)

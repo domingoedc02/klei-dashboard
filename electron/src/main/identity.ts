@@ -1,4 +1,6 @@
 export const APP_ID = 'co.klei.bridal.electron.preview'
+// Never `co.klei.bridal`: that is the Tauri app's entry.
+export const KEYCHAIN_SERVICE = APP_ID
 export const PRODUCT_NAME = 'Klei Bridal Preview'
 export const USER_DATA_DIR = 'Klei Bridal Preview'
 export const MAIN_LABEL = 'main'

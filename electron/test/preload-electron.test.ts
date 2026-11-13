@@ -89,7 +89,7 @@ test('a sub-frame on app://klei gets no bridge; the main page keeps working afte
     await page.reload()
     await page.waitForFunction(() => typeof (window as unknown as { klei?: unknown }).klei === 'object')
     const again = await page.evaluate(() => (window as unknown as { klei: Klei }).klei.sign_out!().then(() => 'resolved', (e: { kind: string }) => e.kind))
-    assert.equal(again, 'failed')
+    assert.equal(again, 'resolved')
   } finally {
     await app.close()
   }

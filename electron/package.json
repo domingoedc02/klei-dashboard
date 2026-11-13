@@ -15,5 +15,8 @@
     "electron": "45.3.2",
     "esbuild": "0.28.2",
     "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@napi-rs/keyring": "2.1.2"
   }
 }
