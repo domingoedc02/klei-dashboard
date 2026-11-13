@@ -36,8 +36,8 @@ export function parseMethod(m: string): string {
   return up
 }
 
-/** What a call sends besides the headers: nothing, or JSON with its Idempotency-Key (empty: none). 17.1 adds the multipart file. */
-export type Payload = { json: unknown; key: string } | null
+/** What a call sends besides the headers: nothing, JSON, or one multipart `file` part; each with its Idempotency-Key (empty: none). */
+export type Payload = { json: unknown; key: string } | { file: { name: string; bytes: Buffer<ArrayBuffer> }; key: string } | null
 
 export interface Raw { status: number; bytes: Buffer }
 
@@ -178,12 +178,20 @@ export class Session {
     return { status: raw.status, body: parseJson(raw.bytes), refreshed }
   }
 
-  async #authed(method: string, path: string, payload: Payload, ifMatch: number | null, timeoutMs: number): Promise<{ raw: Raw; refreshed: boolean }> {
+  /** Signed-in call that hands back the raw answer (uploads). Same path rules, token refresh and 401 handling as `requestIf`; `signal` abandons the request as `cancelled`. */
+  async call(method: string, path: string, payload: Payload, timeoutMs: number, signal?: AbortSignal): Promise<Raw> {
+    const m = parseMethod(method)
+    checkPath(path)
+    this.#url(path)
+    return (await this.#authed(m, path, payload, null, timeoutMs, signal)).raw
+  }
+
+  async #authed(method: string, path: string, payload: Payload, ifMatch: number | null, timeoutMs: number, signal?: AbortSignal): Promise<{ raw: Raw; refreshed: boolean }> {
     let token = this.#access ?? (await this.#refresh(null))
-    const first = await this.#sendRaw(method, path, payload, token, ifMatch, timeoutMs)
+    const first = await this.#sendRaw(method, path, payload, token, ifMatch, timeoutMs, signal)
     if (first.status !== 401) return { raw: first, refreshed: false }
     token = await this.#refresh(token)
-    const second = await this.#sendRaw(method, path, payload, token, ifMatch, timeoutMs)
+    const second = await this.#sendRaw(method, path, payload, token, ifMatch, timeoutMs, signal)
     if (second.status === 401) throw await this.#expire()
     return { raw: second, refreshed: true }
   }
@@ -237,28 +245,37 @@ export class Session {
     return { status: raw.status, body: parseJson(raw.bytes), refreshed: false }
   }
 
-  async #sendRaw(method: string, path: string, payload: Payload, bearer: string | null, ifMatch: number | null, timeoutMs: number): Promise<Raw> {
+  async #sendRaw(method: string, path: string, payload: Payload, bearer: string | null, ifMatch: number | null, timeoutMs: number, caller?: AbortSignal): Promise<Raw> {
     const url = new URL(`${this.cfg.api}${path}`)
     if (url.origin !== this.#origin || (path !== HEALTH && !url.pathname.startsWith(this.#prefix))) throw badPath()
     const headers: Record<string, string> = {}
     if (bearer !== null) headers.authorization = `Bearer ${bearer}`
     if (ifMatch !== null) headers['if-match'] = String(ifMatch)
-    let body: string | undefined
+    let body: string | FormData | undefined
     if (payload !== null) {
-      headers['content-type'] = 'application/json'
       if (payload.key !== '') headers['idempotency-key'] = payload.key
-      body = JSON.stringify(payload.json)
+      if ('file' in payload) {
+        body = new FormData()
+        body.append('file', new Blob([payload.file.bytes]), payload.file.name)
+      } else {
+        headers['content-type'] = 'application/json'
+        body = JSON.stringify(payload.json)
+      }
     }
-    const signal = AbortSignal.timeout(timeoutMs)
+    const timer = AbortSignal.timeout(timeoutMs)
+    const signal = caller ? AbortSignal.any([timer, caller]) : timer
+    const cancelled = () => new BridgeError('cancelled', 'cancelled')
     let res: Response
     try {
       res = await fetch(url, { method, headers, body, redirect: 'manual', signal })
     } catch (e) {
+      if (caller?.aborted) throw cancelled()
       throw isTimeout(e) ? new BridgeError('timeout', 'request timed out') : new BridgeError('offline', 'server unreachable')
     }
     try {
       return { status: res.status, bytes: Buffer.from(await res.arrayBuffer()) }
     } catch (e) {
+      if (caller?.aborted) throw cancelled()
       throw isTimeout(e) ? new BridgeError('timeout', 'request timed out') : failed('request failed')
     }
   }

@@ -1,7 +1,9 @@
 import { COMMANDS } from '../shared/commands.ts'
 import { BridgeError } from '../shared/errors.ts'
+import type { UploadSummary } from '../shared/events.ts'
 import type { Handlers } from './invoker.ts'
 import type { Session } from './session.ts'
+import { run, Uploader } from './uploads.ts'
 
 const notImplemented = () => Promise.reject(new BridgeError('failed', 'not implemented'))
 
@@ -10,11 +12,40 @@ export interface Deps {
   /** Switches the credential store to process memory ("Continue without saving"). */
   useMemory(): void
   exit(code: number): void
+  /** Native photo picker (filter "Photos", multi-select): the chosen paths, empty when the dialog is cancelled. */
+  pickPhotos?(): Promise<string[]>
 }
 
+const NONE = (): UploadSummary => ({ stored: [], rejected: [], cancelled: false })
+
 // One entry per command; Epics 16 and 17 replace the stubs. Keyed by COMMANDS so a tenth name cannot be added here alone.
-export const createHandlers = ({ session, useMemory, exit }: Deps): Handlers => ({
+export const createHandlers = ({ session, useMemory, exit, pickPhotos }: Deps): Handlers => {
+  const uploader = new Uploader()
+  return {
   ...(Object.fromEntries(COMMANDS.map((c) => [c, notImplemented])) as unknown as Handlers),
+  async upload_files({ kind, targetId }, ctx) {
+    switch (kind) {
+      case 'cancel':
+        uploader.cancel()
+        return NONE()
+      case 'watch': // 17.2
+      case 'unwatch':
+        return NONE()
+      case 'photo':
+      case 'dropped':
+        break
+      default: // avatar, attachment: 17.3
+        return notImplemented()
+    }
+    const paths = kind === 'photo' ? ((await pickPhotos?.()) ?? []) : [] // dropped: 17.2
+    if (paths.length === 0) return NONE()
+    const slot = uploader.begin(ctx.signal)
+    try {
+      return await run(session, targetId, paths, slot.signal, ctx.emit)
+    } finally {
+      slot.release()
+    }
+  },
   async sign_in() {
     await session.signIn()
     return null
@@ -41,4 +72,5 @@ export const createHandlers = ({ session, useMemory, exit }: Deps): Handlers => 
       throw e
     }
   },
-})
+  }
+}

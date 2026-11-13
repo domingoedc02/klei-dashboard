@@ -45,7 +45,7 @@ test('real preload: nine methods, no Node, plain errors, channel calls settle, h
         stub: await err(k.check_update()!),
         badKeys: await err(k.api_request!({ method: 'GET', path: '/x', evil: 1 })),
         badType: await err(k.set_dirty!('yes')),
-        upload: await err(k.upload_files!('photo', 't', (e: unknown) => events.push(e))),
+        upload: await err(k.upload_files!('avatar', 't', (e: unknown) => events.push(e))),
         uploadBad: await err(k.upload_files!('nope', 't', () => {})),
         exportBad: await err(k.export_gowns!('start', new Array(1001).fill('a'), () => {})),
         events,

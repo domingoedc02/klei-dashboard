@@ -2,7 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import type { AddressInfo } from 'node:net'
 import type { Config } from '../src/main/config.ts'
 
-export interface Req { method: string; path: string; auth: string; ifMatch: string; idem: string; body: unknown; ct: string }
+export interface Req { method: string; path: string; auth: string; ifMatch: string; idem: string; body: unknown; ct: string; raw: string }
 export type Reply = [status: number, body?: unknown] | 'close'
 
 /** Scripted backend on a random loopback port; `handler` sees each request and the 1-based count of that path. */
@@ -15,7 +15,7 @@ export async function mock(handler: (r: Req, n: number) => Reply | Promise<Reply
     const h = req.headers
     const r: Req = {
       method: req.method!, path: req.url!, auth: String(h.authorization ?? ''), ifMatch: String(h['if-match'] ?? ''), idem: String(h['idempotency-key'] ?? ''),
-      body: raw ? JSON.parse(raw) : null, ct: String(h['content-type'] ?? ''),
+      body: raw && String(h['content-type'] ?? '').includes('json') ? JSON.parse(raw) : null, ct: String(h['content-type'] ?? ''), raw,
     }
     log.push(r)
     const out = await handler(r, log.filter((x) => x.path === r.path).length)

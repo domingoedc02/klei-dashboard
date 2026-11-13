@@ -1,4 +1,4 @@
-import { app, Menu, shell } from 'electron'
+import { app, dialog, Menu, shell } from 'electron'
 import { join } from 'node:path'
 import { APP_ID, KEYCHAIN_SERVICE, PRODUCT_NAME, SMOKE_EXIT_MS, USER_DATA_DIR } from './identity.ts'
 import { loopbackRedirect } from './auth.ts'
@@ -9,6 +9,7 @@ import { registerIpc, releaseOnGone } from './ipc.ts'
 import { OsKeychain, SwitchKeychain } from './keychain.ts'
 import { registerAppScheme } from './protocol.ts'
 import { Session } from './session.ts'
+import { EXTENSIONS } from './uploads.ts'
 import { createMainWindow, focusMainWindow, hardenWebContents, isMainContents, setupSession } from './window.ts'
 
 // Before `ready`: own profile, never the Tauri app's directory. The single-instance lock follows userData, so an installed Tauri app starts independently.
@@ -24,6 +25,10 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on('second-instance', focusMainWindow)
   app.on('window-all-closed', () => app.quit())
+  const pickPhotos = async () => {
+    const r = await dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'], filters: [{ name: 'Photos', extensions: EXTENSIONS }] })
+    return r.canceled ? [] : r.filePaths
+  }
   void app.whenReady().then(() => {
     // Tauri shows no menu bar on Windows and Linux; macOS keeps the default (Edit keys, Quit).
     if (process.platform !== 'darwin') Menu.setApplicationMenu(null)
@@ -32,7 +37,7 @@ if (!app.requestSingleInstanceLock()) {
     const keychain = new SwitchKeychain(new OsKeychain(KEYCHAIN_SERVICE), cfg.smoke || (!app.isPackaged && process.env.KLEI_KEYCHAIN !== 'os'))
     // The preview never registers klei://, so sign-in always returns through the loopback listener (AD-27).
     const session = new Session(cfg, keychain, { redirect: loopbackRedirect, open: (url) => void shell.openExternal(url).catch((e: Error) => console.warn(`open browser failed: ${e.message}`)) })
-    const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code) })
+    const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code), pickPhotos })
     const invoker = createInvoker({ handlers, trustedSender: isMainContents, log: (reason) => console.warn(`ipc rejected: ${reason}`) })
     registerIpc(invoker)
     releaseOnGone(createMainWindow(setupSession()).webContents, invoker)
