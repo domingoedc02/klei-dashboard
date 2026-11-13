@@ -15,6 +15,10 @@ export interface Deps {
 // One entry per command; Epics 16 and 17 replace the stubs. Keyed by COMMANDS so a tenth name cannot be added here alone.
 export const createHandlers = ({ session, useMemory, exit }: Deps): Handlers => ({
   ...(Object.fromEntries(COMMANDS.map((c) => [c, notImplemented])) as unknown as Handlers),
+  async sign_in() {
+    await session.signIn()
+    return null
+  },
   async sign_out() {
     await session.signOut()
     return null

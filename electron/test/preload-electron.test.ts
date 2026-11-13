@@ -42,7 +42,7 @@ test('real preload: nine methods, no Node, plain errors, channel calls settle, h
         symbols: Object.getOwnPropertySymbols(k).length,
         globals: [typeof (window as never as { ipcRenderer: unknown }).ipcRenderer, typeof require, typeof process, typeof Buffer].join(),
         electronGlobals: Object.keys(window).filter((n) => /electron|ipc|klei/i.test(n)),
-        stub: await err(k.sign_in()!),
+        stub: await err(k.check_update()!),
         badKeys: await err(k.api_request!({ method: 'GET', path: '/x', evil: 1 })),
         badType: await err(k.set_dirty!('yes')),
         upload: await err(k.upload_files!('photo', 't', (e: unknown) => events.push(e))),

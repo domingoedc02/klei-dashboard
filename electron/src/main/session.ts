@@ -3,6 +3,7 @@ import { BridgeError } from '../shared/errors.ts'
 import type { ApiCall } from '../shared/commands.ts'
 import type { ApiResponse } from '../shared/events.ts'
 import type { Config } from './config.ts'
+import { generatePkce, generateState } from './auth.ts'
 import type { Keychain } from './keychain.ts'
 
 const HEALTH = '/health/ready'
@@ -57,6 +58,19 @@ const parsePair = (body: unknown): TokenPair => {
   throw failed('bad token response')
 }
 
+/** Where the browser returns after sign-in. 16.5 adds the loopback listener; the deep link needs nothing running. */
+export interface Redirect { uri: string; stop(): void }
+export type StartRedirect = (complete: (url: URL) => Promise<void>) => Promise<Redirect>
+const DEEP_LINK: StartRedirect = async () => ({ uri: 'klei://auth/callback', stop() {} })
+
+export interface SessionOptions {
+  /** Hands the authorize URL to the system browser; main builds that URL, never the page. */
+  open?: (url: string) => void
+  redirect?: StartRedirect
+}
+
+interface Pending { verifier: string; state: string; resolve(): void; reject(e: BridgeError): void }
+
 const isTimeout = (e: unknown) => (e as { name?: unknown } | null)?.name === 'TimeoutError'
 
 /** Token state of the signed-in User. The access token lives in memory only; the refresh token only in the keychain. */
@@ -66,20 +80,81 @@ export class Session {
   #access: string | null = null
   #gate: Promise<unknown> = Promise.resolve()
   #dirty = false
+  #pending: Pending | null = null
+  readonly #open: (url: string) => void
+  readonly #redirect: StartRedirect
   readonly #origin: string
   readonly #prefix: string
 
-  constructor(cfg: Config, keychain: Keychain) {
+  constructor(cfg: Config, keychain: Keychain, { open = () => {}, redirect = DEEP_LINK }: SessionOptions = {}) {
     this.cfg = cfg
     this.keychain = keychain
+    this.#open = open
+    this.#redirect = redirect
     const base = new URL(cfg.api)
     this.#origin = base.origin
     this.#prefix = `${base.pathname.replace(/\/+$/, '')}/api/v1/`
   }
 
+  /** Opens the system browser and waits for the callback. A second call supersedes the wait in progress, which ends as `cancelled`; `signOut` cancels it too. */
+  async signIn(): Promise<void> {
+    await guard(() => this.keychain.load())
+    const { verifier, challenge } = generatePkce()
+    const state = generateState()
+    const redirect = await this.#redirect((url) => this.complete(url))
+    let timer: NodeJS.Timeout | undefined
+    const wait = new Promise<void>((resolve, reject) => {
+      this.#cancelPending()
+      this.#pending = { verifier, state, resolve, reject }
+      timer = setTimeout(() => {
+        if (this.#pending?.state === state) this.#pending = null
+        reject(new BridgeError('timeout', 'sign-in timed out'))
+      }, this.cfg.signInTimeoutMs)
+    })
+    const url = new URL(`${this.cfg.auth}/authorize`)
+    for (const [k, v] of [['client', 'desktop'], ['challenge', challenge], ['state', state], ['redirect', redirect.uri]] as const) url.searchParams.append(k, v)
+    try {
+      this.#open(url.href)
+      await wait
+    } finally {
+      clearTimeout(timer)
+      if (this.#pending?.state === state) this.#pending = null
+      redirect.stop()
+    }
+  }
+
+  #cancelPending() {
+    this.#pending?.reject(new BridgeError('cancelled', 'sign-in cancelled'))
+    this.#pending = null
+  }
+
+  /** The callback URL carried `code` and `state`; one attempt only, whatever the outcome. */
+  async complete(url: URL): Promise<void> {
+    const p = this.#pending
+    if (p === null) throw failed('no sign-in in progress')
+    this.#pending = null
+    try {
+      await this.#finish(p, url)
+    } catch (e) {
+      p.reject(e as BridgeError)
+      throw e
+    }
+    p.resolve()
+  }
+
+  async #finish(p: Pending, url: URL): Promise<void> {
+    if (url.searchParams.get('state') !== p.state) throw failed('state mismatch')
+    const code = url.searchParams.get('code')
+    if (!code) throw failed('no code')
+    const { status, body } = await this.#post('/api/v1/auth/token', { code, verifier: p.verifier })
+    if (status !== 200) throw failed('code rejected')
+    await this.#accept(parsePair(body))
+  }
+
   /** Drops the access token first, then revokes on the server (best effort: offline works), then clears the credential. */
   // shortcut: logout is best effort, so offline leaves the server session to expire; upgrade when sessions need a hard revoke.
   async signOut(): Promise<void> {
+    this.#cancelPending()
     this.#access = null
     const rt = await this.keychain.load().catch(() => null)
     if (rt !== null) await this.#post('/api/v1/auth/logout', { refreshToken: rt }).catch(() => {})

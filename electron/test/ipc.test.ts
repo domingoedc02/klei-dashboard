@@ -85,7 +85,7 @@ test('every stub rejects failed / not implemented', async () => {
   const handlers = createHandlers({ session: {} as never, useMemory() {}, exit() {} })
   assert.deepEqual(Object.keys(handlers).sort(), [...COMMANDS].sort())
   const { bridge } = loopback(handlers)
-  assert.deepEqual(await bridge.sign_in().then(() => assert.fail(), (x) => x), { kind: 'failed', message: 'not implemented' })
+  assert.deepEqual(await bridge.check_update().then(() => assert.fail(), (x) => x), { kind: 'failed', message: 'not implemented' })
   assert.deepEqual(await bridge.upload_files('cancel', 't', () => {}).then(() => assert.fail(), (x) => x), { kind: 'failed', message: 'not implemented' })
 })
 
