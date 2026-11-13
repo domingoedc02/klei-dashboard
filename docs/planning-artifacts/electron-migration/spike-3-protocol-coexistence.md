@@ -25,3 +25,6 @@ Preview identity: app id `co.klei.bridal.electron.preview`, its own `userData`, 
 
 ## Residual risk
 Real coexistence with the installed Tauri app and a live sign-in remain to be run in 16.4 and 16.5. Windows registry and Linux `.desktop` handler registration are not verified.
+
+## Update (16.5)
+Preview sign-in uses `loopbackRedirect` in `electron/src/main/auth.ts`; `electron/test/contract.test.ts` asserts main never calls `setAsDefaultProtocolClient` or `removeAsDefaultProtocolClient` and `index.ts` never attaches the deep-link handler. `loopback.test.ts` shows the listener binds `127.0.0.1` at port 1024 or above and closes after one callback. Still open: loopback sign-in beside a running Tauri app with a live backend (20.1), and the Windows registry and Linux `.desktop` checks.

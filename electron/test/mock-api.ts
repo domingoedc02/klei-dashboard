@@ -36,5 +36,5 @@ export async function mock(handler: (r: Req, n: number) => Reply | Promise<Reply
 export const pair = (access: string, refresh: string) => ({ accessToken: access, refreshToken: refresh, expiresIn: 900 })
 
 export const cfg = (api: string, over: Partial<Config> = {}): Config => ({
-  api, auth: 'http://127.0.0.1:1', signInTimeoutMs: 5000, requestTimeoutMs: 5000, uploadTimeoutMs: 5000, retryDelayMs: 50, loopback: false, smoke: false, ...over,
+  api, auth: 'http://127.0.0.1:1', signInTimeoutMs: 5000, requestTimeoutMs: 5000, uploadTimeoutMs: 5000, retryDelayMs: 50, smoke: false, ...over,
 })

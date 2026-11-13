@@ -1,6 +1,7 @@
 import { app, Menu, shell } from 'electron'
 import { join } from 'node:path'
 import { APP_ID, KEYCHAIN_SERVICE, PRODUCT_NAME, SMOKE_EXIT_MS, USER_DATA_DIR } from './identity.ts'
+import { loopbackRedirect } from './auth.ts'
 import { createHandlers } from './commands.ts'
 import { loadConfig } from './config.ts'
 import { createInvoker } from './invoker.ts'
@@ -29,7 +30,8 @@ if (!app.requestSingleInstanceLock()) {
     const cfg = loadConfig(__dirname)
     // Memory token: smoke runs (CI has no credential store) and unpackaged builds (every rebuild is a new identity, so the OS asks again). KLEI_KEYCHAIN=os forces the real one.
     const keychain = new SwitchKeychain(new OsKeychain(KEYCHAIN_SERVICE), cfg.smoke || (!app.isPackaged && process.env.KLEI_KEYCHAIN !== 'os'))
-    const session = new Session(cfg, keychain, { open: (url) => void shell.openExternal(url).catch((e: Error) => console.warn(`open browser failed: ${e.message}`)) })
+    // The preview never registers klei://, so sign-in always returns through the loopback listener (AD-27).
+    const session = new Session(cfg, keychain, { redirect: loopbackRedirect, open: (url) => void shell.openExternal(url).catch((e: Error) => console.warn(`open browser failed: ${e.message}`)) })
     const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code) })
     const invoker = createInvoker({ handlers, trustedSender: isMainContents, log: (reason) => console.warn(`ipc rejected: ${reason}`) })
     registerIpc(invoker)

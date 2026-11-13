@@ -3,7 +3,7 @@ import { BridgeError } from '../shared/errors.ts'
 import type { ApiCall } from '../shared/commands.ts'
 import type { ApiResponse } from '../shared/events.ts'
 import type { Config } from './config.ts'
-import { generatePkce, generateState } from './auth.ts'
+import { generatePkce, generateState, type StartRedirect } from './auth.ts'
 import type { Keychain } from './keychain.ts'
 
 const HEALTH = '/health/ready'
@@ -58,9 +58,6 @@ const parsePair = (body: unknown): TokenPair => {
   throw failed('bad token response')
 }
 
-/** Where the browser returns after sign-in. 16.5 adds the loopback listener; the deep link needs nothing running. */
-export interface Redirect { uri: string; stop(): void }
-export type StartRedirect = (complete: (url: URL) => Promise<void>) => Promise<Redirect>
 const DEEP_LINK: StartRedirect = async () => ({ uri: 'klei://auth/callback', stop() {} })
 
 export interface SessionOptions {

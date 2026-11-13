@@ -10,7 +10,6 @@ export interface Config {
   uploadTimeoutMs: number
   /** Wait before an upload is re-sent after a network error or a busy server. */
   retryDelayMs: number
-  loopback: boolean
   smoke: boolean
 }
 
@@ -26,7 +25,6 @@ export function loadConfig(dir: string, env: NodeJS.ProcessEnv = process.env): C
     requestTimeoutMs: 10_000,
     uploadTimeoutMs: 120_000,
     retryDelayMs: 3_000,
-    loopback: env.KLEI_LOOPBACK === '1',
     smoke: env.KLEI_SMOKE === '1',
   }
 }

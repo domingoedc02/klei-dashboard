@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { createHandlers } from '../src/main/commands.ts'
-import { challengeFor } from '../src/main/auth.ts'
+import { challengeFor, type StartRedirect } from '../src/main/auth.ts'
 import { MemoryKeychain } from '../src/main/keychain.ts'
-import { Session, type StartRedirect } from '../src/main/session.ts'
+import { Session } from '../src/main/session.ts'
 import { cfg, mock, pair } from './mock-api.ts'
 
 /** A fake browser and redirect: `opened` resolves with the authorize URL; `callback(url)` is what the redirect hands to the session. */

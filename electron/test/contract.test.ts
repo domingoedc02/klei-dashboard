@@ -33,7 +33,7 @@ test('the nine commands and no others: Tauri, shared list, preload allow list an
   const rust = [...(/pub const NAMES: \[&str; 9\] = \[([^\]]+)\]/.exec(read('../../desktop/src-tauri/src/commands.rs'))?.[1] ?? '').matchAll(/"(\w+)"/g)].map((m) => m[1]!).sort()
   assert.deepEqual(rust, WANT)
   assert.deepEqual([...COMMANDS].sort(), WANT)
-  const cfg = { api: 'http://127.0.0.1:1', auth: 'http://127.0.0.1:1', signInTimeoutMs: 1, requestTimeoutMs: 1, uploadTimeoutMs: 1, retryDelayMs: 1, loopback: false, smoke: false }
+  const cfg = { api: 'http://127.0.0.1:1', auth: 'http://127.0.0.1:1', signInTimeoutMs: 1, requestTimeoutMs: 1, uploadTimeoutMs: 1, retryDelayMs: 1, smoke: false }
   assert.deepEqual(Object.keys(createHandlers({ session: new Session(cfg, new MemoryKeychain()), useMemory() {}, exit() {} })).sort(), WANT)
   const noIpc = { invoke: async () => ({ ok: null }), on() {}, removeListener() {} }
   assert.deepEqual(Object.keys(createBridge(noIpc)).sort(), WANT)
@@ -65,7 +65,8 @@ test('identity: window minimum 1100x700, no global tauri equivalent, Tauri deep 
   assert.equal(MAIN_WINDOW.minWidth, 1100)
   assert.equal(MAIN_WINDOW.minHeight, 700)
   assert.equal(tauri.app.withGlobalTauri, false)
-  assert.ok(!mainFiles.some((f) => /setAsDefaultProtocolClient/.test(abs(f))), '16.5 owns the deep link; not before')
+  assert.ok(!mainFiles.some((f) => /setAsDefaultProtocolClient|removeAsDefaultProtocolClient/.test(abs(f))), 'the preview never registers klei://; registration is the owner cutover decision (OQ-M4)')
+  assert.ok(!mainFiles.some((f) => f.endsWith('index.ts') && /attachDeepLink/.test(abs(f))), 'the deep link handler stays disabled in the preview')
 })
 
 test('no remote URL in main, shared or preload sources (the config and 18.3 constants live in their own modules)', () => {
@@ -73,7 +74,8 @@ test('no remote URL in main, shared or preload sources (the config and 18.3 cons
   const allowed = new Set<string>()
   for (const f of files) {
     const hits = abs(f).match(/(?:https?|wss?):\/\/[^\s'"`)]+/g) ?? []
-    for (const h of hits) assert.ok(allowed.has(h), `${rel(f)}: ${h}`)
+    // The loopback sign-in redirect never leaves this machine.
+    for (const h of hits) assert.ok(allowed.has(h) || h.startsWith('http://127.0.0.1'), `${rel(f)}: ${h}`)
   }
 })
 
