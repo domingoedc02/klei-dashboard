@@ -8,16 +8,20 @@
   "scripts": {
     "build": "node scripts/build-main.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --test-concurrency=1 \"test/*.test.*\" \"test/parity/*.test.*\""
+    "test": "node --test --test-concurrency=1 \"test/*.test.*\" \"test/parity/*.test.*\"",
+    "build:renderer": "node test/parity/build-renderer.mjs electron",
+    "pack": "npm run build && npm run build:renderer && node scripts/pack.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
     "electron": "45.3.2",
+    "electron-builder": "26.18.0",
     "esbuild": "0.28.2",
     "typescript": "5.9.3"
   },
   "dependencies": {
     "@napi-rs/keyring": "2.1.2",
     "@zip.js/zip.js": "2.25.0"
-  }
+  },
+  "author": "Klei"
 }

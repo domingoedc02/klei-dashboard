@@ -1,0 +1,45 @@
+# Preview packaging (18.1). Unsigned on purpose: internal app, no certificates (OQ-M1). Nothing here registers a URL scheme (AD-27).
+appId: co.klei.bridal.electron.preview
+productName: Klei Bridal Preview
+copyright: Klei
+directories:
+  output: release
+  buildResources: build/icons
+files:
+  - package.json
+  - build/package.json
+  - build/main/**
+  - build/shared/**
+  - build/preload/**
+  - build/renderer/**
+asar: true
+npmRebuild: false
+mac:
+  target:
+    - { target: dmg, arch: [arm64, x64] }
+  icon: icon.icns
+  category: public.app-category.business
+  # Ad hoc: Apple silicon will not start a binary whose signature the repackaging broke. No Developer ID, no notarization.
+  identity: "-"
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  artifactName: klei-bridal-preview-${version}-mac-${arch}.${ext}
+win:
+  target:
+    - { target: nsis, arch: [x64] }
+  icon: icon.ico
+  signAndEditExecutable: false
+  artifactName: klei-bridal-preview-${version}-win-x64.${ext}
+nsis:
+  oneClick: true
+  perMachine: false
+  deleteAppDataOnUninstall: false
+linux:
+  target:
+    - { target: AppImage, arch: [x64] }
+    - { target: deb, arch: [x64] }
+  icon: icon.png
+  category: Office
+  maintainer: Klei
+  synopsis: Klei Bridal Preview
+  artifactName: klei-bridal-preview-${version}-linux-x64.${ext}
