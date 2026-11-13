@@ -1,0 +1,5 @@
+/node_modules/
+/parity-out/
+/build/
+/.cache/
+/.tmp/
