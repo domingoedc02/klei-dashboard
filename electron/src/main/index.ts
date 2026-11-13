@@ -25,8 +25,11 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on('second-instance', focusMainWindow)
   app.on('window-all-closed', () => app.quit())
-  const pickPhotos = async () => {
-    const r = await dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'], filters: [{ name: 'Photos', extensions: EXTENSIONS }] })
+  const pick = async (kind: 'photo' | 'avatar' | 'attachment') => {
+    const r = await dialog.showOpenDialog({
+      properties: kind === 'avatar' ? ['openFile'] : ['openFile', 'multiSelections'],
+      ...(kind === 'attachment' ? {} : { filters: [{ name: 'Photos', extensions: EXTENSIONS }] }),
+    })
     return r.canceled ? [] : r.filePaths
   }
   void app.whenReady().then(() => {
@@ -38,7 +41,7 @@ if (!app.requestSingleInstanceLock()) {
     // The preview never registers klei://, so sign-in always returns through the loopback listener (AD-27).
     const session = new Session(cfg, keychain, { redirect: loopbackRedirect, open: (url) => void shell.openExternal(url).catch((e: Error) => console.warn(`open browser failed: ${e.message}`)) })
     const uploader = new Uploader()
-    const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code), pickPhotos, uploader })
+    const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code), pick, uploader })
     const invoker = createInvoker({ handlers, trustedSender: isMainContents, log: (reason) => console.warn(`ipc rejected: ${reason}`) })
     registerIpc(invoker, uploader)
     releaseOnGone(createMainWindow(setupSession()).webContents, invoker)

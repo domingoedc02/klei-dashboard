@@ -7,7 +7,7 @@ import { test } from 'node:test'
 import { createHandlers } from '../src/main/commands.ts'
 import { MemoryKeychain } from '../src/main/keychain.ts'
 import { Session } from '../src/main/session.ts'
-import { keyFor, run, triage, Uploader, type Picked } from '../src/main/uploads.ts'
+import { attachFiles, keyFor, run, setAvatar, triage, Uploader, type Picked } from '../src/main/uploads.ts'
 import { cfg, mock, pair, type Reply, type Req } from './mock-api.ts'
 
 const BATCH = '0b1c2d3e-0000-4000-8000-000000000001'
@@ -251,7 +251,7 @@ test('a second run is refused while one runs; the slot frees on release; an oute
   assert.doesNotThrow(() => u.begin().release())
 })
 
-test('upload_files handler: photo uses the picker, a cancelled dialog is an empty summary, cancel/watch/unwatch are empty, a second photo run is refused', async () => {
+test('upload_files handler: photo uses the picker, a cancelled dialog is an empty summary, cancel/unwatch/dropped are empty, a second photo run is refused', async () => {
   const m = await mock(async (r) => {
     const s = shared(r)
     if (s) return s
@@ -260,11 +260,11 @@ test('upload_files handler: photo uses the picker, a cancelled dialog is an empt
   })
   const f = folder([['a.jpg', 5]])
   let picked: string[] = f.paths('a.jpg')
-  const h = createHandlers({ session: await signedIn(m.api), useMemory() {}, exit() {}, pickPhotos: async () => picked })
+  const h = createHandlers({ session: await signedIn(m.api), useMemory() {}, exit() {}, pick: async () => picked })
   const emitted: unknown[] = []
   const ctx = { signal: live(), emit: (x: unknown) => void emitted.push(x) }
   const empty = { stored: [], rejected: [], cancelled: false }
-  for (const kind of ['cancel', 'watch', 'unwatch', 'dropped'] as const) assert.deepEqual(await h.upload_files({ kind, targetId: BATCH }, ctx), empty)
+  for (const kind of ['cancel', 'unwatch', 'dropped'] as const) assert.deepEqual(await h.upload_files({ kind, targetId: BATCH }, ctx), empty)
   const first = h.upload_files({ kind: 'photo', targetId: BATCH }, ctx)
   await sleep(50)
   await assert.rejects(h.upload_files({ kind: 'photo', targetId: BATCH }, ctx), { kind: 'bad_request', message: 'an upload is already running' })
@@ -273,17 +273,129 @@ test('upload_files handler: photo uses the picker, a cancelled dialog is an empt
   assert.ok(emitted.some((e) => (e as { type?: string }).type === 'progress'))
   picked = []
   assert.deepEqual(await h.upload_files({ kind: 'photo', targetId: BATCH }, ctx), empty)
-  await assert.rejects(h.upload_files({ kind: 'avatar', targetId: '' }, ctx), { kind: 'failed', message: 'not implemented' })
   m.close(); f.done()
 })
 
 test('the page aborting (reload, window closed) cancels the run', async () => {
   const m = await mock(async (r) => shared(r) ?? (await sleep(1000), stored()))
   const f = folder([['a.jpg', 5]])
-  const h = createHandlers({ session: await signedIn(m.api, { uploadTimeoutMs: 5000 }), useMemory() {}, exit() {}, pickPhotos: async () => f.paths('a.jpg') })
+  const h = createHandlers({ session: await signedIn(m.api, { uploadTimeoutMs: 5000 }), useMemory() {}, exit() {}, pick: async () => f.paths('a.jpg') })
   const ac = new AbortController()
   setTimeout(() => ac.abort(), 150)
   const out = (await h.upload_files({ kind: 'photo', targetId: BATCH }, { signal: ac.signal, emit() {} })) as { cancelled: boolean }
   assert.equal(out.cancelled, true)
+  m.close(); f.done()
+})
+
+const INQ = '0b1c2d3e-0000-4000-8000-0000000000aa'
+const ATT = `/api/v1/inquiries/${INQ}/attachments`
+const MB = 1024 * 1024
+
+test('attachment: a bad inquiry id is bad_request before the dialog, any file read or request', async () => {
+  const m = await mock((r) => shared(r) ?? stored())
+  let opened = 0
+  const h = createHandlers({ session: await signedIn(m.api), useMemory() {}, exit() {}, pick: async () => (opened++, ['/x/a.pdf']) })
+  for (const bad of ['', 'short', `${INQ}z`, INQ.replace('a', 'g'), `${INQ}0`, '../'.repeat(12)]) {
+    await assert.rejects(h.upload_files({ kind: 'attachment', targetId: bad }, { signal: live(), emit() {} }), { kind: 'bad_request', message: 'bad inquiry id' }, bad)
+  }
+  assert.equal(opened, 0)
+  assert.equal(m.log.length, 0)
+  m.close()
+})
+
+test('attachment: any type, sequential, each with a fresh 32-hex key; ids land in stored; the 20 MiB boundary', async () => {
+  let open = 0
+  let peak = 0
+  const m = await mock(async (r, n) => {
+    const s = shared(r)
+    if (s) return s
+    peak = Math.max(peak, ++open)
+    await sleep(30)
+    open--
+    return stored(n)
+  })
+  const f = folder([['a.pdf', 10], ['b.docx', 10], ['at.bin', 20 * MB], ['over.bin', 20 * MB + 1]])
+  const out = await attachFiles(await signedIn(m.api), INQ, [...f.paths('a.pdf', 'b.docx', 'at.bin', 'over.bin'), '/nope/gone.txt'])
+  assert.equal(out.stored.length, 3)
+  assert.deepEqual(out.rejected.map((r) => [r.name, r.reason]).sort(), [['gone.txt', 'unreadable'], ['over.bin', 'size']])
+  assert.equal(peak, 1)
+  const sent = m.log.filter((r) => r.path === ATT)
+  assert.equal(sent.length, 3)
+  assert.ok(sent.every((r) => /^[0-9a-f]{32}$/.test(r.idem) && r.auth === 'Bearer access-1' && r.raw.includes('name="file"')))
+  assert.equal(new Set(sent.map((r) => r.idem)).size, 3)
+  assert.equal(out.cancelled, false)
+  m.close(); f.done()
+})
+
+test('attachment: 413 is size, 422 is unreadable, 403 fatal no_access, other fatal failed, a missing id is failed, no retry on a lost connection', async () => {
+  const f = folder([['a.pdf', 5]])
+  for (const [status, want] of [[413, 'size'], [422, 'unreadable']] as const) {
+    const m = await mock((r) => shared(r) ?? [status, {}])
+    const out = await attachFiles(await signedIn(m.api), INQ, f.paths('a.pdf'))
+    assert.deepEqual(out.rejected, [{ name: 'a.pdf', reason: want }])
+    m.close()
+  }
+  for (const [reply, want] of [[[403, {}], { kind: 'no_access' }], [[500, {}], { kind: 'failed', message: 'attachment upload failed' }], [[201, {}], { kind: 'failed', message: 'bad attachment answer' }]] as const) {
+    const m = await mock((r) => shared(r) ?? (reply as unknown as Reply))
+    await assert.rejects(attachFiles(await signedIn(m.api), INQ, f.paths('a.pdf')), want)
+    m.close()
+  }
+  const m = await mock((r) => shared(r) ?? 'close')
+  await assert.rejects(attachFiles(await signedIn(m.api), INQ, f.paths('a.pdf')), { kind: 'offline' })
+  assert.equal(m.count(ATT), 1)
+  m.close(); f.done()
+})
+
+test('avatar: PUT with no idempotency key, 2 MiB boundary, status mapping', async () => {
+  const f = folder([['me.png', 10], ['at.png', 2 * MB], ['over.png', 2 * MB + 1], ['me.gif', 5]])
+  let m = await mock((r) => shared(r) ?? [200, {}])
+  const s = await signedIn(m.api)
+  assert.deepEqual(await setAvatar(s, f.paths('me.png')[0]!), { stored: ['avatar'], rejected: [], cancelled: false })
+  const put = m.log.find((r) => r.path === '/api/v1/me/avatar')!
+  assert.deepEqual([put.method, put.idem, put.auth], ['PUT', '', 'Bearer access-1'])
+  assert.ok(put.raw.includes('filename="me.png"') && put.raw.includes('name="file"'))
+  assert.deepEqual((await setAvatar(s, f.paths('at.png')[0]!)).stored, ['avatar'])
+  assert.deepEqual((await setAvatar(s, f.paths('over.png')[0]!)).rejected, [{ name: 'over.png', reason: 'size' }])
+  assert.deepEqual((await setAvatar(s, f.paths('me.gif')[0]!)).rejected, [{ name: 'me.gif', reason: 'type' }])
+  assert.deepEqual((await setAvatar(s, '/nope/x.png')).rejected, [{ name: 'x.png', reason: 'unreadable' }])
+  assert.equal(m.count('/api/v1/me/avatar'), 2)
+  m.close()
+  for (const [status, want] of [[413, 'size'], [415, 'type']] as const) {
+    m = await mock((r) => shared(r) ?? [status, {}])
+    assert.deepEqual((await setAvatar(await signedIn(m.api), f.paths('me.png')[0]!)).rejected, [{ name: 'me.png', reason: want }])
+    m.close()
+  }
+  m = await mock((r) => shared(r) ?? [403, {}])
+  await assert.rejects(setAvatar(await signedIn(m.api), f.paths('me.png')[0]!), { kind: 'no_access' })
+  m.close()
+  m = await mock((r) => shared(r) ?? [500, {}])
+  await assert.rejects(setAvatar(await signedIn(m.api), f.paths('me.png')[0]!), { kind: 'failed', message: 'avatar upload failed' })
+  m.close(); f.done()
+})
+
+test('attachment and avatar handlers: a dismissed dialog is cancelled:true with no request; unknown kind is bad_request', async () => {
+  const m = await mock((r) => shared(r) ?? stored())
+  const h = createHandlers({ session: await signedIn(m.api), useMemory() {}, exit() {}, pick: async () => [] })
+  const ctx = { signal: live(), emit() {} }
+  const dismissed = { stored: [], rejected: [], cancelled: true }
+  assert.deepEqual(await h.upload_files({ kind: 'avatar', targetId: '' }, ctx), dismissed)
+  assert.deepEqual(await h.upload_files({ kind: 'attachment', targetId: INQ }, ctx), dismissed)
+  await assert.rejects(h.upload_files({ kind: 'nope' as never, targetId: '' }, ctx), { kind: 'bad_request', message: 'unknown upload kind' })
+  assert.equal(m.log.length, 0)
+  m.close()
+})
+
+test('attachment and avatar handlers pick, send and return a summary only (no paths, no bytes)', async () => {
+  const m = await mock((r) => shared(r) ?? stored(7))
+  const f = folder([['a.pdf', 5], ['me.jpg', 5]])
+  const asked: string[] = []
+  const h = createHandlers({ session: await signedIn(m.api), useMemory() {}, exit() {}, pick: async (k) => (asked.push(k), k === 'avatar' ? f.paths('me.jpg') : f.paths('a.pdf')) })
+  const ctx = { signal: live(), emit() {} }
+  const a = await h.upload_files({ kind: 'attachment', targetId: INQ }, ctx)
+  const v = await h.upload_files({ kind: 'avatar', targetId: '' }, ctx)
+  assert.deepEqual(a, { stored: [id(7)], rejected: [], cancelled: false })
+  assert.deepEqual(v, { stored: ['avatar'], rejected: [], cancelled: false })
+  assert.deepEqual(asked, ['attachment', 'avatar'])
+  assert.ok(!JSON.stringify([a, v]).includes(tmpdir()))
   m.close(); f.done()
 })

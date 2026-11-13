@@ -3,7 +3,7 @@ import { BridgeError } from '../shared/errors.ts'
 import type { UploadSummary } from '../shared/events.ts'
 import type { Handlers } from './invoker.ts'
 import type { Session } from './session.ts'
-import { run, Uploader } from './uploads.ts'
+import { attachFiles, checkInquiry, run, setAvatar, Uploader } from './uploads.ts'
 
 const notImplemented = () => Promise.reject(new BridgeError('failed', 'not implemented'))
 
@@ -12,16 +12,17 @@ export interface Deps {
   /** Switches the credential store to process memory ("Continue without saving"). */
   useMemory(): void
   exit(code: number): void
-  /** Native photo picker (filter "Photos", multi-select): the chosen paths, empty when the dialog is cancelled. */
-  pickPhotos?(): Promise<string[]>
+  /** Native file dialog: `photo` (filter "Photos", multi-select), `avatar` (same filter, one file), `attachment` (any type, multi-select). The chosen paths; empty when dismissed. */
+  pick?(kind: 'photo' | 'avatar' | 'attachment'): Promise<string[]>
   /** Shared with the private drop channel (index.ts); a fresh one when omitted. */
   uploader?: Uploader
 }
 
 const NONE = (): UploadSummary => ({ stored: [], rejected: [], cancelled: false })
+const DISMISSED = (): UploadSummary => ({ ...NONE(), cancelled: true })
 
 // One entry per command; Epics 16 and 17 replace the stubs. Keyed by COMMANDS so a tenth name cannot be added here alone.
-export const createHandlers = ({ session, useMemory, exit, pickPhotos, uploader = new Uploader() }: Deps): Handlers => {
+export const createHandlers = ({ session, useMemory, exit, pick, uploader = new Uploader() }: Deps): Handlers => {
   return {
   ...(Object.fromEntries(COMMANDS.map((c) => [c, notImplemented])) as unknown as Handlers),
   async upload_files({ kind, targetId }, ctx) {
@@ -38,10 +39,19 @@ export const createHandlers = ({ session, useMemory, exit, pickPhotos, uploader 
       case 'photo':
       case 'dropped':
         break
-      default: // avatar, attachment: 17.3
-        return notImplemented()
+      case 'avatar': {
+        const [path] = (await pick?.('avatar')) ?? []
+        return path === undefined ? DISMISSED() : setAvatar(session, path, ctx.signal)
+      }
+      case 'attachment': {
+        checkInquiry(targetId)
+        const picked = (await pick?.('attachment')) ?? []
+        return picked.length === 0 ? DISMISSED() : attachFiles(session, targetId, picked, ctx.signal)
+      }
+      default:
+        throw new BridgeError('bad_request', 'unknown upload kind')
     }
-    const paths = kind === 'photo' ? ((await pickPhotos?.()) ?? []) : uploader.takeDrop()
+    const paths = kind === 'photo' ? ((await pick?.('photo')) ?? []) : uploader.takeDrop()
     if (paths.length === 0) return NONE()
     const slot = uploader.begin(ctx.signal)
     try {

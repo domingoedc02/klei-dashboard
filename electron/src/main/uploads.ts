@@ -1,5 +1,5 @@
 // Port of desktop/src-tauri/src/uploads.rs (photo run). Reads files, never writes: no copy, cache or temp file (NFR-1).
-import { createHash } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import { readFile, stat } from 'node:fs/promises'
 import { basename, extname } from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
@@ -167,6 +167,10 @@ const parse = <T>(b: Buffer): T | null => {
   try { return JSON.parse(b.toString('utf8')) as T | null } catch { return null }
 }
 
+export const ATTACHMENT_MAX_BYTES = 20 * 1024 * 1024
+export const AVATAR_MAX_BYTES = 2 * 1024 * 1024
+
+const fresh = () => randomBytes(16).toString('hex')
 const noAccess = () => new BridgeError('no_access', 'no access')
 
 /** Uploads `paths` into `batch`. The batch must be the caller's own; the room left comes from the server. Stored files stay stored whatever happens later. */
@@ -247,4 +251,76 @@ export async function run(session: Session, batch: string, paths: string[], sign
   await Promise.all(Array.from({ length: IN_FLIGHT }, worker))
   if (fatal) throw fatal
   return { stored, rejected: [...refused, ...rejected], cancelled: signal.aborted }
+}
+
+/** An Inquiry id is 36 hex digits and dashes; checked before a dialog opens, a file is read or a request is made. */
+export function checkInquiry(id: string): void {
+  if (id.length !== 36 || !/^[0-9a-fA-F-]+$/.test(id)) throw new BridgeError('bad_request', 'bad inquiry id')
+}
+
+/**
+ * Sends the picked files to the Reply of one Inquiry, one at a time, any type. `stored` holds the Attachment ids.
+ * shortcut: no resend after a lost connection (the User attaches again), no progress; add both if files grow past a few MB.
+ */
+export async function attachFiles(session: Session, inquiry: string, paths: string[], signal?: AbortSignal): Promise<UploadSummary> {
+  checkInquiry(inquiry)
+  const { ok, bad } = await statAll(paths)
+  const stored: string[] = []
+  const refused: Rejected[] = [...bad]
+  for (const p of ok) {
+    const name = basename(p.path)
+    if (p.len > ATTACHMENT_MAX_BYTES) {
+      refused.push({ name, reason: 'size' })
+      continue
+    }
+    const bytes = await readFile(p.path).catch(() => null)
+    if (bytes === null) {
+      refused.push({ name, reason: 'unreadable' })
+      continue
+    }
+    const raw = await session.call('POST', `/api/v1/inquiries/${inquiry}/attachments`, { file: { name, bytes }, key: fresh() }, session.cfg.uploadTimeoutMs, signal)
+    switch (raw.status) {
+      case 200:
+      case 201: {
+        const id = parse<{ id?: unknown }>(raw.bytes)?.id
+        if (typeof id !== 'string') throw new BridgeError('failed', 'bad attachment answer')
+        stored.push(id)
+        break
+      }
+      case 413: refused.push({ name, reason: 'size' }); break
+      case 422: refused.push({ name, reason: 'unreadable' }); break
+      case 403: throw noAccess()
+      default: throw new BridgeError('failed', 'attachment upload failed')
+    }
+  }
+  return { stored, rejected: refused, cancelled: false }
+}
+
+/** Sends one picked file as the signed-in User's avatar. `stored` holds "avatar" on success; the server confirms the real type. */
+export async function setAvatar(session: Session, path: string, signal?: AbortSignal): Promise<UploadSummary> {
+  const { ok, bad } = await statAll([path])
+  const { send, refused: more } = triage(ok, 1)
+  const refused: Rejected[] = [...bad, ...more]
+  const stored: string[] = []
+  const p = send[0]
+  if (p) {
+    const name = basename(p.path)
+    const bytes = p.len > AVATAR_MAX_BYTES ? null : await readFile(p.path).catch(() => null)
+    let reason: RejectReason | null = null
+    if (p.len > AVATAR_MAX_BYTES) reason = 'size'
+    else if (bytes === null) reason = 'unreadable'
+    else {
+      const raw = await session.call('PUT', '/api/v1/me/avatar', { file: { name, bytes }, key: '' }, session.cfg.uploadTimeoutMs, signal)
+      switch (raw.status) {
+        case 200: case 201: break
+        case 413: reason = 'size'; break
+        case 415: reason = 'type'; break
+        case 403: throw noAccess()
+        default: throw new BridgeError('failed', 'avatar upload failed')
+      }
+    }
+    if (reason) refused.push({ name, reason })
+    else stored.push('avatar')
+  }
+  return { stored, rejected: refused, cancelled: false }
 }
