@@ -48,7 +48,7 @@ if (!app.requestSingleInstanceLock()) {
     const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code), pick, save, uploader })
     const invoker = createInvoker({ handlers, trustedSender: isMainContents, log: (reason) => console.warn(`ipc rejected: ${reason}`) })
     registerIpc(invoker, uploader)
-    releaseOnGone(createMainWindow(setupSession()).webContents, invoker)
+    releaseOnGone(createMainWindow(setupSession(session)).webContents, invoker)
     if (process.env.KLEI_SMOKE === '1') setTimeout(() => app.exit(1), SMOKE_EXIT_MS).unref()
   })
 }

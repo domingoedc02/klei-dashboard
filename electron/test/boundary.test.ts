@@ -6,7 +6,7 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { resolveAppFile, serveAppFile } from '../src/main/app-files.ts'
 import { APP_URL, isAppUrl, PERMISSIONS_ALLOWED, webPreferences } from '../src/main/boundary.ts'
-import { CSP } from '../src/main/csp.ts'
+import { CSP, cspFor } from '../src/main/csp.ts'
 
 const path = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 const tauri = JSON.parse(readFileSync(path('../../desktop/src-tauri/tauri.conf.json'), 'utf8'))
@@ -51,15 +51,15 @@ test('app file serving is confined to the renderer root', async () => {
   const res = await get('app://klei/assets/a.js')
   assert.equal(res.status, 200)
   assert.equal(res.headers.get('content-type'), 'text/javascript; charset=utf-8')
-  assert.equal(res.headers.get('content-security-policy'), CSP)
+  assert.equal(res.headers.get('content-security-policy'), cspFor())
   assert.equal(res.headers.get('x-content-type-options'), 'nosniff')
   const index = await get('app://klei/')
   assert.equal(index.headers.get('content-type'), 'text/html; charset=utf-8')
-  assert.equal(index.headers.get('content-security-policy'), CSP)
+  assert.equal(index.headers.get('content-security-policy'), cspFor())
   for (const url of ['app://klei/assets/a.map', 'app://klei/../secret.txt', 'app://other/index.html']) {
     const r = await get(url)
     assert.equal(r.status, 404, url)
-    assert.equal(r.headers.get('content-security-policy'), CSP)
+    assert.equal(r.headers.get('content-security-policy'), cspFor())
   }
   assert.equal((await get('app://klei/', 'POST')).status, 405)
 })

@@ -8,7 +8,7 @@ import { createBridge } from '../src/preload/bridge.ts'
 import { createHandlers } from '../src/main/commands.ts'
 import { Session } from '../src/main/session.ts'
 import { MemoryKeychain } from '../src/main/keychain.ts'
-import { CSP } from '../src/main/csp.ts'
+import { CSP, cspFor } from '../src/main/csp.ts'
 import { MAIN_WINDOW } from '../src/main/identity.ts'
 import { CHANNEL_COMMANDS, COMMANDS } from '../src/shared/commands.ts'
 
@@ -60,6 +60,12 @@ test('CSP equals the Tauri CSP; connect-src stays none; no unsafe or remote sour
   assert.equal(CSP, tauri.app.security.csp)
   assert.match(CSP, /connect-src 'none'/)
   assert.ok(!/unsafe|https?:|\*/.test(CSP))
+  assert.equal(cspFor('darwin'), CSP)
+  assert.equal(cspFor('linux'), CSP)
+  const win = cspFor('win32')
+  assert.equal(win.replace(' http://klei-img.localhost', ''), CSP)
+  assert.match(win, /img-src 'self' klei-img: data: http:\/\/klei-img\.localhost;/)
+  assert.match(win, /connect-src 'none'/)
 })
 
 test('identity: window minimum 1100x700, no global tauri equivalent, Tauri deep link scheme stays unclaimed by the preview', () => {
@@ -72,7 +78,7 @@ test('identity: window minimum 1100x700, no global tauri equivalent, Tauri deep 
 
 test('no remote URL in main, shared or preload sources (the config and 18.3 constants live in their own modules)', () => {
   const files = [...mainFiles, ...walk(path('../src/shared')), ...walk(path('../src/preload'))]
-  const allowed = new Set<string>()
+  const allowed = new Set<string>(['http://klei-img.localhost'])
   for (const f of files) {
     const hits = abs(f).match(/(?:https?|wss?):\/\/[^\s'"`)]+/g) ?? []
     // The loopback sign-in redirect never leaves this machine.
