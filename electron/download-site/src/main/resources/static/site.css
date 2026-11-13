@@ -1,0 +1,29 @@
+/* Colours copied by hand from backend/app/src/main/resources/static/tokens.css. Not linked. */
+:root {
+  --frame: #f6f5f4;
+  --sheet: #ffffff;
+  --edge: #e7e5e2;
+  --rule: #efedeb;
+  --ink: #141312;
+  --muted: #615d59;
+  --accent-ink: #0063bf;
+  --accent-tint: #e6f1fc;
+  --focus: #0063bf;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--frame); color: var(--ink); font: 16px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 64rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
+h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+h2 { font-size: 1.125rem; margin: 0 0 .25rem; }
+section { background: var(--sheet); border: 1px solid var(--edge); border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; }
+.note, p { color: var(--muted); margin: .25rem 0 .75rem; }
+.tag { display: inline-block; margin-left: .5rem; padding: 0 .5rem; border-radius: 999px; background: var(--accent-tint); color: var(--accent-ink); font-size: .75rem; font-weight: 600; vertical-align: middle; }
+table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+th, td { text-align: left; padding: .5rem .5rem; border-top: 1px solid var(--rule); vertical-align: top; }
+thead th { color: var(--muted); font-weight: 600; border-top: 0; }
+code { font: .75rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+a { color: var(--accent-ink); }
+a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+li { margin: .25rem 0; }
+@media (max-width: 40rem) { table, thead, tbody, tr, th, td { display: block; } thead { display: none; } tr { border-top: 1px solid var(--edge); padding: .5rem 0; } th, td { border: 0; padding: .125rem .25rem; } }

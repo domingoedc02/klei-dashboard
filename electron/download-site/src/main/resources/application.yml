@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: klei-download-site
+  main:
+    banner-mode: "off"
+  web:
+    resources:
+      add-mappings: false
+
+server:
+  port: ${KLEI_DOWNLOAD_PORT:8090}
+  error:
+    whitelabel:
+      enabled: false
+    include-message: never
+    include-stacktrace: never
+    include-exception: false
+
+logging:
+  level:
+    # These log the request path, which holds the secret token.
+    org.springframework.web.servlet.PageNotFound: "OFF"
+    org.apache.coyote: "OFF"
+    org.apache.catalina.connector: "OFF"
+
+klei:
+  download:
+    path-token: ${KLEI_DOWNLOAD_PATH_TOKEN:}
+    path-token-file: ${KLEI_DOWNLOAD_PATH_TOKEN_FILE:}
+    data-dir: ${KLEI_DOWNLOAD_DATA_DIR:/data}
