@@ -1,7 +1,7 @@
 export const APP_URL = 'app://klei/'
 
-// Empty on purpose. 17.6 may add one entry, only with a packaged-app test showing the original needs it.
-export const PERMISSIONS_ALLOWED: readonly string[] = []
+// Copy buttons (Assistant, Viewer, TwoFactor) call navigator.clipboard.writeText; Electron asks for this permission and refuses without it (webview-behavior.test.ts). Reading the clipboard, notifications, media and the rest stay denied.
+export const PERMISSIONS_ALLOWED: readonly string[] = ['clipboard-sanitized-write']
 
 export const webPreferences = (packaged: boolean) => ({
   contextIsolation: true,

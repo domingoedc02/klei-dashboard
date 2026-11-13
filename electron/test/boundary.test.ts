@@ -23,7 +23,7 @@ test('webPreferences equal the hardened set exactly', () => {
 
 test('CSP equals the Tauri release CSP', () => assert.equal(CSP, tauri.app.security.csp))
 
-test('permission allow list is empty', () => assert.deepEqual(PERMISSIONS_ALLOWED, []))
+test('permission allow list is the one clipboard write the Copy buttons need', () => assert.deepEqual(PERMISSIONS_ALLOWED, ['clipboard-sanitized-write']))
 
 test('only app://klei/ is an app URL', () => {
   assert.ok(isAppUrl(APP_URL) && isAppUrl('app://klei/#/dashboard') && isAppUrl('app://klei/assets/x.js'))

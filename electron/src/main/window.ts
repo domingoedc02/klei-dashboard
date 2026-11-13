@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, type Session } from 'electron'
+import { app, BrowserWindow, dialog, session, type Session } from 'electron'
 import { join } from 'node:path'
 import { APP_URL, isAppUrl, PERMISSIONS_ALLOWED, webPreferences } from './boundary.ts'
 import { MAIN_WINDOW } from './identity.ts'
@@ -32,6 +32,13 @@ export function hardenWebContents(): void {
     wc.on('will-redirect', stay)
     wc.on('will-frame-navigate', stay)
     wc.on('will-attach-webview', (e) => e.preventDefault())
+    // A page with a `beforeunload` handler (Review with unsaved edits) is never closed silently: Electron shows no prompt of its own, so ask here. Same words as the in-app leave dialog.
+    wc.on('will-prevent-unload', (e) => {
+      const win = BrowserWindow.fromWebContents(wc)
+      const opts = { type: 'warning' as const, title: 'Leave without saving?', message: 'Leave without saving?', detail: 'Your changes to this batch will be lost.', buttons: ['Keep reviewing', 'Leave'], defaultId: 0, cancelId: 0, noLink: true }
+      const leave = (win ? dialog.showMessageBoxSync(win, opts) : dialog.showMessageBoxSync(opts)) === 1
+      if (leave) e.preventDefault()
+    })
   })
 }
 
