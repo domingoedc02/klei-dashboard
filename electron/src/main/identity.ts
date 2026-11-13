@@ -11,5 +11,7 @@ export const MAIN_WINDOW = {
   height: 800,
   minWidth: 1100,
   minHeight: 700,
+  // Tauri sizes the web content (inner size); Electron's default sizes the frame, which cost 32 px of height on macOS.
+  useContentSize: true,
   show: false,
 } as const

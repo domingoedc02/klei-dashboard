@@ -16,6 +16,7 @@ test('window options equal the Tauri window', () => {
     { title: w.title, width: w.width, height: w.height, minWidth: w.minWidth, minHeight: w.minHeight },
   )
   assert.equal(MAIN_WINDOW.show, false)
+  assert.equal(MAIN_WINDOW.useContentSize, true, 'Tauri sizes are inner sizes')
 })
 
 test('preview identity is separate from the Tauri identity', () => {

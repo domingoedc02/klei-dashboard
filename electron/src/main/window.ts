@@ -33,13 +33,15 @@ export function hardenWebContents(): void {
 }
 
 export function createMainWindow(ses: Session): BrowserWindow {
-  const win = new BrowserWindow({ ...MAIN_WINDOW, webPreferences: { ...webPreferences(app.isPackaged), session: ses } })
+  const win = new BrowserWindow({ ...MAIN_WINDOW, webPreferences: { ...webPreferences(app.isPackaged), session: ses, preload: join(__dirname, '..', 'preload', 'index.js') } })
   win.once('ready-to-show', () => win.show())
   win.on('closed', () => { main = undefined })
   void win.loadURL(APP_URL)
   main = win
   return win
 }
+
+export const isMainContents = (id: number): boolean => main !== undefined && !main.isDestroyed() && main.webContents.id === id
 
 export function focusMainWindow(): void {
   if (!main) return
