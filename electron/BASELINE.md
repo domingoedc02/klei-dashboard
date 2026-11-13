@@ -31,3 +31,31 @@ Manual form, valid only while no `electron*.yml` is committed:
 The second command must print nothing, except `?? .github/workflows/electron*.yml`.
 
 Test (no `git` is run): `node --test electron/test/protected-paths.test.ts`
+
+## Electron runtime (15.1)
+
+Web check 2026-11-14: Electron 45.3.2 is npm latest and in the three-newest-majors support window (OQ-M1).
+
+| Item | Value |
+|---|---|
+| Electron | 45.3.2 (pinned, `electron/package-lock.json`) |
+| Node in main | 24.22.2 |
+| Chromium | 156.0.8078.100 |
+| Node ABI (`process.versions.modules`) | 150 |
+| TypeScript | 5.9.3, `@types/node` 24.19.2 (same as `desktop/`) |
+| Test runner | `node --test` with type stripping; no Vitest here |
+
+Main is compiled to CommonJS (`npm run build`, `build/main/`). Electron 45.3.2 hangs on ESM main with top-level `await app.whenReady()`; main uses `.then`.
+
+## Identity
+
+App id `co.klei.bridal.electron.preview`, product name "Klei Bridal Preview", `userData` = `<appData>/Klei Bridal Preview`, set before `ready`. The single-instance lock lives in `userData`, so an installed Tauri app (`co.klei.bridal`) starts independently. No `klei://` claim.
+
+## Build-time values
+
+`KLEI_API_URL`, `KLEI_AUTH_URL`: read by `npm run build` into `build/main/build-config.json`; main reads it (16.1), the renderer never sees it. `KLEI_RELEASE=1` with either missing fails the build. Without `KLEI_RELEASE`, defaults are `http://127.0.0.1:8080` and `http://127.0.0.1:8081`, as in Tauri debug builds.
+
+## Smoke mode
+
+`KLEI_SMOKE=1`, same contract as `desktop/src-tauri/src/lib.rs`: in-memory credential (16.3), first `api_request` answers signed out (16.1), exit code 1 after 60 s. Used by the CI smoke launch (19.2, 19.3). 15.1 implements the exit; the rest lands in 16.x.
+

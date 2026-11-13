@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-const read = (p) => readFileSync(fileURLToPath(new URL(p, import.meta.url)), 'utf8')
+const read = (p: string) => readFileSync(fileURLToPath(new URL(p, import.meta.url)), 'utf8')
 const NINE = ['api_request', 'sign_in', 'sign_out', 'session_only', 'set_dirty', 'check_update', 'install_update', 'upload_files', 'export_gowns']
 
 test('alias module: one case per command, nothing dispatches on a page-supplied name', () => {
