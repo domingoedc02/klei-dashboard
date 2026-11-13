@@ -23,6 +23,10 @@ export const createHandlers = ({ session, useMemory, exit }: Deps): Handlers => 
     await session.signOut()
     return null
   },
+  set_dirty({ dirty }) {
+    session.setDirty(dirty)
+    return Promise.resolve(null)
+  },
   session_only() {
     useMemory()
     return Promise.resolve(null)
