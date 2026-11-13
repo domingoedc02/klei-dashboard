@@ -1,0 +1,1 @@
+{"name":"spike-5-zip","private":true,"type":"module","version":"0.0.0","dependencies":{"@zip.js/zip.js":"^2.25.0","archiver":"^8.0.0","fflate":"^0.8.3","jszip":"^3.10.2","yazl":"^3.3.1"}}
