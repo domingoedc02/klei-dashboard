@@ -1,6 +1,7 @@
 import { COMMANDS } from '../shared/commands.ts'
 import { BridgeError } from '../shared/errors.ts'
-import type { UploadSummary } from '../shared/events.ts'
+import type { ExportSummary, UploadSummary } from '../shared/events.ts'
+import { build, clean, Exporter, fetchManifest } from './export.ts'
 import type { Handlers } from './invoker.ts'
 import type { Session } from './session.ts'
 import { attachFiles, checkInquiry, run, setAvatar, Uploader } from './uploads.ts'
@@ -14,15 +15,19 @@ export interface Deps {
   exit(code: number): void
   /** Native file dialog: `photo` (filter "Photos", multi-select), `avatar` (same filter, one file), `attachment` (any type, multi-select). The chosen paths; empty when dismissed. */
   pick?(kind: 'photo' | 'avatar' | 'attachment'): Promise<string[]>
+  /** The save dialog for the download; null when the User dismisses it. */
+  save?(suggested: string): Promise<string | null>
+  exporter?: Exporter
   /** Shared with the private drop channel (index.ts); a fresh one when omitted. */
   uploader?: Uploader
 }
 
 const NONE = (): UploadSummary => ({ stored: [], rejected: [], cancelled: false })
 const DISMISSED = (): UploadSummary => ({ ...NONE(), cancelled: true })
+const NOTHING = (cancelled: boolean): ExportSummary => ({ gowns: 0, photos: 0, cancelled })
 
 // One entry per command; Epics 16 and 17 replace the stubs. Keyed by COMMANDS so a tenth name cannot be added here alone.
-export const createHandlers = ({ session, useMemory, exit, pick, uploader = new Uploader() }: Deps): Handlers => {
+export const createHandlers = ({ session, useMemory, exit, pick, save, uploader = new Uploader(), exporter = new Exporter() }: Deps): Handlers => {
   return {
   ...(Object.fromEntries(COMMANDS.map((c) => [c, notImplemented])) as unknown as Handlers),
   async upload_files({ kind, targetId }, ctx) {
@@ -56,6 +61,25 @@ export const createHandlers = ({ session, useMemory, exit, pick, uploader = new 
     const slot = uploader.begin(ctx.signal)
     try {
       return await run(session, targetId, paths, slot.signal, ctx.emit)
+    } finally {
+      slot.release()
+    }
+  },
+  async export_gowns({ kind, ids }, ctx) {
+    if (kind === 'cancel') {
+      exporter.cancel()
+      return NOTHING(false)
+    }
+    if (kind !== 'start') throw new BridgeError('bad_request', 'unknown download kind')
+    if (ids.length === 0) throw new BridgeError('bad_request', 'nothing to download')
+    const slot = exporter.begin(ctx.signal)
+    try {
+      const items = await fetchManifest(session, ids)
+      const first = items[0]
+      if (!first) throw new BridgeError('failed', 'those gowns no longer exist')
+      const dest = await save?.(items.length === 1 ? `${clean(first.name)}.zip` : 'klei-gowns.zip')
+      if (!dest) return NOTHING(true)
+      return await build(session, items, dest, slot.signal, ctx.emit)
     } finally {
       slot.release()
     }

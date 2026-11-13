@@ -17,6 +17,7 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "@napi-rs/keyring": "2.1.2"
+    "@napi-rs/keyring": "2.1.2",
+    "@zip.js/zip.js": "2.25.0"
   }
 }

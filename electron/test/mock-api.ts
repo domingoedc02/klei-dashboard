@@ -21,8 +21,9 @@ export async function mock(handler: (r: Req, n: number) => Reply | Promise<Reply
     const out = await handler(r, log.filter((x) => x.path === r.path).length)
     if (out === 'close') return void req.socket.destroy()
     const [status, body] = out
-    res.writeHead(status, { 'content-type': 'application/json' })
-    res.end(body === undefined ? '' : JSON.stringify(body))
+    const bin = Buffer.isBuffer(body)
+    res.writeHead(status, { 'content-type': bin ? 'application/octet-stream' : 'application/json' })
+    res.end(body === undefined ? '' : bin ? body : JSON.stringify(body))
   })
   await new Promise<void>((ok) => server.listen(0, '127.0.0.1', ok))
   return {

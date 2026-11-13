@@ -82,7 +82,7 @@ test('no remote URL in main, shared or preload sources (the config and 18.3 cons
 
 test('writes: only the modules the plan names may touch the file system, and none yet', () => {
   // config.ts reads the baked build-config.json; 17.1 uploads.ts (read), 17.4 export.ts (the one chosen file); app-files.ts only reads the renderer bundle.
-  const allow: Record<string, RegExp> = { 'main/app-files.ts': /^(readFile|realpath|stat)$/, 'main/config.ts': /^readFileSync$/, 'main/uploads.ts': /^(readFile|stat)$/ }
+  const allow: Record<string, RegExp> = { 'main/app-files.ts': /^(readFile|realpath|stat)$/, 'main/config.ts': /^readFileSync$/, 'main/uploads.ts': /^(readFile|stat)$/, 'main/export.ts': /^(createWriteStream|unlink)$/ }
   const WRITE = /\b(writeFile|appendFile|createWriteStream|mkdir|rm|rmdir|unlink|rename|copyFile|cp|truncate|open|symlink|link|writeSync|openSync)\b/
   for (const f of mainFiles) {
     const t = abs(f)
@@ -91,7 +91,7 @@ test('writes: only the modules the plan names may touch the file system, and non
     assert.ok(!star, `${rel(f)}: whole fs import`)
     for (const i of imports) {
       assert.ok(allow[rel(f)]?.test(i), `${rel(f)} imports ${i}`)
-      assert.ok(!WRITE.test(i), `${rel(f)} imports ${i}`)
+      assert.ok(rel(f) === 'main/export.ts' || !WRITE.test(i), `${rel(f)} imports ${i}`)
     }
     assert.ok(!/\bset_?[sS]ecret\b|localStorage|sessionStorage|indexedDB|document\.cookie/.test(t), rel(f))
   }

@@ -32,6 +32,10 @@ if (!app.requestSingleInstanceLock()) {
     })
     return r.canceled ? [] : r.filePaths
   }
+  const save = async (suggested: string) => {
+    const r = await dialog.showSaveDialog({ defaultPath: suggested, filters: [{ name: 'Zip archive', extensions: ['zip'] }] })
+    return r.canceled ? null : r.filePath
+  }
   void app.whenReady().then(() => {
     // Tauri shows no menu bar on Windows and Linux; macOS keeps the default (Edit keys, Quit).
     if (process.platform !== 'darwin') Menu.setApplicationMenu(null)
@@ -41,7 +45,7 @@ if (!app.requestSingleInstanceLock()) {
     // The preview never registers klei://, so sign-in always returns through the loopback listener (AD-27).
     const session = new Session(cfg, keychain, { redirect: loopbackRedirect, open: (url) => void shell.openExternal(url).catch((e: Error) => console.warn(`open browser failed: ${e.message}`)) })
     const uploader = new Uploader()
-    const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code), pick, uploader })
+    const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code), pick, save, uploader })
     const invoker = createInvoker({ handlers, trustedSender: isMainContents, log: (reason) => console.warn(`ipc rejected: ${reason}`) })
     registerIpc(invoker, uploader)
     releaseOnGone(createMainWindow(setupSession()).webContents, invoker)
