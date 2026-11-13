@@ -1,5 +1,7 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
+import { DROP_CHANNEL } from '../shared/commands.ts'
 import { createBridge } from './bridge.ts'
+import { attachDrop } from './drop.ts'
 
 // Wrapped so `ipcRenderer` itself never leaves this file.
 contextBridge.exposeInMainWorld(
@@ -10,3 +12,5 @@ contextBridge.exposeInMainWorld(
     removeListener: (channel, l) => void ipcRenderer.removeListener(channel, l),
   }),
 )
+
+attachDrop(window, { send: (m) => ipcRenderer.send(DROP_CHANNEL, m), pathOf: (f) => webUtils.getPathForFile(f) })

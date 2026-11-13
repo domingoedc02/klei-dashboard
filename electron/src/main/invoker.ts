@@ -78,6 +78,6 @@ export function createInvoker({ handlers, trustedSender, log }: InvokerDeps) {
     for (const c of live.get(senderId)?.values() ?? []) c.abort()
     live.delete(senderId)
   }
-  return { invoke, release, liveCalls: () => [...live.values()].reduce((n, m) => n + m.size, 0) }
+  return { invoke, release, trusted, liveCalls: () => [...live.values()].reduce((n, m) => n + m.size, 0) }
 }
 export type Invoker = ReturnType<typeof createInvoker>

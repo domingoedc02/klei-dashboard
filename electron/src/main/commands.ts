@@ -14,13 +14,14 @@ export interface Deps {
   exit(code: number): void
   /** Native photo picker (filter "Photos", multi-select): the chosen paths, empty when the dialog is cancelled. */
   pickPhotos?(): Promise<string[]>
+  /** Shared with the private drop channel (index.ts); a fresh one when omitted. */
+  uploader?: Uploader
 }
 
 const NONE = (): UploadSummary => ({ stored: [], rejected: [], cancelled: false })
 
 // One entry per command; Epics 16 and 17 replace the stubs. Keyed by COMMANDS so a tenth name cannot be added here alone.
-export const createHandlers = ({ session, useMemory, exit, pickPhotos }: Deps): Handlers => {
-  const uploader = new Uploader()
+export const createHandlers = ({ session, useMemory, exit, pickPhotos, uploader = new Uploader() }: Deps): Handlers => {
   return {
   ...(Object.fromEntries(COMMANDS.map((c) => [c, notImplemented])) as unknown as Handlers),
   async upload_files({ kind, targetId }, ctx) {
@@ -28,8 +29,11 @@ export const createHandlers = ({ session, useMemory, exit, pickPhotos }: Deps): 
       case 'cancel':
         uploader.cancel()
         return NONE()
-      case 'watch': // 17.2
+      case 'watch': // stays open until `unwatch`, a newer watch or the page going away: the events ride this call's channel
+        await uploader.watch(ctx.emit, ctx.signal)
+        return NONE()
       case 'unwatch':
+        uploader.unwatch()
         return NONE()
       case 'photo':
       case 'dropped':
@@ -37,7 +41,7 @@ export const createHandlers = ({ session, useMemory, exit, pickPhotos }: Deps): 
       default: // avatar, attachment: 17.3
         return notImplemented()
     }
-    const paths = kind === 'photo' ? ((await pickPhotos?.()) ?? []) : [] // dropped: 17.2
+    const paths = kind === 'photo' ? ((await pickPhotos?.()) ?? []) : uploader.takeDrop()
     if (paths.length === 0) return NONE()
     const slot = uploader.begin(ctx.signal)
     try {

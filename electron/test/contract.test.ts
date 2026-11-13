@@ -41,12 +41,13 @@ test('the nine commands and no others: Tauri, shared list, preload allow list an
   assert.equal(Object.keys(JSON.parse(read('../../desktop/src-tauri/capabilities/default.json')).permissions).length, 9)
 })
 
-test('exactly one ipcMain.handle (klei:invoke), no ipcMain.on, no handler name taken from the renderer', () => {
+test('one ipcMain.handle (klei:invoke) and one ipcMain.on (klei:drop, 17.2), nothing else, no handler name taken from the renderer', () => {
   const src = mainFiles.map((f) => ({ f, t: abs(f) }))
   const handles = src.flatMap(({ f, t }) => [...t.matchAll(/ipcMain\.(\w+)\(([^,)]*)/g)].map((m) => ({ f: rel(f), fn: m[1], arg: m[2]!.trim() })))
-  assert.deepEqual(handles, [{ f: 'main/ipc.ts', fn: 'handle', arg: 'INVOKE_CHANNEL' }])
+  assert.deepEqual(handles, [{ f: 'main/ipc.ts', fn: 'handle', arg: 'INVOKE_CHANNEL' }, { f: 'main/ipc.ts', fn: 'on', arg: 'DROP_CHANNEL' }])
+  assert.match(read('../src/shared/commands.ts'), /DROP_CHANNEL = 'klei:drop'/)
   assert.match(read('../src/shared/commands.ts'), /INVOKE_CHANNEL = 'klei:invoke'/)
-  for (const { f, t } of src) assert.ok(!/ipcMain\.(on|once|addListener)\b|\.handleOnce\(|ipcMain\.removeHandler/.test(t), rel(f))
+  for (const { f, t } of src) assert.ok(!/ipcMain\.(once|addListener)\b|\.handleOnce\(|ipcMain\.removeHandler/.test(t), rel(f))
 })
 
 test('preload exposes one object named klei, with no ipcRenderer in it', () => {

@@ -122,11 +122,13 @@ test('event ids are never reused within a bridge', async () => {
   assert.ok(seen.every((s) => /^[0-9a-f-]{36}$/.test(s)))
 })
 
-test('preload source imports only electron and local files, and uses ipcRenderer.invoke/on/removeListener only', () => {
-  for (const f of ['../src/preload/bridge.ts', '../src/preload/index.ts', '../src/shared/commands.ts', '../src/shared/errors.ts', '../src/shared/events.ts']) {
+test('preload source imports only electron and local files, and uses ipcRenderer.invoke/on/removeListener, plus send on the private drop channel only', () => {
+  for (const f of ['../src/preload/bridge.ts', '../src/preload/drop.ts', '../src/preload/index.ts', '../src/shared/commands.ts', '../src/shared/errors.ts', '../src/shared/events.ts']) {
     const text = readFileSync(path(f), 'utf8')
     for (const m of text.matchAll(/(?:from|import)\s+'([^']+)'/g)) assert.ok(m[1] === 'electron' || m[1]!.startsWith('./') || m[1]!.startsWith('../'), `${f}: ${m[1]}`)
-    assert.ok(!/\brequire\(|process\.|ipcRenderer\.(send|sendSync|postMessage|sendTo|sendToHost)/.test(text), f)
+    assert.ok(!/\brequire\(|process\.|ipcRenderer\.(sendSync|postMessage|sendTo|sendToHost)/.test(text), f)
+    // the one private one-way channel (17.2): nothing but DROP_CHANNEL may be sent
+    for (const m of text.matchAll(/ipcRenderer\.send\(([^,)]*)/g)) assert.equal(m[1]!.trim(), 'DROP_CHANNEL', f)
   }
   const index = readFileSync(path('../src/preload/index.ts'), 'utf8')
   assert.match(index, /exposeInMainWorld\(\s*'klei'/)

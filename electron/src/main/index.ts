@@ -9,7 +9,7 @@ import { registerIpc, releaseOnGone } from './ipc.ts'
 import { OsKeychain, SwitchKeychain } from './keychain.ts'
 import { registerAppScheme } from './protocol.ts'
 import { Session } from './session.ts'
-import { EXTENSIONS } from './uploads.ts'
+import { EXTENSIONS, Uploader } from './uploads.ts'
 import { createMainWindow, focusMainWindow, hardenWebContents, isMainContents, setupSession } from './window.ts'
 
 // Before `ready`: own profile, never the Tauri app's directory. The single-instance lock follows userData, so an installed Tauri app starts independently.
@@ -37,9 +37,10 @@ if (!app.requestSingleInstanceLock()) {
     const keychain = new SwitchKeychain(new OsKeychain(KEYCHAIN_SERVICE), cfg.smoke || (!app.isPackaged && process.env.KLEI_KEYCHAIN !== 'os'))
     // The preview never registers klei://, so sign-in always returns through the loopback listener (AD-27).
     const session = new Session(cfg, keychain, { redirect: loopbackRedirect, open: (url) => void shell.openExternal(url).catch((e: Error) => console.warn(`open browser failed: ${e.message}`)) })
-    const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code), pickPhotos })
+    const uploader = new Uploader()
+    const handlers = createHandlers({ session, useMemory: () => keychain.useMemory(), exit: (code) => app.exit(code), pickPhotos, uploader })
     const invoker = createInvoker({ handlers, trustedSender: isMainContents, log: (reason) => console.warn(`ipc rejected: ${reason}`) })
-    registerIpc(invoker)
+    registerIpc(invoker, uploader)
     releaseOnGone(createMainWindow(setupSession()).webContents, invoker)
     if (process.env.KLEI_SMOKE === '1') setTimeout(() => app.exit(1), SMOKE_EXIT_MS).unref()
   })

@@ -16,9 +16,39 @@ export interface Picked { path: string; len: number; mtimeNs: bigint }
 export interface Rejected { name: string; reason: RejectReason }
 export type Emit = (p: { type: 'progress' } & UploadProgress) => void
 
-/** Single run slot. `cancel()` aborts the run; the signal also follows the caller's (page reload, window close). */
+/** A drop is claimed within this long or forgotten. */
+export const DROP_TTL_MS = 10_000
+const MAX_DROPPED = 10_000
+const MAX_PATH = 4096
+
+interface Watcher { emit(message: unknown): void; end(): void }
+type DropMessage = { over: boolean } | { paths: string[] }
+
+const isPlain = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v) && [Object.prototype, null].includes(Object.getPrototypeOf(v))
+
+/** What the preload may tell main about a window drag: exactly `{over}` or `{paths}`. Anything else is ignored. */
+export function parseDrop(m: unknown): DropMessage | null {
+  if (!isPlain(m)) return null
+  const ks = Object.keys(m)
+  if (ks.length !== 1) return null
+  if (ks[0] === 'over') return typeof m.over === 'boolean' ? { over: m.over } : null
+  if (ks[0] === 'paths' && Array.isArray(m.paths) && m.paths.length > 0 && m.paths.length <= MAX_DROPPED && m.paths.every((p) => typeof p === 'string' && p.length > 0 && p.length <= MAX_PATH)) return { paths: m.paths as string[] }
+  return null
+}
+
+/**
+ * Run state shared by the commands: at most one run, the screen listening for drops, and the paths of the last OS drop.
+ * Dropped paths live here and never go to the page, so only files the User really dropped can be sent.
+ */
 export class Uploader {
   #active: AbortController | null = null
+  #watcher: Watcher | null = null
+  #dropped: { at: number; paths: string[] } | null = null
+  readonly #now: () => number
+
+  constructor(now: () => number = Date.now) {
+    this.#now = now
+  }
 
   begin(outer?: AbortSignal): { signal: AbortSignal; release(): void } {
     if (this.#active) throw new BridgeError('bad_request', 'an upload is already running')
@@ -38,6 +68,62 @@ export class Uploader {
   cancel(): void {
     this.#active?.abort()
   }
+
+  /** Only the Upload screen listens; a drop anywhere else is forgotten at once. Resolves when this watch ends (unwatch, a newer watch, or the page going away). */
+  watch(emit: (message: unknown) => void, signal: AbortSignal): Promise<void> {
+    this.#watcher?.end()
+    return new Promise<void>((resolve) => {
+      const w: Watcher = { emit, end: () => { signal.removeEventListener('abort', gone); resolve() } }
+      const gone = () => {
+        if (this.#watcher === w) this.unwatch()
+        else w.end()
+      }
+      this.#watcher = w
+      if (signal.aborted) gone()
+      else signal.addEventListener('abort', gone, { once: true })
+    })
+  }
+
+  unwatch(): void {
+    const w = this.#watcher
+    this.#watcher = null
+    this.#dropped = null
+    w?.end()
+  }
+
+  drag(over: boolean): void {
+    this.#watcher?.emit({ type: 'drag', over })
+  }
+
+  dropFiles(paths: string[]): void {
+    const w = this.#watcher
+    if (!w) return
+    this.#dropped = { at: this.#now(), paths }
+    w.emit({ type: 'dropped', count: paths.length })
+  }
+
+  /** The paths of the last drop, once, and only while it is younger than the TTL. */
+  takeDrop(): string[] {
+    const d = this.#dropped
+    this.#dropped = null
+    return d && this.#now() - d.at < DROP_TTL_MS ? d.paths : []
+  }
+
+  /** A private preload message. Dropped unless it has the exact shape. */
+  message(m: unknown): void {
+    const d = parseDrop(m)
+    if (!d) return
+    if ('over' in d) this.drag(d.over)
+    else {
+      this.drag(false)
+      this.dropFiles(d.paths)
+    }
+  }
+}
+
+/** The listener for the private drop channel; messages from anything but the trusted main frame are ignored. */
+export const dropListener = <E>(trusted: (e: E) => boolean, uploader: Uploader) => (e: E, m: unknown): void => {
+  if (trusted(e)) uploader.message(m)
 }
 
 /** Reads size and modified time only. Folders are skipped; a file that cannot be inspected is refused. */

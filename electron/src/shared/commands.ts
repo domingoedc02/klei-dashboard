@@ -9,6 +9,8 @@ export type Command = (typeof COMMANDS)[number]
 export const isCommand = (n: unknown): n is Command => typeof n === 'string' && (COMMANDS as readonly string[]).includes(n)
 
 export const INVOKE_CHANNEL = 'klei:invoke'
+/** One-way, preload to main only: window drag state and dropped paths. Never reachable from the page (17.2). */
+export const DROP_CHANNEL = 'klei:drop'
 export const eventChannel = (id: string) => `klei:ev:${id}`
 
 /** What main answers to `klei:invoke`. `ended`: main sent the end marker on this call's event channel, so preload may wait for it. */
