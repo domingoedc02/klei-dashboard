@@ -274,3 +274,54 @@ Each story is a file in `docs/stories/` named `<epic>.<n>-<slug>.md`. Format: fr
 ## Gate 5
 
 Status: approved by the user on 2026-11-08. This file is final; stories stay `ready` until the Dev agent starts them. The Dev to QA loop runs one story at a time, starting with Story 1.1, and pauses after each epic.
+
+## Addendum: Electron migration, Epics 14 to 20 (2026-11-13)
+
+Additive. Epics 1 to 13, their stories and Gate 5 above are unchanged and still describe the protected Tauri app (baseline commit `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`). The migration builds a separate Electron target in `electron/` and is governed by `docs/prd.md` section 13 (MFR-1 to MFR-8). Shards and stories live in `docs/prd/` and `docs/stories/`; the index and authority table are `docs/prd/index.md`. Nothing here is built, run or tested yet.
+
+### Epic 14: Baseline, parity harness and feasibility
+Stories: 14.1 Baseline freeze and protected-path gate; 14.2 Electron-owned parity harness; 14.3 Feasibility spikes; 14.4 Read-only renderer build and shim feasibility. Shard: `docs/prd/epic-14-baseline-and-feasibility.md`.
+
+### Epic 15: Electron shell and IPC
+Stories: 15.1 Electron scaffold and window; 15.2 Hardened renderer boundary, `app://` and CSP; 15.3 Preload shim and Channel compatibility; 15.4 Closed command registry and error contract. Shard: `docs/prd/epic-15-electron-shell-and-ipc.md`.
+
+### Epic 16: Session and API
+Stories: 16.1 Runtime configuration and `api_request`; 16.2 Token refresh and session expiry; 16.3 Credential store, `sign_out` and `session_only`; 16.4 `sign_in` with PKCE; 16.5 Deep link, single instance and loopback; 16.6 `set_dirty`. Shard: `docs/prd/epic-16-session-and-api.md`.
+
+### Epic 17: Native features
+Stories: 17.1 Photo upload engine; 17.2 Watched-window drag and drop; 17.3 Attachment and avatar uploads; 17.4 Gown archive export; 17.5 `klei-img` image protocol; 17.6 Webview behavior parity. Shard: `docs/prd/epic-17-native-features.md`.
+
+### Epic 18: Packaging and manual update
+Stories: 18.1 Per-OS Electron packaging; 18.2 Unsigned distribution qualification; 18.3 Fixed-page manual update (the one approved Electron-only exception to FR-43); 18.4 Install, upgrade and rollback qualification; 18.5 Download site (Thymeleaf, own port, secret path). Shard: `docs/prd/epic-18-packaging-and-manual-update.md`.
+
+### Epic 19: Isolated CI
+Stories: 19.1 Protection workflow; 19.2 Build and test workflow; 19.3 Packaging matrix; 19.4 Isolated release workflow. Shard: `docs/prd/epic-19-isolated-ci.md`.
+
+### Epic 20: Qualification, pilot and cutover
+Stories: 20.1 Full-flow parity matrix run; 20.2 Start-up and memory measurement; 20.3 Opt-in pilot; 20.4 Rollback rehearsal and decision records. Shard: `docs/prd/epic-20-qualification-and-cutover.md`.
+
+Total: 7 epics, 33 stories. Order: 14 first; 15 after 14.1 (15.3 also after 14.4); 16 after 15.4; 17 after 15.3 and 16.2; 18 after 14.3, 15.1, 16.6 and 17; 19.1 after 14.1, rest of 19 after 15.4 and 18; 20 after 14 to 19.
+
+### Migration coverage map (inventory to story)
+
+| Surface | Story |
+|---|---|
+| `api_request` | 16.1, 16.2 |
+| `sign_in` | 16.4, 16.5 |
+| `sign_out`, `session_only` | 16.3 |
+| `set_dirty` | 16.6 |
+| `upload_files` kinds `photo`, `dropped`, `cancel` | 17.1 |
+| `upload_files` kinds `watch`, `unwatch` and drag and drop | 17.2 |
+| `upload_files` kinds `attachment`, `avatar` | 17.3 |
+| `export_gowns` `start`, `cancel` | 17.4 |
+| `check_update`, `install_update` | 18.3, 18.5 |
+| Closed nine-command set, error contract | 15.4 |
+| `klei-img://` protocol and Windows host quirk | 17.5, 14.3 |
+| `klei://auth/callback`, single instance, loopback | 16.5 |
+| OS keychain | 16.3, 14.3 |
+| Dialogs, `open::that` | 17.1, 17.3, 17.4, 16.4 |
+| Clipboard, `execCommand`, `beforeunload`, hash routing | 17.6 |
+| Window, CSP, navigation, permissions | 15.1, 15.2 |
+| Tauri JS import `bridge.ts:1` (`invoke`, `Channel`) | 14.4, 15.3 |
+| Packaging, signing, updater config, download site, CI, release | 18.1, 18.2, 18.5, 19.1 to 19.4 |
+| Cutover, rollback, retirement | 20.1 to 20.4 |
