@@ -15,6 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -25,6 +28,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ExtendWith(OutputCaptureExtension.class)
 class DownloadSiteTest {
     static final String TOKEN = "Zk3_tU9vQ1wXb7LmN0pRsD4eHgYa6CjF2iOq8VnTx5A";
     static final Path DATA = data();
@@ -131,5 +135,22 @@ class DownloadSiteTest {
                 "/files/1.10.0/%2e%2e", "/files/..%2F1.9.0/a.dmg", "/files/1.10.0/a%5Cdmg", "/files/1.10.0/%2Fetc%2Fpasswd"}) {
             mvc.perform(get(URI.create("/" + TOKEN + p))).andExpect(status().is4xxClientError());
         }
+    }
+
+    @Test
+    void stylesheetAndHeadAreServedUnderTheTokenOnly(CapturedOutput out) throws Exception {
+        mvc.perform(get("/" + TOKEN + "/static/site.css")).andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", org.hamcrest.Matchers.startsWith("text/css")))
+                .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                .andExpect(header().doesNotExist("Set-Cookie"));
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head("/" + TOKEN + "/latest.json"))
+                .andExpect(status().isOk());
+        for (String m : new String[] {"put", "delete", "patch", "options"}) {
+            mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
+                    org.springframework.http.HttpMethod.valueOf(m.toUpperCase()), "/" + TOKEN + "/latest.json"))
+                    .andExpect(status().isNotFound()).andExpect(content().string(""));
+        }
+        emptyNotFound("/" + TOKEN + "/files/1.10.0/..%2Fa.dmg");
+        assertFalse(out.getAll().contains(TOKEN), "the token must not reach any log line");
     }
 }
