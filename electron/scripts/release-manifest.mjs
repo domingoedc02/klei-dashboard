@@ -2,6 +2,7 @@
 // Usage: node scripts/release-manifest.mjs list <dir> [--json out.json] [--five]
 //        node scripts/release-manifest.mjs build --version <v> --out release.json entries.json...
 //        node scripts/release-manifest.mjs tag <electron-vX.Y.Z>
+//        node scripts/release-manifest.mjs sums <release.json>   ("<sha256>  <name>" lines, for sha256sum -c)
 // release.json has no URL and no notes; the site shows the SHA-256 beside each file and derives latest.json from it.
 import { createHash } from 'node:crypto'
 import { createReadStream, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
@@ -59,6 +60,16 @@ export function buildManifest(files, version, now = new Date()) {
   return { version, pubDate: now.toISOString(), channel: 'preview', files: [...files].sort((a, b) => a.name.localeCompare(b.name)) }
 }
 
+const SHA = /^[0-9a-f]{64}$/
+
+/** Lines for `sha256sum -c`; every name and hash is re-checked because the file crosses a job boundary. */
+export function sums(manifest) {
+  return manifest.files.map((f) => {
+    if (!NAME.test(f.name) || !SHA.test(f.sha256)) throw new Error('release.json has an invalid file entry')
+    return `${f.sha256}  ${f.name}`
+  })
+}
+
 /** `electron-vX.Y.Z` must name the same version as package.json, or nothing is published. */
 export function tagVersion(tag, pkgVersion) {
   const m = /^electron-v(.+)$/.exec(tag)
@@ -79,10 +90,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     } else if (cmd === 'build') {
       const files = args.filter((a, i) => a.endsWith('.json') && args[i - 1] !== '--out').flatMap((f) => JSON.parse(readFileSync(f, 'utf8')))
       writeFileSync(opt('--out'), JSON.stringify(buildManifest(files, opt('--version')), null, 2))
+    } else if (cmd === 'sums') {
+      console.log(sums(JSON.parse(readFileSync(args[0], 'utf8'))).join('\n'))
     } else if (cmd === 'tag') {
       const pkg = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
       console.log(tagVersion(args[0], pkg.version))
-    } else throw new Error('usage: list <dir> | build --version v --out f entries.json... | tag <tag>')
+    } else throw new Error('usage: list <dir> | build --version v --out f entries.json... | sums <release.json> | tag <tag>')
   } catch (e) {
     console.error(e.message)
     process.exit(1)

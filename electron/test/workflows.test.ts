@@ -157,11 +157,9 @@ test('electron-package.yml: pack, inspect, hash, a smoke launch per OS, 7-day up
   assert.equal(run(/npm run pack -- \$\{\{ matrix\.args \}\}/).length, 1)
   assert.equal(run(/inspect-package\.mjs release\/\$\{\{ matrix\.unpacked \}\}/).length, 1)
   assert.equal(run(/release-manifest\.mjs list release/).length, 1)
-  const smoke = list.filter((s) => /smoke\.mjs/.test(s.run ?? ''))
-  assert.deepEqual(smoke.map((s) => s.if), ["runner.os == 'macOS'", "runner.os == 'Windows'", "runner.os == 'Linux'", "runner.os == 'Linux'"])
-  assert.match(text, /dpkg -i/)
-  assert.match(text, /--appimage-extract-and-run/)
-  assert.match(text, /xvfb-run -a node scripts\/smoke\.mjs/)
+  assert.equal(list.filter((s) => /smoke-installer\.sh/.test(s.run ?? '')).length, 1)
+  const script = readFileSync(join(ROOT, 'electron/scripts/smoke-installer.sh'), 'utf8')
+  for (const re of [/hdiutil attach/, /\/S\b/, /reg query 'HKCU\\Software\\Classes\\klei'/, /dpkg -i/, /--appimage-extract-and-run/, /xvfb-run -a node scripts\/smoke\.mjs/, /x-scheme-handler/]) assert.match(script, re)
   const up = list.filter((s) => s.uses?.startsWith('actions/upload-artifact'))
   assert.equal(up.length, 2)
   for (const u of up) assert.deepEqual([u.with?.['retention-days'], u.with?.['if-no-files-found']], [7, 'error'])
@@ -170,4 +168,82 @@ test('electron-package.yml: pack, inspect, hash, a smoke launch per OS, 7-day up
   assert.ok(five.steps!.some((s) => /release-manifest\.mjs list installers --five/.test(s.run ?? '')))
   assert.ok(five.steps!.some((s) => s.uses?.startsWith('actions/download-artifact')))
   assert.ok(!/continue-on-error/.test(text))
+})
+
+const REL = 'electron-release.yml'
+const SECRET_NAMES = ['ELECTRON_DEPLOY_HOST', 'ELECTRON_DEPLOY_USER', 'ELECTRON_DEPLOY_KEY', 'ELECTRON_DEPLOY_KNOWN_HOSTS', 'ELECTRON_DOWNLOAD_BASE_URL']
+const refs = (text: string, kind: 'secrets' | 'vars') => [...text.matchAll(new RegExp(`\\$\\{\\{\\s*${kind}\\.([A-Za-z_]+)`, 'g'))].map((m) => m[1]!)
+
+test('electron-release: only electron-v* tags start it; Tauri release.yml (v*) does not match them', () => {
+  const w = load(REL)
+  assert.deepEqual(w.on, { push: { tags: ['electron-v*'] } })
+  const tauri = (yaml.load(read('release.yml')) as Workflow).on as { push: { tags: string[] } }
+  assert.deepEqual(tauri.push.tags, ['v*'])
+  assert.ok(!/^v/.test('electron-v1.0.0'))
+})
+
+test('electron-release: tag shape and package.json version are checked first; every later job needs that', () => {
+  const w = load(REL)
+  const v = w.jobs.verify!
+  assert.match(v.if!, /startsWith\(github\.ref, 'refs\/tags\/electron-v'\)/)
+  const run = v.steps!.map((s) => s.run ?? '').join('\n')
+  assert.ok(run.includes('^electron-v[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.]+)?$'))
+  assert.match(run, /release-manifest\.mjs tag "\$GITHUB_REF_NAME"/)
+  assert.deepEqual(w.jobs.test!.needs, 'verify')
+  assert.deepEqual(w.jobs.build!.needs, ['verify', 'test'])
+  assert.deepEqual(w.jobs.publish!.needs, ['verify', 'build'])
+})
+
+test('electron-release: secrets and the approval environment are confined to build and publish; names are the agreed ones', () => {
+  const w = load(REL)
+  const text = read(REL)
+  for (const j of ['verify', 'test']) assert.ok(!w.jobs[j]!.environment && !/secrets\.|vars\./.test(JSON.stringify(w.jobs[j])), j)
+  for (const j of ['build', 'publish']) assert.equal(w.jobs[j]!.environment, 'electron-release', j)
+  assert.ok(!/secrets\.|vars\./.test(JSON.stringify({ env: w.env })))
+  assert.deepEqual([...new Set(refs(text, 'secrets'))].sort(), [...SECRET_NAMES].sort())
+  assert.deepEqual([...new Set(refs(text, 'vars'))].sort(), ['ELECTRON_DEPLOY_PATH', 'KLEI_API_URL', 'KLEI_AUTH_URL'])
+  assert.ok(!/GITHUB_TOKEN/.test(text) && !/permissions:\s*\n\s+contents:\s*write/.test(text))
+  for (const j of Object.values(w.jobs)) assert.equal(j.permissions, undefined)
+})
+
+test('electron-release: release build only in the package step, real URL only from the secret, no secret while dependencies install', () => {
+  const build = load(REL).jobs.build!
+  const pack = build.steps!.filter((s) => /npm run pack/.test(s.run ?? ''))
+  assert.equal(pack.length, 1)
+  assert.deepEqual(pack[0]!.env, { KLEI_RELEASE: '1', KLEI_API_URL: '${{ vars.KLEI_API_URL }}', KLEI_AUTH_URL: '${{ vars.KLEI_AUTH_URL }}', KLEI_DOWNLOAD_BASE_URL: '${{ secrets.ELECTRON_DOWNLOAD_BASE_URL }}' })
+  assert.ok(build.steps!.filter((s) => /npm ci/.test(s.run ?? '')).every((s) => !s.env))
+  assert.ok(!('KLEI_RELEASE' in (load(REL).env ?? {})))
+  assert.ok(!build.env || !/secrets\./.test(JSON.stringify(build.env)))
+})
+
+test('electron-release: nothing built with the real URL is uploaded to GitHub; the secret scan and inspection run; no GitHub release', () => {
+  const w = load(REL)
+  const text = read(REL)
+  const ups = steps(w).filter((s) => s.uses?.startsWith('actions/upload-artifact'))
+  assert.equal(ups.length, 1)
+  assert.match(String(ups[0]!.with!.path), /entries-\$\{\{ matrix\.id \}\}\.json$/)
+  assert.deepEqual([ups[0]!.with!['retention-days'], ups[0]!.with!['if-no-files-found']], [1, 'error'])
+  const b = w.jobs.build!.steps!.map((s) => s.run ?? '').join('\n')
+  assert.match(b, /inspect-package\.mjs release\/\$\{\{ matrix\.unpacked \}\}/)
+  assert.match(b, /scan-secrets\.mjs build/)
+  assert.match(b, /smoke-installer\.sh/)
+  assert.match(w.jobs.publish!.steps!.map((s) => s.run ?? '').join('\n'), /scan-secrets\.mjs out/)
+  assert.ok(!/gh release|create-release|softprops|action-gh-release|\bgh api\b/.test(text))
+  assert.ok(!/continue-on-error|\|\| true|set -x|bash -x|ssh-keyscan|StrictHostKeyChecking=no/.test(text))
+})
+
+test('electron-release: four native runners as in 19.3, the same tests as 19.2 on three OS families, a publish after all of them', () => {
+  const w = load(REL)
+  const inc = w.jobs.build!.strategy!.matrix!.include as { id: string; os: string; args: string }[]
+  assert.deepEqual(inc.map(({ id, os }) => ({ id, os })), MATRIX)
+  assert.deepEqual(inc.map((m) => m.args), ['--mac --arm64', '--mac --x64', '--win --x64', '--linux --x64'])
+  assert.equal(w.jobs.build!.strategy!['fail-fast'], false)
+  const os = (w.jobs.test!.strategy!.matrix!.include as { os: string }[]).map((m) => m.os).sort()
+  assert.deepEqual(os, ['macos-latest', 'ubuntu-latest', 'windows-latest'])
+  const t = w.jobs.test!.steps!.map((s) => s.run ?? '').join('\n')
+  for (const re of [/npm run typecheck/, /npm test 2>&1 \| tee test\.log/, /check-skips\.mjs test\.log/]) assert.match(t, re)
+  assert.match(w.jobs.publish!.steps!.map((s) => s.run ?? '').join('\n'), /release-manifest\.mjs build --version "\$VERSION" --out out\/release\.json entries\/\*\.json/)
+  assert.match(w.jobs.publish!.steps!.map((s) => s.run ?? '').join('\n'), /deploy\.sh finish "\$VERSION" out\/release\.json/)
+  assert.match(w.jobs.build!.steps!.map((s) => s.run ?? '').join('\n'), /deploy\.sh upload "\$VERSION" release/)
+  assert.match(w.jobs.build!.steps!.map((s) => s.run ?? '').join('\n'), /deploy\.sh check "\$VERSION"/)
 })
