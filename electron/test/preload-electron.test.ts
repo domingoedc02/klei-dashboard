@@ -14,12 +14,13 @@ const electronBin: string = createRequire(path('../package.json'))('electron')
 const profile = mkdtempSync(join(tmpdir(), 'klei-preload-'))
 const SHOTS = process.env.KLEI_SHOT_DIR
 
+// Launched by folder, so package.json gives the app its version (a script path leaves a platform default such as "0.0", which the update check refuses).
 // Nothing listens on port 1, so check_update is offline and no test can reach a real download site.
 before(() => { execFileSync(process.execPath, [join(ROOT, 'scripts/build-main.mjs')], { stdio: 'inherit', env: { ...process.env, KLEI_DOWNLOAD_BASE_URL: `http://127.0.0.1:1/${'x'.repeat(43)}` } }) })
 after(() => rmSync(profile, { recursive: true, force: true }))
 
 const launch = (env: Record<string, string> = {}) =>
-  _electron.launch({ executablePath: electronBin, args: [join(ROOT, 'build/main/index.js')], cwd: ROOT, env: { ...process.env, KLEI_USER_DATA: profile, ...env } })
+  _electron.launch({ executablePath: electronBin, args: [ROOT], cwd: ROOT, env: { ...process.env, KLEI_USER_DATA: profile, ...env } })
 
 type Klei = Record<string, (...a: unknown[]) => Promise<unknown>>
 
@@ -106,7 +107,9 @@ test('signed-out stubs: the real renderer at 1280x800 shows an error state, no c
     await page.waitForSelector('.app, #root > *', { timeout: 15000 })
     await page.waitForTimeout(1500)
     const size = await page.evaluate(() => `${window.innerWidth}x${window.innerHeight}`)
-    assert.equal(size, '1280x800')
+    // A hosted runner's display can be smaller than the window: Electron then shrinks it, never below the 1100x700 minimum.
+    const area = await app.evaluate(({ screen }: { screen: { getPrimaryDisplay(): { workAreaSize: { width: number; height: number } } } }) => screen.getPrimaryDisplay().workAreaSize)
+    assert.equal(size, `${Math.max(1100, Math.min(1280, area.width))}x${Math.max(700, Math.min(800, area.height))}`)
     const text = await page.evaluate(() => document.body.innerText.trim().slice(0, 200))
     assert.ok(text.length > 0, 'page is blank')
     assert.deepEqual(problems, [])
