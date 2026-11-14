@@ -68,15 +68,10 @@ async function startMock(state) {
   return { origin: `http://127.0.0.1:${srv.address().port}`, close: () => { srv.closeAllConnections(); srv.close() } }
 }
 
-/** `size` is the page's inner size, `WxH`. Output goes to <outDir>/app (or app-<size> when it is not the default). */
-export async function captureApp({ wanted = '', outDir, size = '1440x900' }) {
-  const { SCREENS, name } = await load('screens.mjs')
-  const { NOW, makeHandler, routes, imgSvg } = await load('fixtures.mjs')
-  const { probe } = await load('probe.mjs')
-  const { FREEZE_CSS } = await load('common.mjs')
+/** The built app, copied to a temp folder, on a throwaway profile, against a loopback mock. `close()` removes all of it. */
+export async function startApp({ size = '1440x900', flags = FLAGS } = {}) {
+  const { imgSvg } = await load('fixtures.mjs')
   const [W, H] = size.split('x').map(Number)
-  const dir = join(outDir, size === '1440x900' ? 'app' : `app-${size}`)
-  await mkdir(dir, { recursive: true })
 
   const tmp = mkdtempSync(join(tmpdir(), 'klei-parity-'))
   const state = { handler: null, imgSvg, signin: 'ok', auth: 'ok', me: 'ok', latest: '0.0.0', n: 0, notes: [] }
@@ -88,11 +83,12 @@ export async function captureApp({ wanted = '', outDir, size = '1440x900' }) {
   writeFileSync(join(tmp, 'build/main/build-config.json'), JSON.stringify({ api: mock.origin, auth: `${mock.origin}/auth`, download: `${mock.origin}/${TOKEN}` }))
   symlinkSync(join(REPO, 'electron/node_modules'), join(tmp, 'node_modules'))
 
-  const record = { geometry: {}, copy: {} }
-  const skipped = {}
-  const meta = { size, electron: process.versions.electron ?? null, platform: process.platform, arch: process.arch, emulated: false }
-  const failures = []
-  const app = await _electron.launch({ executablePath: electronBin, args: [...FLAGS, tmp], cwd: tmp, env: { ...process.env, KLEI_USER_DATA: join(tmp, 'profile'), KLEI_SMOKE: '' } })
+  const app = await _electron.launch({ executablePath: electronBin, args: [...flags, tmp], cwd: tmp, env: { ...process.env, KLEI_USER_DATA: join(tmp, 'profile'), KLEI_SMOKE: '' } })
+  const close = async () => {
+    await app.close().catch(() => {})
+    mock.close()
+    rmSync(tmp, { recursive: true, force: true })
+  }
   try {
     // The browser's part of sign-in, and fixture pictures for klei-img://: neither changes what the app does with them.
     await app.evaluate(({ shell, session, BrowserWindow }, [origin, w, h]) => {
@@ -111,6 +107,43 @@ export async function captureApp({ wanted = '', outDir, size = '1440x900' }) {
       p.handle('klei-img', async (rq) => new Response(await (await fetch(`${origin}/__img?u=${encodeURIComponent(rq.url)}`)).arrayBuffer(), { headers: { 'content-type': 'image/svg+xml' } }))
       BrowserWindow.getAllWindows()[0].setContentSize(w, h)
     }, [mock.origin, W, H])
+  } catch (e) {
+    await close()
+    throw e
+  }
+  return { app, state, W, H, close }
+}
+
+/** Signed in on the dashboard fixtures; resolves when the page shows it. */
+export async function openDashboard({ app, state }) {
+  const { SCREENS, name } = await load('screens.mjs')
+  const { makeHandler, routes } = await load('fixtures.mjs')
+  const s = SCREENS.find((x) => x.desk && name(x) === 'dashboard-default')
+  const page = await app.firstWindow()
+  await page.waitForSelector('.app, .screen, .auth-card', { timeout: 15000 })
+  state.handler = makeHandler(routes(), () => {})
+  await page.evaluate(() => window.klei.sign_in())
+  await page.evaluate((h) => { location.hash = h }, s.desk.hash)
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await page.waitForSelector(s.desk.ready ?? '.app', { timeout: 15000 })
+  return page
+}
+
+/** `size` is the page's inner size, `WxH`. Output goes to <outDir>/app (or app-<size> when it is not the default). */
+export async function captureApp({ wanted = '', outDir, size = '1440x900' }) {
+  const { SCREENS, name } = await load('screens.mjs')
+  const { NOW, makeHandler, routes } = await load('fixtures.mjs')
+  const { probe } = await load('probe.mjs')
+  const { FREEZE_CSS } = await load('common.mjs')
+  const dir = join(outDir, size === '1440x900' ? 'app' : `app-${size}`)
+  await mkdir(dir, { recursive: true })
+
+  const record = { geometry: {}, copy: {} }
+  const skipped = {}
+  const meta = { size, electron: process.versions.electron ?? null, platform: process.platform, arch: process.arch, emulated: false }
+  const failures = []
+  const { app, state, W, H, close } = await startApp({ size })
+  try {
     meta.version = await app.evaluate(({ app }) => app.getVersion())
     const page = await app.firstWindow()
     await page.context().clock.setFixedTime(NOW)
@@ -171,9 +204,7 @@ export async function captureApp({ wanted = '', outDir, size = '1440x900' }) {
       }
     }
   } finally {
-    await app.close().catch(() => {})
-    mock.close()
-    rmSync(tmp, { recursive: true, force: true })
+    await close()
   }
   await writeFile(join(dir, 'probe.json'), JSON.stringify(record, null, 1))
   await writeFile(join(dir, 'meta.json'), JSON.stringify(meta, null, 1))
