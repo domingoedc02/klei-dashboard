@@ -100,9 +100,9 @@ test('only the provider calls get the long timeout', () => {
 
 test('config: build-time URLs lose the trailing slash; flags come from the environment', () => {
   const dir = mkdtempSync(join(tmpdir(), 'klei-cfg-'))
-  writeFileSync(join(dir, 'build-config.json'), JSON.stringify({ api: 'https://api.example/', auth: 'https://auth.example//' }))
+  writeFileSync(join(dir, 'build-config.json'), JSON.stringify({ api: 'https://api.example/', auth: 'https://auth.example//', download: 'https://dl.example/t/' }))
   const c = loadConfig(dir, { KLEI_SMOKE: '1' })
-  assert.deepEqual([c.api, c.auth, c.smoke], ['https://api.example', 'https://auth.example', true])
+  assert.deepEqual([c.api, c.auth, c.download, c.smoke], ['https://api.example', 'https://auth.example', 'https://dl.example/t', true])
   assert.deepEqual([c.signInTimeoutMs, c.requestTimeoutMs, c.uploadTimeoutMs, c.retryDelayMs], [300_000, 10_000, 120_000, 3_000])
 })
 

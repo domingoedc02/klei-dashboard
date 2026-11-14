@@ -1,12 +1,10 @@
-import { COMMANDS } from '../shared/commands.ts'
 import { BridgeError } from '../shared/errors.ts'
 import type { ExportSummary, UploadSummary } from '../shared/events.ts'
 import { build, clean, Exporter, fetchManifest } from './export.ts'
 import type { Handlers } from './invoker.ts'
 import type { Session } from './session.ts'
+import { check, install } from './update.ts'
 import { attachFiles, checkInquiry, run, setAvatar, Uploader } from './uploads.ts'
-
-const notImplemented = () => Promise.reject(new BridgeError('failed', 'not implemented'))
 
 export interface Deps {
   session: Session
@@ -18,6 +16,10 @@ export interface Deps {
   /** The save dialog for the download; null when the User dismisses it. */
   save?(suggested: string): Promise<string | null>
   exporter?: Exporter
+  /** The running app's version, for the update check. */
+  version?: string
+  /** Opens a URL in the system browser (`shell.openExternal`). */
+  open?(url: string): Promise<void>
   /** Shared with the private drop channel (index.ts); a fresh one when omitted. */
   uploader?: Uploader
 }
@@ -26,10 +28,14 @@ const NONE = (): UploadSummary => ({ stored: [], rejected: [], cancelled: false 
 const DISMISSED = (): UploadSummary => ({ ...NONE(), cancelled: true })
 const NOTHING = (cancelled: boolean): ExportSummary => ({ gowns: 0, photos: 0, cancelled })
 
-// One entry per command; Epics 16 and 17 replace the stubs. Keyed by COMMANDS so a tenth name cannot be added here alone.
-export const createHandlers = ({ session, useMemory, exit, pick, save, uploader = new Uploader(), exporter = new Exporter() }: Deps): Handlers => {
+// One entry per command; `Handlers` is keyed by COMMANDS so a tenth name cannot be added here alone.
+export const createHandlers = ({ session, useMemory, exit, pick, save, uploader = new Uploader(), exporter = new Exporter(), version = '0.0.0', open = () => Promise.reject(new Error('no browser')) }: Deps): Handlers => {
   return {
-  ...(Object.fromEntries(COMMANDS.map((c) => [c, notImplemented])) as unknown as Handlers),
+  check_update: () => check(session.cfg.download, version),
+  install_update: async () => {
+    await install(session.cfg.download, session.isDirty(), open)
+    return null
+  },
   async upload_files({ kind, targetId }, ctx) {
     switch (kind) {
       case 'cancel':

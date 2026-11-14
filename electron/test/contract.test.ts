@@ -33,7 +33,7 @@ test('the nine commands and no others: Tauri, shared list, preload allow list an
   const rust = [...(/pub const NAMES: \[&str; 9\] = \[([^\]]+)\]/.exec(read('../../desktop/src-tauri/src/commands.rs'))?.[1] ?? '').matchAll(/"(\w+)"/g)].map((m) => m[1]!).sort()
   assert.deepEqual(rust, WANT)
   assert.deepEqual([...COMMANDS].sort(), WANT)
-  const cfg = { api: 'http://127.0.0.1:1', auth: 'http://127.0.0.1:1', signInTimeoutMs: 1, requestTimeoutMs: 1, uploadTimeoutMs: 1, retryDelayMs: 1, smoke: false }
+  const cfg = { api: 'http://127.0.0.1:1', auth: 'http://127.0.0.1:1', download: 'http://127.0.0.1:1/t', signInTimeoutMs: 1, requestTimeoutMs: 1, uploadTimeoutMs: 1, retryDelayMs: 1, smoke: false }
   assert.deepEqual(Object.keys(createHandlers({ session: new Session(cfg, new MemoryKeychain()), useMemory() {}, exit() {} })).sort(), WANT)
   const noIpc = { invoke: async () => ({ ok: null }), on() {}, removeListener() {} }
   assert.deepEqual(Object.keys(createBridge(noIpc)).sort(), WANT)

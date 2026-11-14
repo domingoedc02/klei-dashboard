@@ -45,8 +45,10 @@ test('release build without KLEI_API_URL or KLEI_AUTH_URL fails; dev build bakes
   assert.equal(run({ KLEI_RELEASE: '1' }).status, 1)
   assert.equal(run({ KLEI_RELEASE: '1', KLEI_API_URL: 'https://a.example' }).status, 1)
   assert.equal(run({}).status, 0)
-  assert.deepEqual(JSON.parse(readFileSync(path('../build/main/build-config.json'), 'utf8')), { api: 'http://127.0.0.1:8080', auth: 'http://127.0.0.1:8081' })
-  assert.equal(run({ KLEI_RELEASE: '1', KLEI_API_URL: 'https://a.example', KLEI_AUTH_URL: 'https://b.example' }).status, 0)
-  assert.deepEqual(JSON.parse(readFileSync(path('../build/main/build-config.json'), 'utf8')), { api: 'https://a.example', auth: 'https://b.example' })
+  assert.deepEqual(JSON.parse(readFileSync(path('../build/main/build-config.json'), 'utf8')), { api: 'http://127.0.0.1:8080', auth: 'http://127.0.0.1:8081', download: `http://127.0.0.1:8090/${'x'.repeat(43)}` })
+  assert.equal(run({ KLEI_RELEASE: '1', KLEI_API_URL: 'https://a.example', KLEI_AUTH_URL: 'https://b.example' }).status, 1)
+  const download = `https://dl.example/${'x'.repeat(43)}`
+  assert.equal(run({ KLEI_RELEASE: '1', KLEI_API_URL: 'https://a.example', KLEI_AUTH_URL: 'https://b.example', KLEI_DOWNLOAD_BASE_URL: download }).status, 0)
+  assert.deepEqual(JSON.parse(readFileSync(path('../build/main/build-config.json'), 'utf8')), { api: 'https://a.example', auth: 'https://b.example', download })
   execFileSync(process.execPath, [path('../scripts/build-main.mjs')], { env: { PATH: process.env.PATH ?? '' } })
 })

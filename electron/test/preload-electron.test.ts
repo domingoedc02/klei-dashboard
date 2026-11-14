@@ -14,7 +14,8 @@ const electronBin: string = createRequire(path('../package.json'))('electron')
 const profile = mkdtempSync(join(tmpdir(), 'klei-preload-'))
 const SHOTS = process.env.KLEI_SHOT_DIR
 
-before(() => { execFileSync(process.execPath, [join(ROOT, 'scripts/build-main.mjs')], { stdio: 'inherit' }) })
+// Nothing listens on port 1, so check_update is offline and no test can reach a real download site.
+before(() => { execFileSync(process.execPath, [join(ROOT, 'scripts/build-main.mjs')], { stdio: 'inherit', env: { ...process.env, KLEI_DOWNLOAD_BASE_URL: `http://127.0.0.1:1/${'x'.repeat(43)}` } }) })
 after(() => rmSync(profile, { recursive: true, force: true }))
 
 const launch = (env: Record<string, string> = {}) =>
@@ -22,7 +23,7 @@ const launch = (env: Record<string, string> = {}) =>
 
 type Klei = Record<string, (...a: unknown[]) => Promise<unknown>>
 
-test('real preload: nine methods, no Node, plain errors, channel calls settle, handlers are stubs', { timeout: 60_000 }, async () => {
+test('real preload: nine methods, no Node, plain errors, channel calls settle', { timeout: 60_000 }, async () => {
   const app = await launch()
   try {
     const page = await app.firstWindow()
@@ -42,10 +43,10 @@ test('real preload: nine methods, no Node, plain errors, channel calls settle, h
         symbols: Object.getOwnPropertySymbols(k).length,
         globals: [typeof (window as never as { ipcRenderer: unknown }).ipcRenderer, typeof require, typeof process, typeof Buffer].join(),
         electronGlobals: Object.keys(window).filter((n) => /electron|ipc|klei/i.test(n)),
-        stub: await err(k.check_update()!),
+        offline: await err(k.check_update()!),
         badKeys: await err(k.api_request!({ method: 'GET', path: '/x', evil: 1 })),
         badType: await err(k.set_dirty!('yes')),
-        upload: await err(k.install_update!()),
+        refused: await (async () => { await k.set_dirty!(true); const e = await err(k.install_update!()); await k.set_dirty!(false); return e })(),
         uploadBad: await err(k.upload_files!('nope', 't', () => {})),
         exportBad: await err(k.export_gowns!('start', new Array(1001).fill('a'), () => {})),
         events,
@@ -57,9 +58,8 @@ test('real preload: nine methods, no Node, plain errors, channel calls settle, h
     assert.equal(r.symbols, 0)
     assert.equal(r.globals, 'undefined,undefined,undefined,undefined')
     assert.deepEqual(r.electronGlobals, ['klei'])
-    const failed = { plain: true, keys: ['kind', 'message'], e: { kind: 'failed', message: 'not implemented' } }
-    assert.deepEqual(r.stub, failed)
-    assert.deepEqual(r.upload, failed)
+    assert.deepEqual(r.offline, { plain: true, keys: ['kind', 'message'], e: { kind: 'offline', message: 'server unreachable' } })
+    assert.deepEqual(r.refused, { plain: true, keys: ['kind', 'message'], e: { kind: 'update_refused', message: 'You have unsent work. Finish or discard it first.' } })
     const bad = { plain: true, keys: ['kind', 'message'], e: { kind: 'bad_request', message: 'bad request' } }
     for (const k of ['badKeys', 'badType', 'uploadBad', 'exportBad'] as const) assert.deepEqual(r[k], bad, k)
     assert.deepEqual(r.events, [])

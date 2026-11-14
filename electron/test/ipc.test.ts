@@ -80,13 +80,9 @@ test('non-BridgeError failures become failed/request failed; seeded secrets neve
   assert.deepEqual(await bridge.check_update().then(() => assert.fail(), (x) => x), { kind: 'too_large', message: 'too big' })
 })
 
-test('every stub rejects failed / not implemented', async () => {
+test('the real handler table covers exactly the nine commands', async () => {
   const { createHandlers } = await import('../src/main/commands.ts')
-  const handlers = createHandlers({ session: {} as never, useMemory() {}, exit() {} })
-  assert.deepEqual(Object.keys(handlers).sort(), [...COMMANDS].sort())
-  const { bridge } = loopback(handlers)
-  assert.deepEqual(await bridge.check_update().then(() => assert.fail(), (x) => x), { kind: 'failed', message: 'not implemented' })
-  assert.deepEqual(await bridge.install_update().then(() => assert.fail(), (x) => x), { kind: 'failed', message: 'not implemented' })
+  assert.deepEqual(Object.keys(createHandlers({ session: {} as never, useMemory() {}, exit() {} })).sort(), [...COMMANDS].sort())
 })
 
 test('a handler sees validated args and the abort signal; results come back unchanged', async () => {
