@@ -17,7 +17,7 @@ const WHY: Record<RejectReason, string> = {
   type: 'Not a JPEG, PNG or WebP',
   size: 'Over 25 MB',
   full: 'Batch is full. Group these photos, then upload the rest.',
-  dimensions: 'Image is too large: over 40 megapixels',
+  dimensions: 'Image is too large: over 100 megapixels (WebP: 40)',
   unreadable: "Couldn't read the file",
 };
 

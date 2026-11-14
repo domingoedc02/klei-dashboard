@@ -310,7 +310,7 @@ Not in MVP (Deferred, constraints kept): tenant DEK replacement, `KLEI_BIDX_KEY`
 
 Per Photo upload:
 
-1. The API receives one file (≤ 25 MB). Type comes from magic bytes (JPEG, PNG, WebP), never the header. The decoder refuses headers over 40 megapixels; at most two decodes run at once.
+1. The API receives one file (≤ 25 MB). Type comes from magic bytes (JPEG, PNG, WebP), never the header. The decoder refuses JPEG and PNG headers over 100 megapixels and WebP over 40 (Story 21.7; was 40 for all); at most two decodes run at once.
 2. Decode with `ImageIO` (TwelveMonkeys for WebP), reject on failure, build a 480 px JPEG thumbnail with metadata stripped. The original is stored as uploaded. Plain bytes exist only in this request's memory.
 3. `ObjectCipher` encrypts original and thumbnail with two fresh DEKs. Body `[version:1][nonce:12][ciphertext + tag]`, plaintext framed and padded to 64 KB steps, AAD `obj|<bucket>|<objectId>`.
 4. `PutObject` under random UUID keys (Content-Type `application/octet-stream`, no user metadata, no tags). Then, in one DB transaction, insert both `stored_object` rows and the `photo` row. If the commit fails, the objects are deleted.

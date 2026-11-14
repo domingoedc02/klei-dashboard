@@ -165,7 +165,7 @@ class UploadIT {
             "gif claiming jpeg" to Triple("sneaky-zq91.jpg", "GIF89a....".toByteArray(), 415),
             "polyglot" to Triple("poly-zq92.jpg", Images.polyglot(), 415),
             "undecodable" to Triple("cut-zq93.jpg", Images.jpeg().copyOf(100), 415),
-            "41 megapixels" to Triple("huge-zq94.png", Images.pngHeaderOnly(6500, 6500), 413),
+            "101 megapixels" to Triple("huge-zq94.png", Images.pngHeaderOnly(10_100, 10_000), 413),
             "over 25 MB" to Triple("big-zq95.jpg", ByteArray(25 * 1024 * 1024 + 1), 413),
         )
         for ((label, v) in bad) {

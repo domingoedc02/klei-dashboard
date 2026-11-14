@@ -146,7 +146,7 @@ describe('Upload screen', () => {
       'a.gif Not a JPEG, PNG or WebP',
       'b.png Over 25 MB',
       'c.jpg Batch is full. Group these photos, then upload the rest.',
-      'd.jpg Image is too large: over 40 megapixels',
+      'd.jpg Image is too large: over 100 megapixels (WebP: 40)',
       "e.jpg Couldn't read the file",
     ]);
     expect(screen.getByText('2 photos stored')).toBeTruthy();
