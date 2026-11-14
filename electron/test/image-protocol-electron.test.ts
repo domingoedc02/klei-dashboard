@@ -54,6 +54,17 @@ test('real session: klei-img is answered by the handler (signed out gives 503), 
     assert.equal(seen.remote, 'error')
     assert.ok(seen.blocked.some((b: string) => b.startsWith('img-src http://example.com')), `example.com must be blocked by img-src: ${seen.blocked}`)
     if (process.platform !== 'win32') assert.ok(seen.blocked.some((b: string) => b.startsWith('img-src http://klei-img.localhost')), `the alias origin is not allowed off Windows: ${seen.blocked}`)
+    else {
+      assert.ok(!seen.blocked.some((b: string) => b.startsWith('img-src http://klei-img.localhost')), `the alias origin is allowed on Windows: ${seen.blocked}`)
+      const viaAlias = await app.evaluate(async ({ session }: { session: typeof import('electron').session }, u: string) => {
+        const ses = session.fromPartition('klei')
+        const ok = await ses.fetch(`http://klei-img.localhost/${u}/${u}`)
+        const other = await ses.fetch('http://example.com/x.png')
+        return { ok: ok.status, other: other.status }
+      }, U)
+      // 503 is the signed-out answer of the image handler itself; only the handler answers 403 for any other host without touching the network.
+      assert.deepEqual(viaAlias, { ok: 503, other: 403 }, 'the Windows alias is answered by the handler and other http stays closed')
+    }
   } finally {
     await app.close()
   }

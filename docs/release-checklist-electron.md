@@ -15,8 +15,8 @@ Every row below is a real packaged app on a real machine. `electron/test/package
 | macOS arm64 | `klei-bridal-preview-<version>-mac-arm64.dmg` | macOS 15 or later, Apple silicon |
 | macOS x64 | `klei-bridal-preview-<version>-mac-x64.dmg` | macOS 15 or later, Intel |
 | Windows x64 | `klei-bridal-preview-<version>-win-x64.exe` | Windows 11 |
-| Linux AppImage | `klei-bridal-preview-<version>-linux-x64.AppImage` | Ubuntu 24.04 |
-| Linux deb | `klei-bridal-preview-<version>-linux-x64.deb` | Ubuntu 24.04 |
+| Linux AppImage | `klei-bridal-preview-<version>-linux-x64.AppImage` | Not a release target (owner scope 2026-11-15); skip |
+| Linux deb | `klei-bridal-preview-<version>-linux-x64.deb` | Not a release target (owner scope 2026-11-15); skip |
 
 ## Identities (the two apps must never share these)
 

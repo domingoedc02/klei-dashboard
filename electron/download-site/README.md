@@ -2,7 +2,7 @@
 
 Small read-only Spring Boot + Thymeleaf site (story 18.5). Lists each Electron version with per-OS downloads and serves `latest.json` for the app's Update button. Separate from `backend/`; shares no code, port or secret with it.
 
-Every URL starts with a secret token: `/<token>/`. Anything else is an empty `404`. A secret path is obscurity, not access control: anyone with the URL can download.
+Every URL starts with a secret token: `/<token>/`. Anything else is an empty `404`, except bare `/<token>`, which serves the same page without a redirect. A secret path is obscurity, not access control: anyone with the URL can download.
 
 ## Configure
 
