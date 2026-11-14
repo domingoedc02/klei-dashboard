@@ -29,7 +29,7 @@ method: static read of CSS and TSX against the prototype. Nothing was rendered.
 
 ## Not bugs (do not revert)
 
-Focus ring `#0063bf`; meta text `--color-faint #716c66`; info pill ink `#0063bf`; h1 tracking -0.033em (prototype -0.024em); stat figure 32/600 (prototype 40/700); no uppercase eyebrow labels; no "N appointments today" in the dashboard date line (11.4 user decision); wireframe-state toggles not built (11.2); photo cap 200 vs prototype 100 (11.5 U-1).
+Focus ring `#0063bf`; meta text `--color-faint #716c66`; info pill ink `#0063bf`; h1 tracking -0.033em (prototype -0.024em); stat figure 32/600 (prototype 40/700); no uppercase eyebrow labels; no "N appointments today" in the dashboard date line (11.4 user decision); wireframe-state toggles not built (11.2); photo cap 200 vs prototype 100 (lifted 2026-11-14, Story 21.6) (11.5 U-1).
 
 ## Gap table, sorted by severity
 

@@ -32,6 +32,9 @@ klei:
     from: ${KLEI_MAIL_FROM:no-reply@klei.test}
     # Outside dev the SMTP connection must upgrade to TLS and the certificate must match (architecture §8.2).
     require-tls: ${KLEI_SMTP_REQUIRE_TLS:false}
+  upload:
+    # Safety ceiling, not a product limit: grouping holds two 4-byte-per-pair matrices (5,000 photos = 100 MB) and the commit body holds about 26,000 ids. Stay under 16,000 (database IN-list limit).
+    max-photos: ${KLEI_UPLOAD_MAX_PHOTOS:5000}
   s3:
     endpoint: ${KLEI_S3_ENDPOINT:}
     access-key: ${KLEI_S3_ACCESS_KEY:}

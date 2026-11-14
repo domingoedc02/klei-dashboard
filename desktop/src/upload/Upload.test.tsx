@@ -53,7 +53,7 @@ describe('Upload screen', () => {
     backend();
     const { container } = await open();
     expect(await screen.findByRole('heading', { name: 'Drop gown photos here' })).toBeTruthy();
-    expect(screen.getByText('JPG, PNG or WebP up to 25 MB each. Upload up to 200 at once and AI groups them.')).toBeTruthy();
+    expect(screen.getByText('JPG, PNG or WebP up to 25 MB each. Add as many as you like and AI groups them.')).toBeTruthy();
     expect(document.querySelector('.dropzone img.illo')).toBeTruthy();
     expect(screen.getByText('Drop photos. AI groups the same gown, tags it, and drafts a description.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Choose photos' })).toBeTruthy();
@@ -72,7 +72,7 @@ describe('Upload screen', () => {
   it('restores stored photos as a count and a thumbnail strip', async () => {
     backend({ status: 200, body: { id: B, phase: 'empty', photoIds: [photo(1), photo(2)], rejected: 0 } });
     const { container } = await open();
-    expect(await screen.findByText('2 of 200 photos stored')).toBeTruthy();
+    expect(await screen.findByText('2 photos stored')).toBeTruthy();
     const strip = screen.getByRole('list', { name: 'Stored photos' });
     const imgs = within(strip).getAllByRole('img');
     expect(imgs.map((i) => i.getAttribute('src'))).toEqual([thumbUrl(B, photo(1)), thumbUrl(B, photo(2))]);
@@ -84,10 +84,10 @@ describe('Upload screen', () => {
   it('removes one stored photo with its close button', async () => {
     backend({ status: 200, body: { id: B, phase: 'empty', photoIds: [photo(1), photo(2)], rejected: 0 } });
     await open();
-    await screen.findByText('2 of 200 photos stored');
+    await screen.findByText('2 photos stored');
     await userEvent.click(screen.getByRole('button', { name: 'Remove photo 1' }));
     expect(mocks.request).toHaveBeenCalledWith('DELETE', `/api/v1/uploads/${B}/photos/${photo(1)}`, undefined, undefined, undefined);
-    expect(await screen.findByText('1 of 200 photos stored')).toBeTruthy();
+    expect(await screen.findByText('1 photo stored')).toBeTruthy();
     const imgs = within(screen.getByRole('list', { name: 'Stored photos' })).getAllByRole('img');
     expect(imgs.map((i) => i.getAttribute('src'))).toEqual([thumbUrl(B, photo(2))]);
   });
@@ -98,10 +98,25 @@ describe('Upload screen', () => {
     mocks.request.mockImplementation(async (m: string, p: string, ...rest: unknown[]) =>
       m === 'DELETE' ? { status: 409 } : base(m, p, ...rest));
     await open();
-    await screen.findByText('1 of 200 photos stored');
+    await screen.findByText('1 photo stored');
     await userEvent.click(screen.getByRole('button', { name: 'Remove photo 1' }));
-    expect(await screen.findByText('1 of 200 photos stored')).toBeTruthy();
+    expect(await screen.findByText('1 photo stored')).toBeTruthy();
     expect(mocks.request.mock.calls.filter(([m]) => m === 'DELETE')).toHaveLength(1);
+  });
+
+  it('takes a batch of any size: no cap in the copy, a bounded strip, a bounded rejected list', async () => {
+    backend({ status: 200, body: { id: B, phase: 'empty', photoIds: Array.from({ length: 300 }, (_, i) => photo(i)), rejected: 0 } });
+    await open();
+    expect(await screen.findByText('300 photos stored')).toBeTruthy();
+    const strip = screen.getByRole('list', { name: 'Stored photos' });
+    expect(within(strip).getAllByRole('listitem')).toHaveLength(61);
+    expect(within(strip).getByText('and 240 more')).toBeTruthy();
+    runs = async () => summary({ rejected: Array.from({ length: 80 }, (_, i) => ({ name: `x${i}.gif`, reason: 'type' as const })) });
+    await userEvent.click(screen.getByRole('button', { name: 'Choose photos' }));
+    const list = await screen.findByRole('list', { name: 'Files not uploaded' });
+    expect(within(list).getAllByRole('listitem')).toHaveLength(51);
+    expect(within(list).getByText('and 30 more')).toBeTruthy();
+    expect(screen.getByRole('alert').textContent).toContain('80 files couldn’t be uploaded.');
   });
 
   it('shows progress, then the stored photos and one line per rejected file', async () => {
@@ -130,11 +145,11 @@ describe('Upload screen', () => {
     expect(lines).toEqual([
       'a.gif Not a JPEG, PNG or WebP',
       'b.png Over 25 MB',
-      'c.jpg Batch is full: 200 photos',
+      'c.jpg Batch is full. Group these photos, then upload the rest.',
       'd.jpg Image is too large: over 40 megapixels',
       "e.jpg Couldn't read the file",
     ]);
-    expect(screen.getByText('2 of 200 photos stored')).toBeTruthy();
+    expect(screen.getByText('2 photos stored')).toBeTruthy();
     expect(screen.getByRole('alert').textContent).toContain('5 files couldn’t be uploaded.');
     expect(mocks.setDirty).toHaveBeenLastCalledWith(false);
     expect(screen.queryByRole('button', { name: 'Dismiss' })).toBeNull();
@@ -187,7 +202,7 @@ describe('Upload screen', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
     expect(mocks.uploadFiles).toHaveBeenCalledWith('cancel', B);
     await act(async () => finish(summary({ stored: [photo(3)], cancelled: true })));
-    expect(await screen.findByText('1 of 200 photos stored')).toBeTruthy();
+    expect(await screen.findByText('1 photo stored')).toBeTruthy();
     expect(screen.getByText('Cancelled. 1 stored photo is kept.')).toBeTruthy();
   });
 
@@ -213,7 +228,7 @@ describe('Upload screen', () => {
     expect(document.querySelector('.dropzone.over')).not.toBeNull();
     await act(async () => watcher?.({ type: 'dropped', count: 1 }));
     expect(document.querySelector('.dropzone.over')).toBeNull();
-    expect(await screen.findByText('1 of 200 photos stored')).toBeTruthy();
+    expect(await screen.findByText('1 photo stored')).toBeTruthy();
     expect(mocks.uploadFiles).toHaveBeenCalledWith('dropped', B, expect.any(Function));
   });
 

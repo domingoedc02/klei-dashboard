@@ -39,7 +39,7 @@ FR-4: Sign in on the Auth Web, rate-limited, anti-enumeration, return by Deep Li
 FR-5: Request and complete a password reset.
 FR-6: Session in OS keychain, PKCE code exchange, sign out, server-side authorization.
 FR-7: Dashboard widgets scoped to Permissions.
-FR-8: Start an Upload Batch (JPEG, PNG, WebP, 25 MB, 200 per batch, encrypted storage).
+FR-8: Start an Upload Batch (JPEG, PNG, WebP, 25 MB, no fixed photo limit but a server ceiling of 5,000 per batch since Story 21.6, encrypted storage).
 FR-9: Process a batch: embed, group, tag, describe, with progress, notification, retry.
 FR-10: Review Groups: edit name, Attributes, Description; Confidence shown.
 FR-11: Rearrange Photos: move, split, merge, discard, reversible until Save.
@@ -300,7 +300,10 @@ Stories: 19.1 Protection workflow; 19.2 Build and test workflow; 19.3 Packaging 
 ### Epic 20: Qualification, pilot and cutover
 Stories: 20.1 Full-flow parity matrix run; 20.2 Start-up and memory measurement; 20.3 Opt-in pilot; 20.4 Rollback rehearsal and decision records. Shard: `docs/prd/epic-20-qualification-and-cutover.md`.
 
-Total: 7 epics, 33 stories. Order: 14 first; 15 after 14.1 (15.3 also after 14.4); 16 after 15.4; 17 after 15.3 and 16.2; 18 after 14.3, 15.1, 16.6 and 17; 19.1 after 14.1, rest of 19 after 15.4 and 18; 20 after 14 to 19.
+### Epic 21: Layout and picker fixes
+UI fixes in `desktop/src` reported after Epic 13: scrolling frame, Upload Review save bar, Gallery viewer image and full view, group picker. Not part of the Electron migration; the fixes ship in both apps because the Electron renderer builds `desktop/src`. Stories: 21.1 App frame and per-panel scroll; 21.2 Upload Review: fixed save bar and independent panes; 21.3 Gallery viewer: full image and full-view lightbox; 21.4 Group combobox with photo counts (Move, Merge); 21.5 Re-baseline the protected-path gate; 21.6 No-limit upload. Files: `docs/stories/21.1-app-frame-and-per-panel-scroll.md` to `docs/stories/21.6-no-limit-upload.md`. Order: 21.1 first; 21.2 and 21.3 after 21.1; 21.4 after 21.2; 21.6 after 21.1 (it edits `Upload.tsx`, not the frame); 21.5 last, after 21.6 (owner approval; PRs 21.1 to 21.4 fail `electron-protect` until it lands). 21.3 overlaps 13.10 (`ready`, Viewer); 21.4 reopens UR-15 (13.8); 21.2 replaces the sticky save bar of 13.7.
+
+Total: 7 migration epics (14 to 20), 33 stories; plus Epic 21, 6 stories, outside the migration. Order: 14 first; 15 after 14.1 (15.3 also after 14.4); 16 after 15.4; 17 after 15.3 and 16.2; 18 after 14.3, 15.1, 16.6 and 17; 19.1 after 14.1, rest of 19 after 15.4 and 18; 20 after 14 to 19; 21 independent of 14 to 20, but its 21.5 moves the gate that 14.1 set, and 21.6 also changes `backend/`.
 
 ### Migration coverage map (inventory to story)
 

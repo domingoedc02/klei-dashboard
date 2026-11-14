@@ -4,6 +4,7 @@ import { formatDate } from '../format';
 import { gownFullUrl, gownThumbUrl } from '../platform';
 import { useShell } from '../shell/context';
 import { Icon } from '../shell/icons';
+import { Lightbox } from '../shell/Lightbox';
 import { ErrorBlock, Pill, type PillTone } from '../shell/ui';
 import { DownloadStatus, useDownload } from './download';
 import { EditGown } from './EditGown';
@@ -28,6 +29,8 @@ export function Viewer({ id }: { id: string }) {
   const [at, setAt] = useState(0);
   const [tries, setTries] = useState(0);
   const [failed, setFailed] = useState(false);
+  const [full, setFull] = useState(false);
+  const opener = useRef<HTMLElement | null>(null);
   const download = useDownload();
 
   const load = useCallback(async () => {
@@ -49,13 +52,13 @@ export function Viewer({ id }: { id: string }) {
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
-      if (t && ['INPUT', 'SELECT', 'TEXTAREA'].includes(t.tagName)) return;
+      if (full || (t && ['INPUT', 'SELECT', 'TEXTAREA'].includes(t.tagName))) return;
       if (e.key === 'ArrowLeft') setAt((i) => Math.max(0, i - 1));
       else if (e.key === 'ArrowRight') setAt((i) => Math.min(n - 1, i + 1));
     };
     document.addEventListener('keydown', on);
     return () => document.removeEventListener('keydown', on);
-  }, [n]);
+  }, [n, full]);
 
   const copy = async (text: string) => {
     try {
@@ -133,6 +136,7 @@ export function Viewer({ id }: { id: string }) {
                 <button type="button" className="btn" disabled={at === 0} onClick={() => setAt(at - 1)}>Previous</button>
                 <span aria-live="polite">{at + 1} of {n}</span>
                 <button type="button" className="btn" disabled={at === n - 1} onClick={() => setAt(at + 1)}>Next</button>
+                <button type="button" className="btn" onClick={(e) => { opener.current = e.currentTarget; setFull(true); }}>Full view</button>
               </div>
               <ul className="strip" aria-label="Photos">
                 {photos.map((p, i) => (
@@ -170,6 +174,12 @@ export function Viewer({ id }: { id: string }) {
           {g.description ? <p className="description">{g.description}</p> : <p className="lede">No description yet.</p>}
         </aside>
       </div>
+      {full && current && (
+        <Lightbox
+          src={gownFullUrl(g.id ?? id, current.id ?? '')} index={at} total={n}
+          onMove={(d) => setAt((i) => Math.min(n - 1, Math.max(0, i + d)))} onClose={() => { setFull(false); opener.current?.focus(); }}
+        />
+      )}
     </section>
   );
 }

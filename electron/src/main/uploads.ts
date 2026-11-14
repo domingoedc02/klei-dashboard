@@ -8,7 +8,6 @@ import { BridgeError } from '../shared/errors.ts'
 import type { Session } from './session.ts'
 
 export const MAX_BYTES = 25 * 1024 * 1024
-export const MAX_PHOTOS = 200
 export const EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp']
 const IN_FLIGHT = 3
 
@@ -18,7 +17,7 @@ export type Emit = (p: { type: 'progress' } & UploadProgress) => void
 
 /** A drop is claimed within this long or forgotten. */
 export const DROP_TTL_MS = 10_000
-const MAX_DROPPED = 10_000
+const MAX_DROPPED = 50_000
 const MAX_PATH = 4096
 
 interface Watcher { emit(message: unknown): void; end(): void }
@@ -141,13 +140,13 @@ export async function statAll(paths: string[]): Promise<{ ok: Picked[]; bad: Rej
   return { ok, bad }
 }
 
-/** Extension, then size, then the room left in the batch (first `room` files stay). The server still confirms the real image type. */
-export function triage(picked: Picked[], room: number): { send: Picked[]; refused: Rejected[] } {
+/** Extension, then size. The batch ceiling is the server's call (a 413 with `limit`); the server also confirms the real image type. */
+export function triage(picked: Picked[]): { send: Picked[]; refused: Rejected[] } {
   const send: Picked[] = []
   const refused: Rejected[] = []
   for (const p of picked) {
     const ext = extname(p.path).slice(1).toLowerCase()
-    const reason: RejectReason | null = !EXTENSIONS.includes(ext) ? 'type' : p.len > MAX_BYTES ? 'size' : send.length >= room ? 'full' : null
+    const reason: RejectReason | null = !EXTENSIONS.includes(ext) ? 'type' : p.len > MAX_BYTES ? 'size' : null
     if (reason) refused.push({ name: basename(p.path), reason })
     else send.push(p)
   }
@@ -173,17 +172,16 @@ export const AVATAR_MAX_BYTES = 2 * 1024 * 1024
 const fresh = () => randomBytes(16).toString('hex')
 const noAccess = () => new BridgeError('no_access', 'no access')
 
-/** Uploads `paths` into `batch`. The batch must be the caller's own; the room left comes from the server. Stored files stay stored whatever happens later. */
+/** Uploads `paths` into `batch`. The batch must be the caller's own; the server decides when it is full. Stored files stay stored whatever happens later. */
 export async function run(session: Session, batch: string, paths: string[], signal: AbortSignal, emit: Emit): Promise<UploadSummary> {
   const cur = await session.call('GET', '/api/v1/uploads/current', null, session.cfg.requestTimeoutMs, signal)
   if (cur.status === 403) throw noAccess()
   const view = cur.status === 200 ? parse<{ id?: unknown; photoIds?: unknown }>(cur.bytes) : null
   if (view === null || typeof view !== 'object') throw new BridgeError('failed', 'no upload batch')
   if (view.id !== batch) throw new BridgeError('bad_request', 'not the current batch')
-  const storedBefore = Array.isArray(view.photoIds) ? view.photoIds.length : 0
 
   const { ok, bad } = await statAll(paths)
-  const { send, refused: over } = triage(ok, Math.max(0, MAX_PHOTOS - storedBefore))
+  const { send, refused: over } = triage(ok)
   const refused = [...bad, ...over]
   const stored: string[] = []
   const rejected: Rejected[] = []
@@ -192,9 +190,11 @@ export async function run(session: Session, batch: string, paths: string[], sign
   let done = 0
   let waiting = 0
   let fatal: BridgeError | null = null
+  let full = false
   const tick = (photoId: string | null) => emit({ type: 'progress', done, total, waiting: waiting > 0, photoId })
 
   const one = async (job: Picked): Promise<Outcome> => {
+    if (full) return { refused: 'full' }
     const bytes = await readFile(job.path).catch(() => null)
     if (bytes === null) return { refused: 'unreadable' }
     const name = basename(job.path)
@@ -208,7 +208,7 @@ export async function run(session: Session, batch: string, paths: string[], sign
             const id = parse<{ id?: unknown }>(raw.bytes)?.id
             return typeof id === 'string' ? { stored: id } : { fatal: new BridgeError('failed', 'bad upload answer') }
           }
-          case 413: return { refused: storedBefore + stored.length >= MAX_PHOTOS ? 'full' : 'dimensions' }
+          case 413: full = parse<{ extensions?: { limit?: unknown } }>(raw.bytes)?.extensions?.limit !== undefined; return { refused: full ? 'full' : 'dimensions' }
           case 415: return { refused: 'type' }
           case 403: return { fatal: noAccess() }
           case 429: case 502: case 503: case 504: break
@@ -299,7 +299,7 @@ export async function attachFiles(session: Session, inquiry: string, paths: stri
 /** Sends one picked file as the signed-in User's avatar. `stored` holds "avatar" on success; the server confirms the real type. */
 export async function setAvatar(session: Session, path: string, signal?: AbortSignal): Promise<UploadSummary> {
   const { ok, bad } = await statAll([path])
-  const { send, refused: more } = triage(ok, 1)
+  const { send, refused: more } = triage(ok)
   const refused: Rejected[] = [...bad, ...more]
   const stored: string[] = []
   const p = send[0]

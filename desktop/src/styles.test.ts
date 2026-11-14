@@ -93,24 +93,40 @@ describe('styles.css', () => {
     expect(body('.empty-state .illo')).toMatch(/height: 240px/);
     expect(body('.empty-state.compact .illo')).toMatch(/height: 144px/);
     expect(body('.empty-state p')).toMatch(/max-width: 44ch/);
-    expect(body('.scrim .dialog .actions')).toMatch(/justify-content: flex-end; margin-top: var\(--space-6\)/);
+    expect(body('.scrim .dialog .actions')).toMatch(/justify-content: flex-end;[\s\S]*position: sticky; bottom: calc\(-1 \* var\(--space-6\)\)/);
     expect(body('.btn')).toMatch(/line-height: 1\.33/);
     expect(body('.profile-btn')).toMatch(/padding: var\(--space-1\) var\(--space-2\) var\(--space-1\) var\(--space-1\)[\s\S]*border-radius: var\(--radius-full\)/);
     expect(body('.avatar.small')).toMatch(/width: 24px; height: 24px/);
     expect(body('.assist-chips .chip-btn')).toMatch(/padding: 4px var\(--space-3\)/);
   });
 
-  it('review: 320 + fluid grid, list scrolls past 600, bordered cards with accent ring, full-bleed sticky savebar, 3-col tags', () => {
+  it('review: 320 + fluid grid, panes scroll alone, bordered cards with accent ring, fixed savebar row, 3-col tags', () => {
     const body = (sel: string) => blocks(styles).find((x) => x.sel.includes(sel))!.body;
+    const exact = (sel: string) => blocks(styles.replace(/\/\*[\s\S]*?\*\//g, '')).find((x) => x.sel.join(', ') === sel)!.body;
     expect(body('.rv')).toMatch(/grid-template-columns: 320px minmax\(0, 1fr\)/);
-    expect(body('.rv-list')).toMatch(/max-height: 600px; overflow-y: auto/);
+    expect(exact('.rv-list')).toMatch(/flex: 1; min-height: 0; overflow-y: auto/);
+    expect(exact('.rv-list')).not.toMatch(/max-height/);
+    expect(exact('.rv > .editor')).toMatch(/min-height: 0; overflow-y: auto/);
+    expect(exact('.rv')).toMatch(/grid-template-rows: minmax\(0, 1fr\)/);
     expect(body('.gl')).toMatch(/border: 1px solid/);
     expect(body(".gl[aria-current='true']")).toMatch(/box-shadow: 0 0 0 1px var\(--color-accent\)/);
     expect(body('.strip img')).toMatch(/width: 40px/);
     expect(body('.gl:focus-visible')).toMatch(/outline-offset: -2px/);
-    expect(body('.savebar')).toMatch(/padding: var\(--space-4\) var\(--space-8\)/);
-    expect(body('.savebar')).toMatch(/position: sticky; bottom: 0[\s\S]*border-top[\s\S]*calc\(var\(--space-8\) \* -1\)/);
+    expect(exact('.savebar')).toMatch(/display: flex[\s\S]*padding: var\(--space-4\) 0[\s\S]*border-top/);
+    expect(exact('.savebar')).not.toMatch(/sticky|calc|margin/);
     expect(body('.tags-grid')).toMatch(/repeat\(3, minmax\(0, 1fr\)\)/);
+  });
+
+  it('settings and inquiries: sheet is a fixed flex column, panel scrolls, .foot sticks flush to the bottom', () => {
+    const exact = (sel: string) => blocks(styles.replace(/\/\*[\s\S]*?\*\//g, '')).filter((x) => x.sel.join(', ') === sel).at(-1)!.body;
+    expect(exact('.sheet:has(.settings), .sheet:has(.inquiries)')).toMatch(/flex-direction: column; overflow: hidden; padding-bottom: 0/);
+    expect(exact(".settings > [role='tabpanel']")).toMatch(/flex: 1; min-height: 0[\s\S]*overflow-y: auto/);
+    expect(exact('.foot')).toMatch(/position: sticky; bottom: 0; margin-top: auto/);
+    expect(exact('.inq-list')).toMatch(/overflow-y: auto/);
+    expect(exact('.inq-thread')).toMatch(/overflow-y: auto/);
+    expect(exact('.composer-foot')).toMatch(/position: sticky; bottom: 0/);
+    expect(exact('.inq-thread > .messages')).toMatch(/overflow-y: auto/);
+    expect(exact('.inq-thread > .composer')).toMatch(/max-height: 55%; overflow-y: auto/);
   });
 
   it('review editor: 6-col photo toggles, 2-col organizer, 64px confidence meter, no menu chrome', () => {
@@ -118,10 +134,25 @@ describe('styles.css', () => {
     expect(body('.thumbs')).toMatch(/grid-template-columns: repeat\(6, minmax\(0, 1fr\)\)[\s\S]*gap: var\(--space-2\)/);
     expect(body(".th[aria-pressed='true']")).toMatch(/border-color: var\(--color-accent\)/);
     expect(body('.tick')).toMatch(/width: 20px; height: 20px/);
-    expect(body('.org')).toMatch(/repeat\(2, minmax\(0, 1fr\)\)/);
+    expect(body('.org')).toMatch(/repeat\(auto-fit, minmax\(300px, 1fr\)\)/);
     expect(body('.org-row:last-child')).toMatch(/grid-column: 1 \/ -1/);
     expect(body('.conf .meter')).toMatch(/width: 64px/);
-    expect(styles).not.toMatch(/\.menuwrap|\.menubtn|\.photos\b/);
+    expect(styles).not.toMatch(/\.menuwrap|\.menubtn|\.photos(?![-\w])/);
+  });
+
+  it('frame: only panels scroll, never the page; review and viewer fill the sheet', () => {
+    const exact = (sel: string) => blocks(styles.replace(/\/\*[\s\S]*?\*\//g, '')).find((x) => x.sel.join(', ') === sel)!.body;
+    expect(exact('.app')).toMatch(/height: 100vh[\s\S]*overflow: hidden/);
+    expect(exact('.sheet')).toMatch(/position: relative/);
+    expect(exact('.sheet:has(.review), .sheet:has(.viewer)')).toMatch(/display: flex; flex-direction: column; overflow: hidden/);
+    expect(exact('.viewer .details')).toMatch(/min-height: 0; overflow-y: auto/);
+    expect(exact('.viewer .stage img')).toMatch(/object-fit: contain/);
+  });
+
+  it('group combobox: popup is a raised, scrolling list over the pane', () => {
+    const exact = (sel: string) => blocks(styles.replace(/\/\*[\s\S]*?\*\//g, '')).find((x) => x.sel.join(', ') === sel)!.body;
+    expect(exact('.combo-pop')).toMatch(/position: absolute[\s\S]*max-height: 220px[\s\S]*overflow-y: auto/);
+    expect(exact('.combo input')).toMatch(/width: 100%/);
   });
 
   it('avatar is a 32px dark circle', () => {

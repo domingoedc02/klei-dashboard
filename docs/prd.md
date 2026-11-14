@@ -206,7 +206,7 @@ A User can see summaries scoped to their Permissions and jump to the detail scre
 A User with Upload images can add Photos by drag-and-drop or file picker and start processing.
 
 **Consequences (testable):**
-- Accepted: JPEG, PNG, WebP up to 25 MB each, up to 200 Photos per Upload Batch `[ASSUMPTION]`; rejected files are listed with the reason. Confirmed 2026-11-10 (course correction): the cap stays 200; the prototype's 100 does not apply (Story 11.5).
+- Accepted: JPEG, PNG, WebP up to 25 MB each, up to 200 Photos per Upload Batch `[ASSUMPTION]`; rejected files are listed with the reason. Confirmed 2026-11-10 (course correction): the cap stays 200; the prototype's 100 does not apply (Story 11.5). Revised 2026-11-14 (course correction, Story 21.6): no fixed photo limit; the backend keeps one safety ceiling, `klei.upload.max-photos` (default 5,000), and a full batch reads "Batch is full".
 - Each Photo is encrypted client-side before storage (NFR-1) and stored under a random UUID key.
 - Users without Upload images see no upload action; API returns 403.
 
@@ -723,7 +723,7 @@ Resolved at Gate 2 (logged in memlog): scale numbers confirmed; whole-word searc
 11. **Viewer scope.** Viewer sees Dashboard (without inquiry widget), Gallery (read-only), personal Settings. Confirm.
 12. **Outbound SMTP in production.** Which provider/domain will send Invitation and Reply emails (SPF/DKIM, reply-to)?
 13. **Update host.** Where do signed Update packages and the update manifest live (Dokploy-served static path, MinIO public bucket, GitHub Releases)? Needs a stable HTTPS URL baked into the bundle.
-14. **Photo cap per Upload Batch.** ANSWERED 2026-11-10: 200 stays; the prototype's 100 does not apply (Story 11.5).
+14. **Photo cap per Upload Batch.** ANSWERED 2026-11-10: 200 stays; the prototype's 100 does not apply (Story 11.5). Revised 2026-11-14 (course correction, Story 21.6): no fixed photo limit; the backend keeps one safety ceiling, `klei.upload.max-photos` (default 5,000), and a full batch reads "Batch is full".
 15. **Away Message auto-send.** ANSWERED 2026-11-10: yes, once per Client per closure window (FR-32, Story 11.12).
 16. **Two-factor requirement setting.** ANSWERED 2026-11-10 (reply "yes" read as: accept the defaults). zxing QR library: yes. Admin-required 2FA: not built (FR-44). Reverse by writing a story if wanted.
 
@@ -731,7 +731,7 @@ Resolved at Gate 2 (logged in memlog): scale numbers confirmed; whole-word searc
 - §4.1 FR-1 — Authorization code + PKCE for the Deep Link return; loopback redirect fallback; backend URL is a build-time constant.
 - §4.1 FR-3 — Verification by code vs link decided in Auth ADR.
 - §4.1 FR-6 — Role/permission changes apply at next sign-in (wireframe copy).
-- §4.3 FR-8 — Upload limits: JPEG/PNG/WebP, 25 MB each, 200 Photos per batch (prototype says 100; the user kept 200 on 2026-11-10).
+- §4.3 FR-8 — Upload limits: JPEG/PNG/WebP, 25 MB each, 200 Photos per batch (prototype says 100; the user kept 200 on 2026-11-10). Revised 2026-11-14 (course correction, Story 21.6): no fixed photo limit; the backend keeps one safety ceiling, `klei.upload.max-photos` (default 5,000), and a full batch reads "Batch is full".
 - §4.3 FR-11 — Rearrange actions reversible until Save.
 - §4.4 FR-18 — Gown delete is a hard delete including MinIO objects.
 - §4.5 FR-23 — Staff with Reply to inquiries may edit Client fields.

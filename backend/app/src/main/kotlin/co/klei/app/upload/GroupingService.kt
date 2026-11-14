@@ -230,7 +230,8 @@ class GroupingService(
                 .setParameter("ids", ids).resultList.associateBy { it.photoId }
             ids.map { (byPhoto[it] ?: throw IllegalStateException("missing embedding")).vector.values.toFloatArray() }
         }!!
-        val clusters = verify(run, ids, vectors, Clusterer.cluster(vectors, threshold))
+        val sim = Clusterer.similarities(vectors)
+        val clusters = verify(run, ids, sim, Clusterer.cluster(vectors, threshold, sim))
         tx.executeWithoutResult {
             val batch = em.find(UploadBatch::class.java, run.batchId, LockModeType.PESSIMISTIC_WRITE) ?: throw IllegalStateException("batch gone")
             em.createQuery("delete from UploadGroup g where g.batchId = :b").setParameter("b", run.batchId).executeUpdate()
@@ -245,8 +246,7 @@ class GroupingService(
     }
 
     /** One call per group of two or more photos, one after another; a group the model splits becomes several (Story 10.3). */
-    private fun verify(run: Run, ids: List<UUID>, vectors: List<FloatArray>, clusters: List<Cluster>): List<Cluster> {
-        val sim = Clusterer.similarities(vectors)
+    private fun verify(run: Run, ids: List<UUID>, sim: Sims, clusters: List<Cluster>): List<Cluster> {
         var done = 0
         return clusters.flatMap { c ->
             verifyOne(run, ids, sim, c).also {
@@ -257,7 +257,7 @@ class GroupingService(
     }
 
     /** A provider failure leaves the group whole but unverified, so it cannot read High; it never fails the batch. Anything else is a bug and does. */
-    private fun verifyOne(run: Run, ids: List<UUID>, sim: Array<DoubleArray>, c: Cluster): List<Cluster> {
+    private fun verifyOne(run: Run, ids: List<UUID>, sim: Sims, c: Cluster): List<Cluster> {
         if (c.members.size < 2) return listOf(c)
         val sent = GroupVerify.pick(c.members, sim)
         val parts = try {

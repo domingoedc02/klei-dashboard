@@ -49,9 +49,9 @@ export function Forbidden() {
   );
 }
 
-export function Sheet({ title, children }: { title: string; children?: ReactNode }) {
+export function Sheet({ title, className, children }: { title: string; className?: string; children?: ReactNode }) {
   return (
-    <section>
+    <section className={className}>
       <h1>{title}</h1>
       {children}
     </section>

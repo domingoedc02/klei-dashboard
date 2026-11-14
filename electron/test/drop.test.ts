@@ -84,7 +84,7 @@ test('a newer watch replaces the older; the page going away ends and clears the 
 test('only the exact message shapes count: junk, extra keys, wrong types, empty and oversize lists are ignored', () => {
   const u = new Uploader()
   const w = watched(u)
-  for (const m of [null, 1, 'x', [], { over: 'yes' }, { over: true, paths: [] }, { paths: [1] }, { paths: [''] }, { paths: 'a' }, { paths: [] }, { nope: 1 }, { paths: ['a'.repeat(5000)] }, { paths: new Array(10_001).fill('/a') }, Object.create({ over: true })]) {
+  for (const m of [null, 1, 'x', [], { over: 'yes' }, { over: true, paths: [] }, { paths: [1] }, { paths: [''] }, { paths: 'a' }, { paths: [] }, { nope: 1 }, { paths: ['a'.repeat(5000)] }, { paths: new Array(50_001).fill('/a') }, Object.create({ over: true })]) {
     assert.equal(parseDrop(m), null, JSON.stringify(m)?.slice(0, 40))
     u.message(m)
   }

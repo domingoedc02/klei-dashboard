@@ -5401,7 +5401,12 @@
       },
       "Extensions_too_large" : {
         "type" : "object",
-        "additionalProperties" : false
+        "additionalProperties" : false,
+        "properties" : {
+          "limit" : {
+            "format" : "int64"
+          }
+        }
       },
       "Extensions_unsupported_type" : {
         "type" : "object",

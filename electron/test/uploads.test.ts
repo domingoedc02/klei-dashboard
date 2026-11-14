@@ -123,23 +123,33 @@ test('server refusals become reasons and the rest carry on; .txt is refused befo
   m.close(); f.done()
 })
 
-test('only the room left in the batch is sent; the rest are "full"', async () => {
-  const held = Array.from({ length: 199 }, (_, i) => id(i))
-  const m = await mock((r) => shared(r, held) ?? stored(500))
-  const f = folder([['a.jpg', 5], ['b.jpg', 5]])
-  const out = await run(await signedIn(m.api), BATCH, f.paths('a.jpg', 'b.jpg'), live(), () => {})
-  assert.equal(out.stored.length, 1)
-  assert.deepEqual(out.rejected, [{ name: 'b.jpg', reason: 'full' }])
-  assert.equal(m.count(PHOTOS), 1)
+test('a 413 with a limit means the batch is full: that file and every later one are "full", and no more are sent', async () => {
+  const m = await mock((r) => shared(r) ?? [413, { code: 'too_large', extensions: { limit: 5 } }])
+  const names = Array.from({ length: 8 }, (_, i) => `${i}.jpg`)
+  const f = folder(names.map((n) => [n, 5]))
+  const out = await run(await signedIn(m.api), BATCH, f.paths(...names), live(), () => {})
+  assert.equal(out.stored.length, 0)
+  assert.deepEqual(out.rejected.map((r) => r.reason), Array(8).fill('full'))
+  assert.ok(m.count(PHOTOS) <= 3, `sent ${m.count(PHOTOS)}`)
   m.close(); f.done()
 })
 
-test('triage order is type, then size, then room; stat errors and folders', async () => {
+test('a batch with 250 photos already stored still takes more', async () => {
+  const held = Array.from({ length: 250 }, (_, i) => id(i))
+  const m = await mock((r) => shared(r, held) ?? stored(500))
+  const f = folder([['a.jpg', 5], ['b.jpg', 5]])
+  const out = await run(await signedIn(m.api), BATCH, f.paths('a.jpg', 'b.jpg'), live(), () => {})
+  assert.equal(out.stored.length, 2)
+  assert.deepEqual(out.rejected, [])
+  m.close(); f.done()
+})
+
+test('triage order is type, then size; stat errors and folders', async () => {
   const p = (path: string, len: number): Picked => ({ path, len, mtimeNs: 1n })
   const big = 25 * 1024 * 1024 + 1
-  const { send, refused } = triage([p('/x/A.JPG', 1), p('/x/b.txt', big), p('/x/c.png', big), p('/x/d.png', 1), p('/x/e.jpeg', 1)], 1)
-  assert.deepEqual(send.map((s) => s.path), ['/x/A.JPG'])
-  assert.deepEqual(refused, [{ name: 'b.txt', reason: 'type' }, { name: 'c.png', reason: 'size' }, { name: 'd.png', reason: 'full' }, { name: 'e.jpeg', reason: 'full' }])
+  const { send, refused } = triage([p('/x/A.JPG', 1), p('/x/b.txt', big), p('/x/c.png', big), p('/x/d.png', 1), p('/x/e.jpeg', 1)])
+  assert.deepEqual(send.map((s) => s.path), ['/x/A.JPG', '/x/d.png', '/x/e.jpeg'])
+  assert.deepEqual(refused, [{ name: 'b.txt', reason: 'type' }, { name: 'c.png', reason: 'size' }])
   const f = folder([['a.jpg', 5]])
   const m = await mock((r) => shared(r) ?? stored())
   const out = await run(await signedIn(m.api), BATCH, [...f.paths('a.jpg'), join(tmpdir()), '/nope/gone.jpg'], live(), () => {})

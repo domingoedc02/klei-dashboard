@@ -34,10 +34,11 @@ class OpenApiConfig {
     @Bean
     fun problemSchemas() = OpenApiCustomizer { api ->
         val c = api.components
-        // Only 409 carries extensions so far (`usedBy`, Taxonomy); add a code's properties here when its endpoint lands.
+        // Only 409 (`usedBy`, Taxonomy) and 413 (`limit`, a full upload batch) carry extensions so far; add a code's properties here when its endpoint lands.
         ProblemCode.entries.forEach {
             val schema = ObjectSchema().additionalProperties(false)
             if (it == ProblemCode.CONFLICT) schema.addProperty("usedBy", Schema<Long>().type("integer").format("int64")).addProperty("check", StringSchema())
+            if (it == ProblemCode.TOO_LARGE) schema.addProperty("limit", Schema<Long>().type("integer").format("int64"))
             c.addSchemas("Extensions_${it.code}", schema)
         }
         c.addSchemas(

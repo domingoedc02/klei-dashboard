@@ -163,21 +163,35 @@ async fn the_server_refusals_become_reasons_and_the_rest_carry_on() {
 }
 
 #[tokio::test]
-async fn only_the_room_left_in_the_batch_is_sent() {
-    let held: Vec<String> = (0..199).map(|i| format!("0b1c2d3e-0000-4000-8000-{i:012}")).collect();
-    let (api, log) = mock(move |r, _| {
+async fn a_413_with_a_limit_means_the_batch_is_full_and_no_more_are_sent() {
+    let (api, log) = mock(|r, _| shared(r, &[]).unwrap_or((413, json!({ "code": "too_large", "extensions": { "limit": 5 } })))).await;
+    let names: Vec<String> = (0..8).map(|i| format!("{i}.jpg")).collect();
+    let files: Vec<(&str, usize)> = names.iter().map(|n| (n.as_str(), 5)).collect();
+    let dir = Folder::with("full", &files);
+    let (emit, _) = collector();
+    let (_a, cancel) = Uploader::default().begin().map(|(a, c)| (std::mem::ManuallyDrop::new(a), c)).unwrap();
+    let paths: Vec<&str> = names.iter().map(String::as_str).collect();
+    let out = run(signed_in(&api, Duration::from_secs(5)), BATCH.into(), dir.paths(&paths), cancel, emit).await.unwrap();
+    assert_eq!(out.stored.len(), 0);
+    assert_eq!(out.rejected.len(), 8);
+    assert!(out.rejected.iter().all(|r| r.reason == Reason::Full));
+    assert!(count(&log, PHOTOS) <= 3);
+}
+
+#[tokio::test]
+async fn a_batch_with_250_photos_already_stored_still_takes_more() {
+    let held: Vec<String> = (0..250).map(|i| format!("0b1c2d3e-0000-4000-8000-{i:012}")).collect();
+    let (api, _) = mock(move |r, _| {
         let refs: Vec<&str> = held.iter().map(String::as_str).collect();
         shared(r, &refs).unwrap_or_else(|| stored(500))
     })
     .await;
-    let dir = Folder::with("room", &[("a.jpg", 5), ("b.jpg", 5)]);
+    let dir = Folder::with("more", &[("a.jpg", 5), ("b.jpg", 5)]);
     let (emit, _) = collector();
     let (_a, cancel) = Uploader::default().begin().map(|(a, c)| (std::mem::ManuallyDrop::new(a), c)).unwrap();
     let out = run(signed_in(&api, Duration::from_secs(5)), BATCH.into(), dir.paths(&["a.jpg", "b.jpg"]), cancel, emit).await.unwrap();
-    assert_eq!(out.stored.len(), 1);
-    assert_eq!(out.rejected.len(), 1);
-    assert_eq!((out.rejected[0].name.as_str(), out.rejected[0].reason), ("b.jpg", Reason::Full));
-    assert_eq!(count(&log, PHOTOS), 1);
+    assert_eq!(out.stored.len(), 2);
+    assert!(out.rejected.is_empty());
 }
 
 #[tokio::test]

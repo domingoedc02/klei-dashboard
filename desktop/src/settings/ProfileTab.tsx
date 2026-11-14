@@ -154,7 +154,7 @@ export function ProfileTab() {
 
   return (
     <>
-      <form className="form" noValidate aria-labelledby="profile-h" onSubmit={(e) => { e.preventDefault(); if (!saving) void save(); }}>
+      <form id="profile-form" className="form" noValidate aria-labelledby="profile-h" onSubmit={(e) => { e.preventDefault(); if (!saving) void save(); }}>
         <h2 id="profile-h">Profile</h2>
         <div className="avatar-row">
           <Avatar name={saved.name ?? ''} revision={saved.avatar} large />
@@ -178,9 +178,6 @@ export function ProfileTab() {
             {problems.stale && <> <button type="button" className="link" onClick={() => { setProblems({}); void load(); }}>Reload</button></>}
           </p>
         )}
-        <div className="actions">
-          <button type="submit" className="btn primary" disabled={saving || name.trim() === (saved.name ?? '')}>Save changes</button>
-        </div>
       </form>
 
       <form className="form" noValidate aria-labelledby="password-h" onSubmit={(e) => { e.preventDefault(); if (!changing) void change(); }}>
@@ -201,6 +198,10 @@ export function ProfileTab() {
       </form>
 
       <TwoFactorCard />
+
+      <div className="actions foot">
+        <button type="submit" form="profile-form" className="btn primary" disabled={saving || name.trim() === (saved.name ?? '')}>Save changes</button>
+      </div>
     </>
   );
 }

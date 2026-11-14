@@ -4,7 +4,7 @@ import { PENDING, uploadRoutes, NOW, BATCH, LONG_NAME } from '../fixtures.mjs';
 const H = '#/upload';
 const review = { hash: H, ready: '.review .rv-list .gl', fx: (r) => Object.assign(r, uploadRoutes('review')) };
 const pickGroup = (n) => (page) => page.locator('.rv-list .gl').nth(n).click();
-const scrollEnd = (page) => page.evaluate(() => { for (const e of document.querySelectorAll('.sheet, main')) e.scrollTop = e.scrollHeight; });
+const scrollEnd = (page) => page.evaluate(() => { for (const e of document.querySelectorAll('.sheet, main, .rv-list, .rv > .editor')) e.scrollTop = e.scrollHeight; });
 
 // Prototype "error" = empty drop zone + rejected files; the desktop twin is upload_files answering with `rejected`.
 const REJECTED = { __events: [], value: { stored: [], rejected: [{ name: 'wedding-fitting.heic', reason: 'size' }, { name: 'notes.pdf', reason: 'type' }], cancelled: false } };
@@ -28,9 +28,8 @@ export default {
     },
     after: pickGroup(3),
   },
-  'upload-review-photos-selected': { ...review, after: async (page) => { await page.getByRole('button', { name: 'Photo 1', exact: true }).click(); await page.getByRole('button', { name: 'Photo 2', exact: true }).click(); await page.getByLabel('Move selected photos to').selectOption({ index: 1 }); } },
-  // native select: its popup is not part of the page screenshot, so the state is the focused control
-  'upload-review-combo-open': { ...review, after: async (page) => { await page.getByLabel('Move selected photos to').focus(); } },
+  'upload-review-photos-selected': { ...review, after: async (page) => { await page.getByRole('button', { name: 'Photo 1', exact: true }).click(); await page.getByRole('button', { name: 'Photo 2', exact: true }).click(); await page.getByLabel('Move selected photos to').click(); await page.getByRole('option').first().click(); } },
+  'upload-review-combo-open': { ...review, after: async (page) => { await page.getByLabel('Move selected photos to').click(); await page.getByRole('listbox', { name: 'Gowns' }).waitFor(); } },
   'upload-review-discard-dialog': { ...review, after: async (page) => { await page.getByRole('button', { name: 'Discard batch' }).click(); await page.waitForSelector('[role=dialog]'); } },
   'upload-review-scrolled': { ...review, after: async (page) => { await pickGroup(9)(page); await scrollEnd(page); } },
 };

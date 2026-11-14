@@ -76,12 +76,18 @@ const moveBtn = () => screen.getByRole('button', { name: /^Move( \d+)?$/ }) as H
 const mergeBtn = () => screen.getByRole('button', { name: 'Merge' }) as HTMLButtonElement;
 const splitBtn = () => screen.getByRole('button', { name: 'Split into new gown' }) as HTMLButtonElement;
 const discardBtn = () => screen.getByRole('button', { name: 'Discard selected' }) as HTMLButtonElement;
-const moveTo = async (label: string) => {
-  await userEvent.selectOptions(screen.getByLabelText('Move selected photos to'), label);
+const combo = (label: string) => screen.getByRole('combobox', { name: label }) as HTMLInputElement;
+const optionTexts = () => within(screen.getByRole('listbox', { name: 'Gowns' })).getAllByRole('option').map((o) => o.textContent);
+const choose = async (label: string, gown: string) => {
+  await userEvent.click(combo(label));
+  await userEvent.click(screen.getByRole('option', { name: new RegExp(`^${gown} ·`) }));
+};
+const moveTo = async (gown: string) => {
+  await choose('Move selected photos to', gown);
   await userEvent.click(moveBtn());
 };
-const mergeInto = async (label: string) => {
-  await userEvent.selectOptions(screen.getByLabelText('Merge this whole gown into'), label);
+const mergeInto = async (gown: string) => {
+  await choose('Merge this whole gown into', gown);
   await userEvent.click(mergeBtn());
 };
 const names = () => [...document.querySelectorAll('.gl .name')].map((n) => n.textContent);
@@ -258,7 +264,9 @@ describe('Staged edits', () => {
     expect(within(org).getByText('Select photos above first, then choose a gown.')).toBeTruthy();
     expect(within(org).getByText('Moves all 2 photos into the gown you pick and removes this group.')).toBeTruthy();
     expect(within(org).getByText('Select photos above first. They become a separate gown.')).toBeTruthy();
-    expect([...(screen.getByLabelText('Move selected photos to') as HTMLSelectElement).options].map((o) => o.textContent)).toEqual(['Choose a gown…', 'Group 2']);
+    await userEvent.click(combo('Move selected photos to'));
+    expect(optionTexts()).toEqual(['Group 2 · 1 photo']);
+    await userEvent.keyboard('{Escape}');
     await noViolations(container);
 
     await pick(1);
@@ -266,7 +274,7 @@ describe('Staged edits', () => {
     expect(within(org).getByText('Creates “Group 1 II” from the 1 selected.')).toBeTruthy();
     expect(moveBtn().textContent).toBe('Move 1');
     expect([moveBtn(), splitBtn(), discardBtn()].map((b) => b.disabled)).toEqual([true, false, false]);
-    await userEvent.selectOptions(screen.getByLabelText('Move selected photos to'), 'Group 2');
+    await choose('Move selected photos to', 'Group 2');
     expect(moveBtn().disabled).toBe(false);
     await noViolations(container);
 
@@ -274,7 +282,7 @@ describe('Staged edits', () => {
     expect(within(org).getByText('Leave at least one photo in this gown.')).toBeTruthy();
     expect([splitBtn(), discardBtn()].map((b) => b.disabled)).toEqual([true, false]);
 
-    await userEvent.selectOptions(screen.getByLabelText('Merge this whole gown into'), 'Group 2');
+    await choose('Merge this whole gown into', 'Group 2');
     expect(mergeBtn().disabled).toBe(false);
     await noViolations(container);
   });
@@ -359,10 +367,41 @@ describe('Staged edits', () => {
     served = () => [groups()[0]];
     await open();
     for (const l of ['Move selected photos to', 'Merge this whole gown into']) {
-      const sel = screen.getByLabelText(l) as HTMLSelectElement;
-      expect(sel.disabled).toBe(true);
-      expect(sel.options[0].textContent).toBe('No other gowns yet');
+      expect(combo(l).disabled).toBe(true);
+      expect(combo(l).placeholder).toBe('No other gowns yet');
     }
+  });
+
+  it('group combobox: shows counts, filters by name, keys pick, Esc closes only the list, no match says so', async () => {
+    served = () => [...groups(), { ...groups()[1], id: 'g3', name: 'Valentina', photoIds: [photo(4), photo(5), photo(6)] }];
+    const { container } = await open();
+    await pick(1);
+    const c = combo('Move selected photos to');
+    await userEvent.click(c);
+    expect(c.getAttribute('aria-expanded')).toBe('true');
+    expect(optionTexts()).toEqual(['Group 2 · 1 photo', 'Valentina · 3 photos']);
+    await noViolations(container);
+
+    await userEvent.type(c, 'VAL');
+    expect(optionTexts()).toEqual(['Valentina · 3 photos']);
+    await userEvent.clear(c);
+    await userEvent.type(c, 'zzz');
+    expect(screen.getByText('No gown matches', { selector: 'p' })).toBeTruthy();
+    expect(screen.queryByRole('listbox')).toBeNull();
+
+    await userEvent.clear(c);
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    expect(c.getAttribute('aria-activedescendant')).toBe(screen.getByRole('option', { name: /^Valentina/ }).id);
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('listbox')).toBeNull();
+    expect(screen.getByRole('button', { name: /Group 1/ })).toBeTruthy();
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}');
+    expect(c.value).toBe('Valentina');
+    expect(screen.queryByRole('listbox')).toBeNull();
+    expect(moveBtn().disabled).toBe(false);
+
+    await userEvent.type(c, 'x');
+    expect(moveBtn().disabled).toBe(true);
   });
 });
 

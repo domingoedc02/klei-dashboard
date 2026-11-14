@@ -18,7 +18,7 @@
   },
   {
    "name": "gallery-default",
-   "pct": 4.07
+   "pct": 4.08
   },
   {
    "name": "gallery-delete-dialog",
@@ -34,7 +34,7 @@
   },
   {
    "name": "gallery-no-match",
-   "pct": 1.63
+   "pct": 1.64
   },
   {
    "name": "gallery-selected",
@@ -66,7 +66,7 @@
   },
   {
    "name": "inquiries-thread-closed",
-   "pct": 3.82
+   "pct": 3.81
   },
   {
    "name": "inquiries-thread-replied",
@@ -170,39 +170,39 @@
   },
   {
    "name": "upload-review",
-   "pct": 4.52
+   "pct": 3.21
   },
   {
    "name": "upload-review-combo-open",
-   "pct": 4.52
+   "pct": 3.45
   },
   {
    "name": "upload-review-discard-dialog",
-   "pct": 4.01
+   "pct": 2.7
   },
   {
    "name": "upload-review-long",
-   "pct": 5.26
+   "pct": 3.38
   },
   {
    "name": "upload-review-low-group",
-   "pct": 5.06
+   "pct": 3.21
   },
   {
    "name": "upload-review-photos-selected",
-   "pct": 4.59
+   "pct": 3.64
   },
   {
    "name": "upload-review-scrolled",
-   "pct": 4.79
+   "pct": 3.79
   },
   {
    "name": "viewer-default",
-   "pct": 2.45
+   "pct": 2.54
   },
   {
    "name": "viewer-delete-dialog",
-   "pct": 2.09
+   "pct": 2.14
   },
   {
    "name": "viewer-edit-dialog",
@@ -214,7 +214,7 @@
   },
   {
    "name": "viewer-photo-3",
-   "pct": 2.46
+   "pct": 2.56
   }
  ],
  "protoOnly": [],
@@ -236,6 +236,7 @@
   "signin-waiting",
   "upload-loading",
   "upload-stopped",
+  "viewer-lightbox",
   "viewer-loading"
  ],
  "geometry": {

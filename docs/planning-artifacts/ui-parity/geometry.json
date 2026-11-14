@@ -586,6 +586,42 @@
    {
     "kind": "text-ellipsis",
     "sel": "p.inq-subject",
+    "text": "Fitting availability for a June wedding",
+    "detail": "scroll 281x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Hi, I saw the Aurelia gown on your site ",
+    "detail": "scroll 544x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Alterations and timeline question",
+    "detail": "scroll 247x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "We are two months out and I need to know",
+    "detail": "scroll 588x24 > client 167x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
+    "text": "Lace ball gown pricing",
+    "detail": "scroll 170x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-preview",
+    "text": "Could you share a price range for your l",
+    "detail": "scroll 595x24 > client 166x24"
+   },
+   {
+    "kind": "text-ellipsis",
+    "sel": "p.inq-subject",
     "text": "Can I reschedule my appointment?",
     "detail": "scroll 262x24 > client 166x24"
    },
@@ -630,48 +666,6 @@
     "sel": "p.inq-preview",
     "text": "Do you carry sample sizes 8 and 10 in A-",
     "detail": "scroll 576x24 > client 164x24"
-   },
-   {
-    "kind": "text-ellipsis",
-    "sel": "p.inq-preview",
-    "text": "I would like to book a first fitting for",
-    "detail": "scroll 587x24 > client 167x24"
-   },
-   {
-    "kind": "text-ellipsis",
-    "sel": "p.inq-subject",
-    "text": "Veil and accessory options",
-    "detail": "scroll 203x24 > client 163x24"
-   },
-   {
-    "kind": "text-ellipsis",
-    "sel": "p.inq-preview",
-    "text": "Which veils go with a lace ball gown? I ",
-    "detail": "scroll 570x24 > client 163x24"
-   },
-   {
-    "kind": "text-ellipsis",
-    "sel": "p.inq-subject",
-    "text": "First consultation request",
-    "detail": "scroll 192x24 > client 163x24"
-   },
-   {
-    "kind": "text-ellipsis",
-    "sel": "p.inq-preview",
-    "text": "I am getting married in December and nee",
-    "detail": "scroll 584x24 > client 163x24"
-   },
-   {
-    "kind": "text-ellipsis",
-    "sel": "p.inq-subject",
-    "text": "Mikado or satin for a winter wedding?",
-    "detail": "scroll 284x24 > client 166x24"
-   },
-   {
-    "kind": "text-ellipsis",
-    "sel": "p.inq-preview",
-    "text": "We are torn between Mikado and satin for",
-    "detail": "scroll 596x24 > client 166x24"
    }
   ]
  },
@@ -1092,6 +1086,9 @@
   "desktop": []
  },
  "banner-offline": {
+  "desktop": []
+ },
+ "viewer-lightbox": {
   "desktop": []
  }
 }

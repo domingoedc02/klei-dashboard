@@ -18,7 +18,7 @@ class PickImagesTest {
         // 10 photos near 0..9 degrees except photo 6 at 35 degrees (least alike) and photos 1 and 8 at the centre (most alike)
         val s = sim(0.0, 4.0, 1.0, 2.0, 8.0, 7.0, 35.0, 9.0, 4.5, 3.0)
         val members = (0..9).toList()
-        val mean = members.associateWith { a -> members.filter { it != a }.map { s[a][it] }.average() }
+        val mean = members.associateWith { a -> members.filter { it != a }.map { s[a, it] }.average() }
         val ranked = members.sortedBy { mean.getValue(it) }
         val chosen = GroupVerify.pick(members, s)
         assertEquals(8, chosen.size)
