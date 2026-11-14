@@ -1,7 +1,7 @@
 {
   "name": "klei-bridal-electron-preview",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Klei Bridal Preview (Electron migration)",
   "homepage": "https://github.com/domingoedc02/klei-dashboard",
   "type": "module",

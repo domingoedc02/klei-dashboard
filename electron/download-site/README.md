@@ -37,7 +37,9 @@ A version is listed only if its manifest is valid and every named file exists at
 
 ## Docker / Dokploy
 
-`docker compose up --build` reads `.env` and mounts `./data` read-only. In Dokploy, build from this folder's `Dockerfile`, set the three variables, mount a volume at `/data`, and publish container port `8090` through the HTTPS proxy.
+`docker compose up --build` reads `.env` and mounts the host directory `/srv/electron-downloads` at `/data` read-only. Create that directory first and make it writable by the release SSH user; set the GitHub `electron-release` environment variable `ELECTRON_DEPLOY_PATH=/srv/electron-downloads`. Copy any existing releases from the old `./data` directory before switching mounts. Local Docker runs also need the host directory available to Docker.
+
+In Dokploy, deploy this folder's `compose.yml`, set the three variables (keep `KLEI_DOWNLOAD_DATA_DIR=/data`), and publish container port `8090` through the HTTPS proxy. Do not add a second mount targeting `/data`. Redeploy after changing the Compose file. If deploying directly from the `Dockerfile` instead, configure the same `/srv/electron-downloads` to `/data` read-only bind mount in Dokploy.
 
 ## Rotate the token
 

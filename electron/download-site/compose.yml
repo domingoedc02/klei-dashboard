@@ -5,7 +5,7 @@ services:
     ports:
       - "${KLEI_DOWNLOAD_PORT:-8090}:${KLEI_DOWNLOAD_PORT:-8090}"
     volumes:
-      - ./data:/data:ro
+      - /srv/electron-downloads:/data:ro
     read_only: true
     tmpfs:
       - /tmp
