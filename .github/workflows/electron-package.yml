@@ -1,0 +1,142 @@
+name: electron-package
+
+# Builds the five preview installers, each on a runner of its own OS and architecture (the native credential library
+# is per-platform, so cross-arch builds would ship the wrong one), inspects them, and smoke-launches each. Story 19.3.
+on:
+  push:
+    paths:
+      - "electron/**"
+      - ".github/workflows/electron*.yml"
+  pull_request:
+    paths:
+      - "electron/**"
+      - ".github/workflows/electron*.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: ${{ matrix.id }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { id: mac-arm64, os: macos-15, args: "--mac --arm64", unpacked: mac-arm64, file: mac-arm64.dmg }
+          - { id: mac-x64, os: macos-15-intel, args: "--mac --x64", unpacked: mac, file: mac-x64.dmg }
+          - { id: win-x64, os: windows-latest, args: "--win --x64", unpacked: win-unpacked, file: win-x64.exe }
+          - { id: linux-x64, os: ubuntu-24.04, args: "--linux --x64", unpacked: linux-unpacked, file: linux-x64.AppImage }
+    defaults:
+      run:
+        working-directory: electron
+        shell: bash
+    env:
+      KLEI_API_URL: http://127.0.0.1:8080
+      KLEI_AUTH_URL: http://127.0.0.1:8081
+      # Placeholder only, so no real URL or token is in the 7-day artifacts. The release workflow builds with the real one.
+      KLEI_DOWNLOAD_BASE_URL: https://download.invalid/ci-placeholder-not-a-secret-0123456789abcdef
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: electron/package-lock.json
+      - name: Linux system packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb libasound2t64 libgbm1 libgtk-3-0t64 libnss3
+      - run: npm ci
+      - name: Package
+        run: npm run pack -- ${{ matrix.args }}
+      - name: Inspect the unpacked app
+        run: node scripts/inspect-package.mjs release/${{ matrix.unpacked }}
+      - name: Size and SHA-256 of each installer
+        run: node scripts/release-manifest.mjs list release
+
+      - name: Smoke launch (macOS, from the mounted dmg)
+        if: runner.os == 'macOS'
+        run: |
+          mnt="$RUNNER_TEMP/dmg"
+          mkdir -p "$mnt"
+          hdiutil attach -nobrowse -readonly -mountpoint "$mnt" release/klei-bridal-preview-*-${{ matrix.file }}
+          ditto "$mnt/Klei Bridal Preview.app" "$RUNNER_TEMP/Klei Bridal Preview.app"
+          hdiutil detach "$mnt"
+          node scripts/smoke.mjs "$RUNNER_TEMP/Klei Bridal Preview.app/Contents/MacOS/Klei Bridal Preview"
+
+      - name: Smoke launch (Windows, silent install)
+        if: runner.os == 'Windows'
+        run: |
+          MSYS_NO_PATHCONV=1 release/klei-bridal-preview-*-${{ matrix.file }} /S
+          exe=""
+          for i in $(seq 30); do
+            exe=$(find "$(cygpath -u "$LOCALAPPDATA")/Programs" -name 'Klei Bridal Preview.exe' 2>/dev/null | head -1)
+            [ -n "$exe" ] && break
+            sleep 2
+          done
+          [ -n "$exe" ] || { echo "installed app not found"; exit 1; }
+          # The installer may start the app itself; a second copy would hit the single-instance lock and exit 0 without proving anything.
+          taskkill //F //IM "Klei Bridal Preview.exe" 2>/dev/null || true
+          if reg query 'HKCU\Software\Classes\klei' >/dev/null 2>&1; then echo "installer registered a klei URL scheme"; exit 1; fi
+          node scripts/smoke.mjs "$exe"
+
+      - name: Smoke launch (Linux AppImage)
+        if: runner.os == 'Linux'
+        # No FUSE on the runner, so the AppImage unpacks itself (--appimage-extract-and-run). --no-sandbox only here: an AppImage cannot carry the setuid helper.
+        run: |
+          img=$(ls release/klei-bridal-preview-*-${{ matrix.file }})
+          chmod +x "$img"
+          dir="$RUNNER_TEMP/appimage"
+          mkdir -p "$dir"
+          (cd "$dir" && "$OLDPWD/$img" --appimage-extract >/dev/null)
+          if grep -q 'x-scheme-handler' "$dir"/squashfs-root/*.desktop; then echo "AppImage .desktop declares a URL scheme"; exit 1; fi
+          xvfb-run -a node scripts/smoke.mjs "$img" --appimage-extract-and-run --no-sandbox
+
+      - name: Smoke launch (Linux deb, dpkg -i)
+        if: runner.os == 'Linux'
+        run: |
+          deb=$(ls release/klei-bridal-preview-*-linux-x64.deb)
+          sudo dpkg -i "$deb" || sudo apt-get install -f -y
+          pkg=$(dpkg-deb -f "$deb" Package)
+          desktop=$(dpkg -L "$pkg" | grep '\.desktop$' | head -1)
+          [ -n "$desktop" ] || { echo "no .desktop file in the package"; exit 1; }
+          if grep -q 'x-scheme-handler' "$desktop"; then echo "deb .desktop declares a URL scheme"; exit 1; fi
+          bin=$(dpkg -L "$pkg" | while IFS= read -r f; do [ -f "$f" ] && [ -x "$f" ] && [ "$(basename "$f")" = "$pkg" ] && { echo "$f"; break; }; done)
+          [ -n "$bin" ] || { echo "no executable named $pkg in the package"; exit 1; }
+          xvfb-run -a node scripts/smoke.mjs "$bin"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: klei-bridal-preview-${{ matrix.file }}
+          path: electron/release/klei-bridal-preview-*-${{ matrix.file }}
+          retention-days: 7
+          if-no-files-found: error
+      - name: Upload deb
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: klei-bridal-preview-linux-x64.deb
+          path: electron/release/klei-bridal-preview-*-linux-x64.deb
+          retention-days: 7
+          if-no-files-found: error
+
+  five:
+    name: exactly five installers
+    needs: package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: klei-bridal-preview-*
+          merge-multiple: true
+          path: installers
+      - name: Names, count, size and SHA-256
+        run: node electron/scripts/release-manifest.mjs list installers --five | tee -a "$GITHUB_STEP_SUMMARY"

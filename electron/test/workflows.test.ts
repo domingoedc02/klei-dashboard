@@ -120,3 +120,54 @@ test('electron.yml: dummy env passes the same parser the release build uses; no 
   assert.ok(parseBase(env.KLEI_DOWNLOAD_BASE_URL, true).startsWith('https://download.invalid/'))
   assert.ok(!('KLEI_RELEASE' in env))
 })
+
+const MATRIX = [
+  { id: 'mac-arm64', os: 'macos-15' },
+  { id: 'mac-x64', os: 'macos-15-intel' },
+  { id: 'win-x64', os: 'windows-latest' },
+  { id: 'linux-x64', os: 'ubuntu-24.04' },
+]
+
+test('electron-package.yml: path-filtered plus manual trigger; one native runner per target; no secrets, signing or Tauri names', () => {
+  const w = load('electron-package.yml')
+  const text = read('electron-package.yml')
+  assert.deepEqual(Object.keys(w.on).sort(), ['pull_request', 'push', 'workflow_dispatch'])
+  for (const k of ['pull_request', 'push']) assert.deepEqual(trigger(w, k).paths, PATHS, k)
+  const job = w.jobs.package!
+  assert.equal(job.strategy?.['fail-fast'], false)
+  const inc = job.strategy!.matrix!.include as { id: string; os: string; args: string }[]
+  assert.deepEqual(inc.map(({ id, os }) => ({ id, os })), MATRIX)
+  assert.deepEqual(inc.map((m) => m.args), ['--mac --arm64', '--mac --x64', '--win --x64', '--linux --x64'])
+  assert.ok(!/\$\{\{\s*secrets\./.test(text) && !/CSC_|APPLE_|signtool|notariz|identity/i.test(text) && !job.environment && !job.permissions)
+  assert.ok(!/KLEI_RELEASE/.test(text))
+})
+
+test('electron-package.yml: placeholder download URL passes the release parser', () => {
+  const env = load('electron-package.yml').jobs.package!.env!
+  assert.match(env.KLEI_DOWNLOAD_BASE_URL!, /^https:\/\/download\.invalid\//)
+  assert.ok(parseBase(env.KLEI_DOWNLOAD_BASE_URL, true).startsWith('https://download.invalid/'))
+  assert.deepEqual([env.KLEI_API_URL, env.KLEI_AUTH_URL], ['http://127.0.0.1:8080', 'http://127.0.0.1:8081'])
+})
+
+test('electron-package.yml: pack, inspect, hash, a smoke launch per OS, 7-day uploads that fail when empty, and a five-file check', () => {
+  const w = load('electron-package.yml')
+  const text = read('electron-package.yml')
+  const list = w.jobs.package!.steps!
+  const run = (re: RegExp) => list.filter((s) => re.test(s.run ?? ''))
+  assert.equal(run(/npm run pack -- \$\{\{ matrix\.args \}\}/).length, 1)
+  assert.equal(run(/inspect-package\.mjs release\/\$\{\{ matrix\.unpacked \}\}/).length, 1)
+  assert.equal(run(/release-manifest\.mjs list release/).length, 1)
+  const smoke = list.filter((s) => /smoke\.mjs/.test(s.run ?? ''))
+  assert.deepEqual(smoke.map((s) => s.if), ["runner.os == 'macOS'", "runner.os == 'Windows'", "runner.os == 'Linux'", "runner.os == 'Linux'"])
+  assert.match(text, /dpkg -i/)
+  assert.match(text, /--appimage-extract-and-run/)
+  assert.match(text, /xvfb-run -a node scripts\/smoke\.mjs/)
+  const up = list.filter((s) => s.uses?.startsWith('actions/upload-artifact'))
+  assert.equal(up.length, 2)
+  for (const u of up) assert.deepEqual([u.with?.['retention-days'], u.with?.['if-no-files-found']], [7, 'error'])
+  const five = w.jobs.five!
+  assert.equal(five.needs, 'package')
+  assert.ok(five.steps!.some((s) => /release-manifest\.mjs list installers --five/.test(s.run ?? '')))
+  assert.ok(five.steps!.some((s) => s.uses?.startsWith('actions/download-artifact')))
+  assert.ok(!/continue-on-error/.test(text))
+})

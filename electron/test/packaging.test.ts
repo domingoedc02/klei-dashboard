@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { inspect } from '../scripts/inspect-package.mjs'
 import { APP_ID, PRODUCT_NAME } from '../src/main/identity.ts'
 
 const path = (p: string) => fileURLToPath(new URL(p, import.meta.url))
@@ -71,4 +72,5 @@ test('packed macOS arm64 app: metadata, no URL types, native keyring unpacked, s
   assert.ok(existsSync(join(app, 'Contents/Resources/app.asar.unpacked/node_modules/@napi-rs/keyring-darwin-arm64/keyring.darwin-arm64.node')))
   const bin = join(app, 'Contents/MacOS', PRODUCT_NAME)
   execFileSync(bin, [], { env: { ...process.env, KLEI_SMOKE: '1' }, timeout: 40_000, stdio: 'pipe' })
+  assert.deepEqual(inspect(path('../release/mac-arm64')), [], 'the 19.3 inspector agrees')
 })
