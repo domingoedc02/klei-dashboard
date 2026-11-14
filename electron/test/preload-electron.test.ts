@@ -14,13 +14,14 @@ const electronBin: string = createRequire(path('../package.json'))('electron')
 const profile = mkdtempSync(join(tmpdir(), 'klei-preload-'))
 const SHOTS = process.env.KLEI_SHOT_DIR
 
-// Launched by folder, so package.json gives the app its version (a script path leaves a platform default such as "0.0", which the update check refuses).
+// Linux launches by folder so package.json gives the app its version (a script path leaves "0.0", which the update check refuses).
+// Windows hangs on a folder launch on the hosted runner (cause not found), so other platforms keep the script path.
 // Nothing listens on port 1, so check_update is offline and no test can reach a real download site.
 before(() => { execFileSync(process.execPath, [join(ROOT, 'scripts/build-main.mjs')], { stdio: 'inherit', env: { ...process.env, KLEI_DOWNLOAD_BASE_URL: `http://127.0.0.1:1/${'x'.repeat(43)}` } }) })
 after(() => rmSync(profile, { recursive: true, force: true }))
 
 const launch = (env: Record<string, string> = {}) =>
-  _electron.launch({ executablePath: electronBin, args: [ROOT], cwd: ROOT, env: { ...process.env, KLEI_USER_DATA: profile, ...env } })
+  _electron.launch({ executablePath: electronBin, args: [process.platform === 'linux' ? ROOT : join(ROOT, 'build/main/index.js')], cwd: ROOT, env: { ...process.env, KLEI_USER_DATA: profile, ...env } })
 
 type Klei = Record<string, (...a: unknown[]) => Promise<unknown>>
 
