@@ -78,3 +78,23 @@ test('compare: different image sizes count as a full difference', async () => {
   assert.equal(r.pairs[0].diffPixels, 16)
   assert.match(r.pairs[0].size, /4x4 vs 8x4/)
 })
+
+test('electron side: fixture rejections map to what the loopback mock can do; native-only states are skipped with a reason', async () => {
+  const { plan } = await import('./electron-side.mjs')
+  const rej = (kind: string) => ({ 'cmd api_request': { __reject: { kind } } })
+  assert.deepEqual(plan({}), { out: false, me: 'ok', auth: 'ok', signin: 'ok', latest: '0.0.0' })
+  assert.equal(plan(rej('signed_out')).out, true)
+  assert.equal(plan(rej('unreachable')).me, 'down')
+  assert.equal(plan(rej('session_expired')).auth, 'expired')
+  assert.equal(plan(rej('no_access')).auth, 'noaccess')
+  assert.equal(plan({ 'cmd sign_in': () => 0 }).signin, 'hang')
+  assert.equal(plan({ 'cmd sign_in': { __reject: { kind: 'failed' } } }).signin, 'bad')
+  assert.equal(plan({ 'cmd check_update': { status: 'available', version: '1.2.0' } }).latest, '1.2.0')
+  for (const t of [{ 'cmd upload_files': {} }, { 'cmd install_update': {} }, rej('keychain_unavailable')]) assert.match(plan(t).skip, /\w/)
+})
+
+test('electron side writes only under the output directory and never into desktop/ or the baseline folders', () => {
+  const c = code('electron-side.mjs')
+  assert.ok(!/ui-parity|\bflush\s*\(/.test(c))
+  assert.ok(!/(writeFile|mkdir|writeFileSync|cpSync)\([^)]*desktop/.test(c))
+})

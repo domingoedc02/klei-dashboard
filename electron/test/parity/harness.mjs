@@ -1,10 +1,12 @@
 // Parity harness, baseline side (story 14.2). Reuses desktop/scripts/shots/* read-only; writes only under electron/parity-out/<side>/.
-// Usage: node electron/test/parity/harness.mjs --side baseline [--renderer baseline|electron] [--only <id-state substring>] [--renderer-url <url>] [--out <dir>]
+// Usage: node electron/test/parity/harness.mjs --side baseline|app [--renderer baseline|electron] [--only <id-state substring>] [--renderer-url <url>] [--size 1440x900|1280x800|1100x700] [--out <dir>]
+// --side baseline: the original renderer (or the Electron build of it) in plain Chromium with fixtures. --side app: the built Electron app (electron-side.mjs, story 20.1).
 // Not used on purpose: the shared writers and output path of the original capture (they write into docs/planning-artifacts/ui-parity) and its Vite launcher (starts inside desktop/).
 import { mkdir, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { captureApp } from './electron-side.mjs'
 import { serveRenderer } from './serve-renderer.mjs'
 
 const REPO = fileURLToPath(new URL('../../../', import.meta.url))
@@ -42,14 +44,16 @@ async function installKleiShim(page, handler, log) {
   })
 }
 
-export async function captureBaseline({ wanted = '', rendererUrl, outDir, renderer = 'baseline' }) {
+export async function captureBaseline({ wanted = '', rendererUrl, outDir, renderer = 'baseline', size = '1440x900' }) {
   const { SCREENS, name } = await load('screens.mjs')
   const { NOW, makeHandler, routes, imgSvg } = await load('fixtures.mjs')
   const { installShim } = await load('tauri-shim.mjs')
   const { probe } = await load('probe.mjs')
-  const { settle, VIEWPORT } = await load('common.mjs')
+  const { settle } = await load('common.mjs')
+  const [width, height] = size.split('x').map(Number)
+  const VIEWPORT = { width, height }
 
-  const dir = join(outDir, renderer)
+  const dir = join(outDir, size === '1440x900' ? renderer : `${renderer}-${size}`)
   await mkdir(dir, { recursive: true })
   const served = rendererUrl ? { url: rendererUrl, close() {} } : await serveRenderer(join(REPO, renderer === 'electron' ? 'electron/build/renderer' : 'electron/build/baseline-renderer'))
   const record = { geometry: {}, copy: {} }
@@ -89,18 +93,21 @@ export async function captureBaseline({ wanted = '', rendererUrl, outDir, render
     served.close()
   }
   await writeFile(join(dir, 'probe.json'), JSON.stringify(record, null, 1))
-  return { failures, count: Object.keys(record.geometry).length }
+  return { failures, count: Object.keys(record.geometry).length, dir }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  if (arg('side', 'baseline') !== 'baseline') {
-    console.error('Only --side baseline runs now. The Electron side is wired in electron-side.mjs and switched on in story 20.1.')
+  const side = arg('side', 'baseline')
+  if (!['baseline', 'app'].includes(side)) {
+    console.error('--side is baseline or app')
     process.exit(2)
   }
   const outDir = arg('out', join(REPO, 'electron/parity-out'))
-  const renderer = arg('renderer', 'baseline')
-  const { failures, count } = await captureBaseline({ wanted: arg('only', ''), rendererUrl: arg('renderer-url'), outDir, renderer })
-  console.log(`${count} states captured in ${join(outDir, renderer)}`)
+  const size = arg('size', '1440x900')
+  const { failures, count, dir, skipped = 0 } = side === 'app'
+    ? await captureApp({ wanted: arg('only', ''), outDir, size })
+    : await captureBaseline({ wanted: arg('only', ''), rendererUrl: arg('renderer-url'), outDir, renderer: arg('renderer', 'baseline'), size })
+  console.log(`${count} states captured in ${dir ?? join(outDir, arg('renderer', 'baseline'))}${skipped ? `, ${skipped} skipped (see skipped.json)` : ''}`)
   if (failures.length) {
     console.error(`${failures.length} state(s) with errors:\n${failures.join('\n')}`)
     process.exit(1)
