@@ -2,7 +2,7 @@
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
-export const BASELINE = '8083c944b523285c1fce33bb2f1d3331bc0c350d'
+export const BASELINE = '8e2eca27f91f5bfcd7a146961d603117bf8a597b'
 export const PROTECTED = [
   'desktop', 'backend', 'infra', 'prototype', 'docs/api',
   'docs/install-guide.md', 'docs/release-checklist.md', '.github/workflows',

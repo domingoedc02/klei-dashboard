@@ -277,7 +277,7 @@ Status: approved by the user on 2026-11-08. This file is final; stories stay `re
 
 ## Addendum: Electron migration, Epics 14 to 20 (2026-11-13)
 
-Additive. Epics 1 to 13, their stories and Gate 5 above are unchanged and still describe the protected Tauri app (first baseline commit `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`; re-baselined at `8083c944b523285c1fce33bb2f1d3331bc0c350d` in Stories 21.5 and 21.7). The migration builds a separate Electron target in `electron/` and is governed by `docs/prd.md` section 13 (MFR-1 to MFR-8). Shards and stories live in `docs/prd/` and `docs/stories/`; the index and authority table are `docs/prd/index.md`. Nothing here is built, run or tested yet.
+Additive. Epics 1 to 13, their stories and Gate 5 above are unchanged and still describe the protected Tauri app (first baseline commit `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`; re-baselined at `8e2eca27f91f5bfcd7a146961d603117bf8a597b` in Stories 21.5 and 21.7). The migration builds a separate Electron target in `electron/` and is governed by `docs/prd.md` section 13 (MFR-1 to MFR-8). Shards and stories live in `docs/prd/` and `docs/stories/`; the index and authority table are `docs/prd/index.md`. Nothing here is built, run or tested yet.
 
 ### Epic 14: Baseline, parity harness and feasibility
 Stories: 14.1 Baseline freeze and protected-path gate; 14.2 Electron-owned parity harness; 14.3 Feasibility spikes; 14.4 Read-only renderer build and shim feasibility. Shard: `docs/prd/epic-14-baseline-and-feasibility.md`.

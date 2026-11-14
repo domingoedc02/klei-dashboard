@@ -10,7 +10,7 @@ The reviewer records PASS, CONCERNS or FAIL. The owner decides cutover.
 
 1. Preview in use: signed in, a Draft left unsent.
 2. Stop the preview (quit the app).
-3. Install the Tauri build made from the baseline commit `8083c944b523285c1fce33bb2f1d3331bc0c350d` (the Story 21.7 baseline; earlier: `463f89f901d2db71e6e2ce8300ea92e7bd128a5e` from Story 21.5, then `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`), or start the installed one.
+3. Install the Tauri build made from the baseline commit `8e2eca27f91f5bfcd7a146961d603117bf8a597b` (the Story 21.7 baseline; earlier: `463f89f901d2db71e6e2ce8300ea92e7bd128a5e` from Story 21.5, then `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`), or start the installed one.
 4. Open it, sign in.
 5. Confirm business data and Drafts are intact (the data lives on the backend; a Draft lives in the app that held it, so the Tauri side shows its own).
 6. Optional: remove the preview, its profile folder and its credential entry (`electron/INSTALL-PREVIEW.md`, "Removing the preview"). Never touch anything named `co.klei.bridal`.
