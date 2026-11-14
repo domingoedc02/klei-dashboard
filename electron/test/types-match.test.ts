@@ -6,8 +6,8 @@ import { EXPORT_KINDS, UPLOAD_EVENT_TYPES, UPLOAD_KINDS, UPLOAD_PROGRESS_FIELDS,
 import { KINDS } from '../src/shared/errors.ts'
 
 const path = (p: string) => fileURLToPath(new URL(p, import.meta.url))
-const bridge = readFileSync(path('../../desktop/src/bridge.ts'), 'utf8')
-const errorRs = readFileSync(path('../../desktop/src-tauri/src/error.rs'), 'utf8')
+const bridge = readFileSync(path('../../desktop/src/bridge.ts'), 'utf8').replaceAll('\r\n', '\n')
+const errorRs = readFileSync(path('../../desktop/src-tauri/src/error.rs'), 'utf8').replaceAll('\r\n', '\n')
 const quoted = (s: string) => [...s.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]!)
 const block = (re: RegExp) => re.exec(bridge)?.[1] ?? assert.fail(`not found: ${re}`)
 const fields = (body: string) => [...body.matchAll(/^\s*(\w+)\??:/gm)].map((m) => m[1]!)

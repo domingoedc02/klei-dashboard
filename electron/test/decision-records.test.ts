@@ -4,7 +4,7 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 const DIR = fileURLToPath(new URL('../../docs/planning-artifacts/electron-migration/', import.meta.url))
-const read = (f: string) => readFileSync(`${DIR}${f}`, 'utf8')
+const read = (f: string) => readFileSync(`${DIR}${f}`, 'utf8').replaceAll('\r\n', '\n')
 const tableCells = (t: string) => t.split('\n').filter((l) => l.startsWith('|') && !/^\|[-| ]+\|$/.test(l))
 
 test('decision records: the owner records are blank-ready (empty value column, unsigned)', () => {

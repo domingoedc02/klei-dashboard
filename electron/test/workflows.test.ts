@@ -90,12 +90,14 @@ test('electron.yml: path-filtered triggers, three-OS matrix, working directory e
 test('electron.yml: steps in the story order, Node 24 with an npm cache keyed on the Electron lockfile', () => {
   const list = Object.values(load('electron.yml').jobs)[0]!.steps!
   const at = (re: RegExp) => list.findIndex((s) => re.test(`${s.uses ?? ''} ${s.run ?? ''}`))
-  const order = [/actions\/checkout/, /actions\/setup-node/, /npm ci/, /npm run typecheck/, /npm test/, /check-skips\.mjs/, /npm run build\b/, /smoke\.mjs/, /scan-secrets\.mjs build/].map(at)
+  const order = [/actions\/checkout/, /actions\/setup-node/, /npm ci/, /npm run typecheck/, /npm run build\b/, /npm test/, /check-skips\.mjs/, /smoke\.mjs/, /scan-secrets\.mjs build/].map(at)
   assert.ok(order.every((n) => n >= 0), `missing step: ${order}`)
   assert.deepEqual(order, [...order].sort((a, b) => a - b))
   const node = list[at(/actions\/setup-node/)]!.with!
   assert.deepEqual([node['node-version'], node.cache, node['cache-dependency-path']], ['24', 'npm', 'electron/package-lock.json'])
   assert.ok(list.some((s) => /npm run build:renderer/.test(s.run ?? '')))
+  assert.match(read('electron.yml'), /fetch-depth: 0/, 'the baseline-tree test needs the full history')
+  assert.ok(list.some((s) => /electron\/install\.js/.test(s.run ?? '')))
   assert.ok(ORDER.every((a) => list.some((s) => s.uses?.startsWith(a))))
 })
 

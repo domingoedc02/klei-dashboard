@@ -28,7 +28,7 @@ test('copy: writeText works from a click on the secure app origin and shows the 
     await page.click('#copy')
     await page.waitForFunction(() => document.getElementById('status')!.textContent !== '')
     assert.equal(await page.evaluate(() => document.getElementById('status')!.textContent), 'Copied')
-    assert.equal(await app.evaluate(({ clipboard }: { clipboard: { readText(): string } }) => clipboard.readText()), 'recovery-code-1\nrecovery-code-2')
+    assert.equal((await app.evaluate(({ clipboard }: { clipboard: { readText(): string } }) => clipboard.readText())).replaceAll('\r\n', '\n'), 'recovery-code-1\nrecovery-code-2')
   } finally {
     await app.close()
   }

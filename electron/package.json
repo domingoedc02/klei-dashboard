@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "description": "Klei Bridal Preview (Electron migration)",
+  "homepage": "https://github.com/domingoedc02/klei-dashboard",
   "type": "module",
   "main": "build/main/index.js",
   "scripts": {

@@ -13,8 +13,8 @@ import { MAIN_WINDOW } from '../src/main/identity.ts'
 import { CHANNEL_COMMANDS, COMMANDS } from '../src/shared/commands.ts'
 
 const path = (p: string) => fileURLToPath(new URL(p, import.meta.url))
-const read = (p: string) => readFileSync(path(p), 'utf8')
-const abs = (f: string) => readFileSync(f, 'utf8')
+const read = (p: string) => readFileSync(path(p), 'utf8').replaceAll('\r\n', '\n')
+const abs = (f: string) => readFileSync(f, 'utf8').replaceAll('\r\n', '\n')
 const tauri = JSON.parse(read('../../desktop/src-tauri/tauri.conf.json'))
 const WANT = ['api_request', 'sign_in', 'sign_out', 'upload_files', 'export_gowns', 'check_update', 'install_update', 'set_dirty', 'session_only'].sort()
 
@@ -27,7 +27,7 @@ const walk = (dir: string, out: string[] = []): string[] => {
   return out
 }
 const mainFiles = walk(path('../src/main'))
-const rel = (f: string) => f.slice(path('../src/').length)
+const rel = (f: string) => f.slice(path('../src/').length).replaceAll('\\', '/')
 
 test('the nine commands and no others: Tauri, shared list, preload allow list and main handler map agree', () => {
   const rust = [...(/pub const NAMES: \[&str; 9\] = \[([^\]]+)\]/.exec(read('../../desktop/src-tauri/src/commands.rs'))?.[1] ?? '').matchAll(/"(\w+)"/g)].map((m) => m[1]!).sort()
