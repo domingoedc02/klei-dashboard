@@ -469,6 +469,20 @@ class GroupingIT {
     }
 
     @Test
+    fun `a group whose answer cannot be read stays undescribed and does not stop the batch`() {
+        val p = person()
+        val batch = open(p)
+        repeat(2) { add(p, batch, RED) }
+        add(p, batch, GREEN)
+        stub.chatAnswer = { b -> if (Regex("data:image/").findAll(b).count() == 1) "I cannot describe this photo." else StubProvider.DEFAULT_ANSWER(b) }
+        start(p, batch)
+        val done = until(p, batch, "review", "error")
+        assertEquals("review", done["phase"]!!.jsonPrimitive.content, done.toString())
+        assertEquals(listOf(false, true), described(batch).map { it.description == null }.sorted())
+        assertEquals(1, notes.sent.size)
+    }
+
+    @Test
     fun `a failing group stops the batch at step 3 and Retry describes only the groups still missing`() {
         val p = person()
         val batch = open(p)

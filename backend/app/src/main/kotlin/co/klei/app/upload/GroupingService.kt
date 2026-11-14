@@ -334,7 +334,15 @@ class GroupingService(
 
     private fun describeOne(run: Run, t: Todo, allowed: Map<String, List<String>>, tone: String) {
         val images = thumbs(run.userId, run.batchId, t.photos)
-        val answer = provider(3) { ai.describe(AiCall(AiPurpose.DESCRIBE, run.userId, "group ${t.groupId}"), images, allowed, tone) }
+        val answer = try {
+            provider(3) { ai.describe(AiCall(AiPurpose.DESCRIBE, run.userId, "group ${t.groupId}"), images, allowed, tone) }
+        } catch (e: StepFailure) {
+            // The same photos get the same unreadable answer on every Retry, so one such Group must not stop the batch; it stays
+            // undescribed and the Staff member can Rewrite it. shortcut: no marker on the Group, the empty description is the signal.
+            if (e.code != AiFailure.BAD_RESPONSE.name.lowercase()) throw e
+            log.warn("describe skipped, answer not readable")
+            return
+        }
         val tags = TaxonomyMapper.map(answer.attributes, allowed)
         val named = TaxonomyMapper.named(answer.attributes)
         tx.executeWithoutResult {
