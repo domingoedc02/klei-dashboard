@@ -13,10 +13,12 @@
     "pack": "npm run build && npm run build:renderer && node scripts/pack.mjs"
   },
   "devDependencies": {
+    "@types/js-yaml": "4.0.9",
     "@types/node": "24.19.2",
     "electron": "45.3.2",
     "electron-builder": "26.18.0",
     "esbuild": "0.28.2",
+    "js-yaml": "4.3.2",
     "typescript": "5.9.3"
   },
   "dependencies": {

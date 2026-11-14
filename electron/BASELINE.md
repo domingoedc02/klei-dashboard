@@ -32,6 +32,14 @@ The second command must print nothing, except `?? .github/workflows/electron*.ym
 
 Test (no `git` is run): `node --test electron/test/protected-paths.test.ts`
 
+## Protection workflow (19.1)
+
+`.github/workflows/electron-protect.yml` runs the gate above on every `pull_request` and every `push`, with no path, branch or tag filter, so a filter cannot hide an edit to the protected Tauri app. It uses only `actions/checkout` and `actions/setup-node` at full commit SHAs, `permissions: contents: read`, no secrets.
+
+Owner action (a workflow cannot enforce its own existence): in the repository settings add a branch protection rule or ruleset for `main` that requires the status check `protect` (workflow `electron-protect`) and requires review for `.github/workflows/electron-protect.yml` and `electron/scripts/protected-paths.mjs` (CODEOWNERS or the ruleset "restrict file paths"). Until set, a pull request can rewrite the check that guards it.
+
+Static test: `node --test electron/test/workflows.test.ts`.
+
 ## Electron runtime (15.1)
 
 Web check 2026-11-14: Electron 45.3.2 is npm latest and in the three-newest-majors support window (OQ-M1).
