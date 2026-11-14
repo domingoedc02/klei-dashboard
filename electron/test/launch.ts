@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 
 export const path = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 export const ROOT = path('..')
-const { _electron } = createRequire(path('../../desktop/package.json'))('@playwright/test')
+const { _electron } = createRequire(path('../package.json'))('@playwright/test')
 const electronBin: string = createRequire(path('../package.json'))('electron')
 
 export const build = () => { execFileSync(process.execPath, [join(ROOT, 'scripts/build-main.mjs')], { stdio: 'inherit' }) }

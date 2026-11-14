@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 
 const path = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 const ROOT = path('..')
-const { _electron } = createRequire(path('../../desktop/package.json'))('@playwright/test')
+const { _electron } = createRequire(path('../package.json'))('@playwright/test')
 const electronBin: string = createRequire(path('../package.json'))('electron')
 const profile = mkdtempSync(join(tmpdir(), 'klei-preload-'))
 const SHOTS = process.env.KLEI_SHOT_DIR

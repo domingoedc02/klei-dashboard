@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 const path = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 const ROOT = path('..')
 // Playwright and the Electron binary come from existing installs; nothing is added to the lockfile.
-const { _electron } = createRequire(path('../../desktop/package.json'))('@playwright/test')
+const { _electron } = createRequire(path('../package.json'))('@playwright/test')
 const electronBin: string = createRequire(path('../package.json'))('electron')
 
 const hits: string[] = []

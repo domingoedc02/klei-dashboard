@@ -33,7 +33,7 @@ test('a11y checklist names the five kinds of check the story requires', () => {
 })
 
 // compare() on two tiny PNGs
-const require = createRequire(join(HERE, '../../../desktop/package.json'))
+const require = createRequire(join(HERE, '../../package.json'))
 const { PNG } = require('pngjs')
 const solid = (r, g, b) => { const p = new PNG({ width: 4, height: 4 }); for (let i = 0; i < 16; i++) p.data.set([r, g, b, 255], i * 4); return PNG.sync.write(p) }
 const dirs = (fa, fb, pa = {}, pb = {}) => {

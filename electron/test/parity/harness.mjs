@@ -9,7 +9,7 @@ import { serveRenderer } from './serve-renderer.mjs'
 
 const REPO = fileURLToPath(new URL('../../../', import.meta.url))
 const SHOTS = join(REPO, 'desktop/scripts/shots')
-const desktopRequire = createRequire(join(REPO, 'desktop/package.json')) // read-only: Playwright comes from desktop/node_modules until 15.1 installs its own
+const desktopRequire = createRequire(join(REPO, 'electron/package.json'))
 const { chromium } = desktopRequire('@playwright/test')
 const load = (f) => import(pathToFileURL(join(SHOTS, f)).href)
 

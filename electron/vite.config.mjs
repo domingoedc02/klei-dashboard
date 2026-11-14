@@ -1,5 +1,5 @@
 // Electron-owned build of the original renderer (story 14.4). Reads desktop/ only; output and cache go under electron/.
-// Vite, React plugin and @tauri-apps/api resolve from desktop/node_modules (read-only) until 15.1 installs a pinned copy under electron/.
+// Vite, the React plugin, React and @tauri-apps/api come from electron/node_modules (pinned to the versions in desktop/package.json), so a clean checkout builds without installing anything under desktop/.
 import { createRequire } from 'node:module'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -8,7 +8,8 @@ const REPO = fileURLToPath(new URL('../', import.meta.url))
 export const DESKTOP = join(REPO, 'desktop')
 export const OUTDIR = join(REPO, 'electron/build/renderer')
 export const BASELINE_OUTDIR = join(REPO, 'electron/build/baseline-renderer')
-const require = createRequire(join(DESKTOP, 'package.json'))
+const EN = join(REPO, 'electron')
+const require = createRequire(join(EN, 'package.json'))
 export const loadVite = () => import(pathToFileURL(require.resolve('vite')).href)
 const react = (await import(pathToFileURL(require.resolve('@vitejs/plugin-react')).href)).default
 
@@ -37,6 +38,9 @@ export const updateCopy = {
   },
 }
 
+// The page's root is desktop/, so bare imports would look for desktop/node_modules; these send them to electron/node_modules.
+const modules = [{ find: /^(react|react-dom|@tauri-apps\/api)(\/.*)?$/, replacement: `${EN}/node_modules/$1$2` }]
+
 // `electron` target: aliased so the page talks to window.klei. `baseline` target: the original bundle, for the Tauri-shim parity harness.
 export const config = {
   root: DESKTOP,
@@ -46,8 +50,8 @@ export const config = {
   base: './',
   cacheDir: join(REPO, 'electron/.cache/vite'),
   plugins: [updateCopy, react()],
-  resolve: { alias: { '@tauri-apps/api/core': join(REPO, 'electron/src/renderer-compat/core.ts') } },
+  resolve: { alias: [{ find: '@tauri-apps/api/core', replacement: join(REPO, 'electron/src/renderer-compat/core.ts') }, ...modules] },
   server: { fs: { allow: [DESKTOP, join(REPO, 'electron/src')] } },
   build: { outDir: OUTDIR, emptyOutDir: true, assetsInlineLimit: 0, target: 'es2022' },
 }
-export const baselineConfig = { ...config, plugins: [react()], resolve: {}, build: { ...config.build, outDir: BASELINE_OUTDIR } }
+export const baselineConfig = { ...config, plugins: [react()], resolve: { alias: modules }, build: { ...config.build, outDir: BASELINE_OUTDIR } }

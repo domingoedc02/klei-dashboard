@@ -13,13 +13,21 @@
     "pack": "npm run build && npm run build:renderer && node scripts/pack.mjs"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@tauri-apps/api": "2.12.4",
     "@types/js-yaml": "4.0.9",
     "@types/node": "24.19.2",
+    "@vitejs/plugin-react": "6.2.1",
     "electron": "45.3.2",
     "electron-builder": "26.18.0",
     "esbuild": "0.28.2",
     "js-yaml": "4.3.2",
-    "typescript": "5.9.3"
+    "pixelmatch": "8.0.0",
+    "pngjs": "7.0.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.6"
   },
   "dependencies": {
     "@napi-rs/keyring": "2.1.2",

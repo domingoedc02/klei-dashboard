@@ -7,7 +7,7 @@ import { join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const REPO = fileURLToPath(new URL('../../../', import.meta.url))
-const require = createRequire(join(REPO, 'desktop/package.json')) // pixelmatch and pngjs are read from desktop/node_modules until 15.1 installs its own
+const require = createRequire(join(REPO, 'electron/package.json'))
 const { PNG } = require('pngjs')
 const pixelmatch = (await import(pathToFileURL(require.resolve('pixelmatch')).href)).default
 

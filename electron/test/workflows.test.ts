@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
+import { parseBase } from '../src/main/download-url.ts'
 
 // Static checks of the Electron workflow files (Epic 19). Nothing here runs a workflow; the first real run on GitHub is the evidence.
 const ROOT = fileURLToPath(new URL('../../', import.meta.url))
@@ -66,5 +67,56 @@ test('electron-protect: unfiltered pull_request and push, one job, full history,
   assert.equal(node!.with?.['node-version'], '24')
   assert.equal(gate!.run, 'node electron/scripts/protected-paths.mjs')
   assert.equal(rest.length, 0)
-  assert.ok(!/secrets\./.test(read('electron-protect.yml')))
+  assert.ok(!/\$\{\{\s*secrets\./.test(read('electron-protect.yml')))
+})
+
+const PATHS = ['electron/**', '.github/workflows/electron*.yml']
+const ORDER = ['actions/checkout', 'actions/setup-node']
+
+test('electron.yml: path-filtered triggers, three-OS matrix, working directory electron, bash', () => {
+  const w = load('electron.yml')
+  assert.deepEqual(Object.keys(w.on).sort(), ['pull_request', 'push'])
+  for (const k of ['pull_request', 'push']) assert.deepEqual(trigger(w, k).paths, PATHS, k)
+  const job = Object.values(w.jobs)[0]!
+  assert.equal(Object.keys(w.jobs).length, 1)
+  assert.equal(job.strategy?.['fail-fast'], false)
+  const os = (job.strategy?.matrix?.include as { os: string }[]).map((m) => m.os).sort()
+  assert.deepEqual(os, ['macos-latest', 'ubuntu-latest', 'windows-latest'])
+  const d = (job as { defaults?: { run?: { 'working-directory'?: string; shell?: string } } }).defaults?.run
+  assert.deepEqual([d?.['working-directory'], d?.shell], ['electron', 'bash'])
+  assert.ok(!job.environment && !job.permissions && !/\$\{\{\s*secrets\./.test(read('electron.yml')))
+})
+
+test('electron.yml: steps in the story order, Node 24 with an npm cache keyed on the Electron lockfile', () => {
+  const list = Object.values(load('electron.yml').jobs)[0]!.steps!
+  const at = (re: RegExp) => list.findIndex((s) => re.test(`${s.uses ?? ''} ${s.run ?? ''}`))
+  const order = [/actions\/checkout/, /actions\/setup-node/, /npm ci/, /npm run typecheck/, /npm test/, /check-skips\.mjs/, /npm run build\b/, /smoke\.mjs/, /scan-secrets\.mjs build/].map(at)
+  assert.ok(order.every((n) => n >= 0), `missing step: ${order}`)
+  assert.deepEqual(order, [...order].sort((a, b) => a - b))
+  const node = list[at(/actions\/setup-node/)]!.with!
+  assert.deepEqual([node['node-version'], node.cache, node['cache-dependency-path']], ['24', 'npm', 'electron/package-lock.json'])
+  assert.ok(list.some((s) => /npm run build:renderer/.test(s.run ?? '')))
+  assert.ok(ORDER.every((a) => list.some((s) => s.uses?.startsWith(a))))
+})
+
+test('electron.yml: Linux runs under xvfb with its packages; smoke and tests fail the job on a bad exit', () => {
+  const text = read('electron.yml')
+  const job = Object.values(load('electron.yml').jobs)[0]!
+  const include = job.strategy!.matrix!.include as { os: string; headless: string }[]
+  assert.equal(include.find((m) => m.os === 'ubuntu-latest')!.headless, 'xvfb-run -a')
+  assert.ok(include.filter((m) => m.os !== 'ubuntu-latest').every((m) => m.headless === ''))
+  assert.match(text, /apt-get install[^\n]*xvfb/)
+  assert.match(text, /matrix\.headless \}\} npm test 2>&1 \| tee test\.log/)
+  assert.match(text, /matrix\.headless \}\} node scripts\/smoke\.mjs/)
+  assert.ok(!/continue-on-error|\|\| true/.test(text))
+  assert.equal(job.steps!.find((s) => s.name?.startsWith('Smoke'))?.shell, undefined)
+})
+
+test('electron.yml: dummy env passes the same parser the release build uses; no real URL, no release flag', () => {
+  const env = Object.values(load('electron.yml').jobs)[0]!.env!
+  assert.equal(env.KLEI_API_URL, 'http://127.0.0.1:8080')
+  assert.equal(env.KLEI_AUTH_URL, 'http://127.0.0.1:8081')
+  assert.match(env.KLEI_DOWNLOAD_BASE_URL!, /^https:\/\/download\.invalid\//)
+  assert.ok(parseBase(env.KLEI_DOWNLOAD_BASE_URL, true).startsWith('https://download.invalid/'))
+  assert.ok(!('KLEI_RELEASE' in env))
 })

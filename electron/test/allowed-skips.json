@@ -1,0 +1,4 @@
+[
+  { "name": "packed macOS app: update wording in the bundle, and a start leaves the Tauri profile alone", "reason": "needs a packed macOS arm64 app (npm run pack); the packaging workflow covers it in 19.3" },
+  { "name": "packed macOS arm64 app: metadata, no URL types, native keyring unpacked, smoke launch exits 0", "reason": "needs a packed macOS arm64 app (npm run pack); the packaging workflow covers it in 19.3" }
+]
