@@ -322,7 +322,7 @@ Source tree:
 
 ## Electron Migration Scope and Authority
 
-**Scoped authority notice:** This addendum governs only the proposed Electron migration from frozen baseline `463f89f901d2db71e6e2ce8300ea92e7bd128a5e` (re-baselined in Story 21.5; first frozen at `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`). Existing AD-1–AD-21 and FR-1–FR-44 remain authoritative for the protected Tauri product. AD-22 onward apply only to the Electron target; they neither amend Tauri behavior nor authorize implementation, cutover, retirement, or deletion. `docs/brownfield-architecture.md` inventories current contracts; `docs/architecture.md` carries target detail. Reviewers record PASS/CONCERNS/FAIL; the owner decides any pilot, cutover, or separate retirement action. No deployed users: fresh install, no Tauri-token import or cross-framework update.
+**Scoped authority notice:** This addendum governs only the proposed Electron migration from frozen baseline `8083c944b523285c1fce33bb2f1d3331bc0c350d` (re-baselined in Stories 21.5 and 21.7; first frozen at `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`). Existing AD-1–AD-21 and FR-1–FR-44 remain authoritative for the protected Tauri product. AD-22 onward apply only to the Electron target; they neither amend Tauri behavior nor authorize implementation, cutover, retirement, or deletion. `docs/brownfield-architecture.md` inventories current contracts; `docs/architecture.md` carries target detail. Reviewers record PASS/CONCERNS/FAIL; the owner decides any pilot, cutover, or separate retirement action. No deployed users: fresh install, no Tauri-token import or cross-framework update.
 
 ### Target paradigm
 

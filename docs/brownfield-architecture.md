@@ -1,6 +1,6 @@
 # Brownfield architecture inventory: Tauri desktop
 
-**Baseline:** `463f89f901d2db71e6e2ce8300ea92e7bd128a5e` (Epic 21 stories 21.1 to 21.6; this inventory was written at `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`, Epic 13 complete). Read-only inventory; no application files changed. `prototype/v0.1.0/` is a static visual reference, not the running product. The real renderer is `desktop/`.
+**Baseline:** `8083c944b523285c1fce33bb2f1d3331bc0c350d` (Epic 21 stories 21.1 to 21.7; this inventory was written at `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`, Epic 13 complete). Read-only inventory; no application files changed. `prototype/v0.1.0/` is a static visual reference, not the running product. The real renderer is `desktop/`.
 
 ## Authority and scope
 
