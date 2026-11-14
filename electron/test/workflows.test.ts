@@ -48,6 +48,7 @@ test('every Electron workflow: SHA-pinned allowed actions, read-only token, no f
 
 test('workflow files: only electron*.yml were added; the three original workflows are present', () => {
   for (const f of ORIGINAL) assert.ok(existsSync(join(DIR, f)), f)
+  // The original tree, not the gate baseline: the gate baseline already holds the electron*.yml files this test must find as added.
   const baseline = execFileSync('git', ['ls-tree', '--name-only', '51949da2a0f8347c5f1f56fc5d87d8ada6e60643', '.github/workflows/'], { cwd: ROOT, encoding: 'utf8' }).split('\n').filter(Boolean).map((p) => p.split('/').pop())
   const added = readdirSync(DIR).filter((n) => !baseline.includes(n))
   assert.ok(added.length > 0 && added.every((n) => /^electron[^/]*\.yml$/.test(n)), `unexpected added workflow: ${added.join(', ')}`)

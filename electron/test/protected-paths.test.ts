@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { evaluate } from '../scripts/protected-paths.mjs'
+import { readFileSync } from 'node:fs'
+import { BASELINE, evaluate } from '../scripts/protected-paths.mjs'
 
 const wf = '.github/workflows/electron-ci.yml'
 
@@ -33,4 +34,9 @@ test('an edit to an allowed electron workflow after it was added is still allowe
 
 test('same path in diff and status is reported once', () => {
   assert.equal(evaluate('M\tdesktop/a\n', ' M desktop/a\n').report.length, 1)
+})
+
+test('BASELINE is a full SHA and BASELINE.md names the same one', () => {
+  assert.match(BASELINE, /^[0-9a-f]{40}$/)
+  assert.ok(readFileSync(new URL('../BASELINE.md', import.meta.url), 'utf8').includes(`Migration baseline: \`${BASELINE}\``))
 })

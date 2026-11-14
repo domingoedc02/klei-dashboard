@@ -1,6 +1,6 @@
 # Electron migration: shard index
 
-Documentation-only plan to move the Klei Bridal desktop app from Tauri to Electron with no change to the protected Tauri app. Baseline: commit `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`.
+Documentation-only plan to move the Klei Bridal desktop app from Tauri to Electron with no change to the protected Tauri app. Baseline: commit `463f89f901d2db71e6e2ce8300ea92e7bd128a5e` (re-baselined in Story 21.5; first `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`).
 
 ## Authority
 

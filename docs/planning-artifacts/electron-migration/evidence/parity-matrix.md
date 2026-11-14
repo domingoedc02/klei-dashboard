@@ -9,6 +9,7 @@ Verdict is recorded by the reviewer. Cutover is the owner's decision (`decisions
 | Item | Value |
 |---|---|
 | Tauri baseline | `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`; `desktop/` tree `2d4f575ad00986301baed409683a88b22a682ef4` at baseline and at this run |
+| Note | Recorded at the first baseline. Story 21.5 moved the baseline to `463f89f901d2db71e6e2ce8300ea92e7bd128a5e` after Epic 21 changed `desktop/`; this run is not repeated against it. |
 | Gate before and after | `node electron/scripts/protected-paths.mjs`: "protected paths unchanged", exit 0 |
 | Harness | `electron/test/parity/harness.mjs` (`--side baseline`, `--side app`, `--renderer electron`), `compare.mjs` |
 | Tolerance | zero differing pixels, zero geometry-only findings, zero copy differences |

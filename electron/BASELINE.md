@@ -1,6 +1,8 @@
 # Baseline
 
-Migration baseline: `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`, "13.8: Upload Review: select, Move, Merge, Split". It stays the baseline even if `main` moves. Work lives on `electron-migration`.
+Migration baseline: `463f89f901d2db71e6e2ce8300ea92e7bd128a5e`, "21.1-21.4, 21.6: fixed app frame and footers, Review save bar, Viewer lightbox, group combobox, no-limit upload". It stays the baseline even if `main` moves.
+
+Previous baseline: `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`, "13.8: Upload Review: select, Move, Merge, Split". Replaced on 2026-11-14 by owner decision (EJ Domingo, Story 21.5): the Epic 21 UI fixes and the no-limit upload (Story 21.6) changed `desktop/` and `backend/`, so the gate could not pass against the old commit. Work lives on `electron-migration`.
 
 ## Protected paths
 
@@ -20,12 +22,12 @@ Source: `desktop/src-tauri/src/commands.rs`. Frontend call site: `desktop/src/br
 
 Exit 0 prints `protected paths unchanged`. Exit 1 lists each path with its status letter. The script runs these two commands and applies the allow rule:
 
-    git diff --name-status 51949da2a0f8347c5f1f56fc5d87d8ada6e60643 -- desktop backend infra prototype docs/api docs/install-guide.md docs/release-checklist.md .github/workflows
+    git diff --name-status 463f89f901d2db71e6e2ce8300ea92e7bd128a5e -- desktop backend infra prototype docs/api docs/install-guide.md docs/release-checklist.md .github/workflows
     git status --porcelain --untracked-files=all -- desktop backend infra prototype docs/api docs/install-guide.md docs/release-checklist.md .github/workflows
 
 Manual form, valid only while no `electron*.yml` is committed:
 
-    git diff --exit-code 51949da2a0f8347c5f1f56fc5d87d8ada6e60643 -- desktop backend infra prototype docs/api docs/install-guide.md docs/release-checklist.md .github/workflows
+    git diff --exit-code 463f89f901d2db71e6e2ce8300ea92e7bd128a5e -- desktop backend infra prototype docs/api docs/install-guide.md docs/release-checklist.md .github/workflows
     git status --porcelain --untracked-files=all -- desktop backend infra prototype docs/api .github/workflows
 
 The second command must print nothing, except `?? .github/workflows/electron*.yml`.
