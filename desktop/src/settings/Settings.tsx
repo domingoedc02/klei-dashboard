@@ -62,7 +62,7 @@ export function Settings() {
     document.getElementById(`tab-${tabs[j].id}`)?.focus();
   };
   return (
-    <Sheet title="Settings">
+    <Sheet title="Settings" className="settings">
       <p className="lede">{subs.length ? 'Manage your account and workspace.' : 'Manage your account.'}</p>
       <div role="tablist" aria-label="Settings sections" className="tabs" onKeyDown={move}>
         {tabs.map((t) => (

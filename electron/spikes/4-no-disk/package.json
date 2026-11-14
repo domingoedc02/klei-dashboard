@@ -1,0 +1,1 @@
+{"name":"spike-4-no-disk","private":true,"type":"module","version":"0.0.0","main":"main.mjs","dependencies":{"electron":"^45.3.2"}}

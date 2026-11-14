@@ -149,6 +149,26 @@ describe('Gown viewer', () => {
     expect(screen.queryByRole('button', { name: 'Copy description' })).toBeNull();
   });
 
+  it('Full view opens a lightbox on the same photo; arrows step it, Esc closes it and returns focus, the route stays', async () => {
+    const user = userEvent.setup();
+    const { container } = await open();
+    await screen.findByText('1 of 3');
+    const opener = screen.getByRole('button', { name: 'Full view' });
+    await user.click(opener);
+    const box = screen.getByRole('dialog', { name: 'Photo 1 of 3' });
+    expect(document.activeElement).toBe(within(box).getByRole('button', { name: 'Close' }));
+    expect((within(box).getByRole('button', { name: 'Previous' }) as HTMLButtonElement).disabled).toBe(true);
+    const r = await axe.run(container, noisy);
+    expect(r.violations.map((v) => v.id)).toEqual([]);
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('dialog', { name: 'Photo 2 of 3' })).toBeTruthy();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.activeElement).toBe(opener);
+    expect(window.location.hash).toBe(`#/gallery/${id(1)}`);
+    expect(screen.getByText('2 of 3')).toBeTruthy();
+  });
+
   it('has no accessibility violations', async () => {
     const { container } = await open();
     await screen.findByRole('heading', { level: 1, name: 'Willow' });

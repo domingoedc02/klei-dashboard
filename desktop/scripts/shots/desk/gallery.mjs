@@ -42,4 +42,8 @@ export default {
 // Desktop-only states, no prototype twin.
 export const EXTRA = [
   { id: 'viewer', state: 'loading', desk: { hash: `${G}/g0`, ready: '.viewer .skeleton', fx: (r) => { Object.assign(r, galleryRoutes()); r['GET /api/v1/gowns/g0'] = PENDING; } } },
+  {
+    id: 'viewer', state: 'lightbox',
+    desk: { hash: `${G}/g0`, ready: '.viewer .details', fx: (r) => Object.assign(r, galleryRoutes()), after: async (page) => { await page.getByRole('button', { name: 'Full view' }).click(); await page.getByRole('dialog').waitFor(); } },
+  },
 ];

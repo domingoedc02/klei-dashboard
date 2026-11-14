@@ -1,0 +1,198 @@
+name: electron-release
+
+# Publishes the Electron preview to the download site (18.5) on an electron-v<semver> tag. Story 19.4.
+# Not the Tauri release: that is release.yml on v* tags. Nothing here creates a GitHub release or reads RELEASES_*.
+# Installers carry the real download URL, so they are never uploaded as GitHub artifacts (this repository is public);
+# each runner sends its own installer straight to the site's hidden .<version>.part folder, and the last job renames it.
+on:
+  push:
+    tags: ["electron-v*"]
+
+permissions:
+  contents: read
+
+env:
+  KLEI_API_URL: http://127.0.0.1:8080
+  KLEI_AUTH_URL: http://127.0.0.1:8081
+  # Placeholder only, for the test job: the release builds below read the real value from the environment secret.
+  KLEI_DOWNLOAD_BASE_URL: https://download.invalid/ci-placeholder-not-a-secret-0123456789abcdef
+
+jobs:
+  verify:
+    name: tag and version
+    if: startsWith(github.ref, 'refs/tags/electron-v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - id: tag
+        name: Tag must be electron-v<semver> and equal the package version
+        run: |
+          [[ "$GITHUB_REF_NAME" =~ ^electron-v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || { echo "not an electron-v<semver> tag"; exit 1; }
+          echo "version=$(node electron/scripts/release-manifest.mjs tag "$GITHUB_REF_NAME")" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: test ${{ matrix.os }}
+    needs: verify
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            headless: ""
+          - os: windows-latest
+            headless: ""
+          - os: ubuntu-latest
+            headless: xvfb-run -a
+    defaults:
+      run:
+        working-directory: electron
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: electron/package-lock.json
+      - name: Linux system packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb libasound2t64 libgbm1 libgtk-3-0t64 libnss3
+      - run: npm ci
+      - name: Electron binary
+        # npm 11 skips dependency install scripts, so the binary would otherwise download in the middle of the first test.
+        run: node node_modules/electron/install.js
+      - name: Linux sandbox helper
+        if: runner.os == 'Linux'
+        run: |
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
+      - run: npm run typecheck
+      - name: Build
+        run: |
+          npm run build
+          npm run build:renderer
+      - name: Tests
+        run: ${{ matrix.headless }} npm test 2>&1 | tee test.log
+      - name: No unlisted skips
+        run: node scripts/check-skips.mjs test.log
+
+  build:
+    name: build ${{ matrix.id }}
+    needs: [verify, test]
+    runs-on: ${{ matrix.os }}
+    environment: electron-release
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { id: mac-arm64, os: macos-15, args: "--mac --arm64", unpacked: mac-arm64, files: "mac-arm64.dmg" }
+          - { id: mac-x64, os: macos-15-intel, args: "--mac --x64", unpacked: mac, files: "mac-x64.dmg" }
+          - { id: win-x64, os: windows-latest, args: "--win --x64", unpacked: win-unpacked, files: "win-x64.exe" }
+          - { id: linux-x64, os: ubuntu-24.04, args: "--linux --x64", unpacked: linux-unpacked, files: "linux-x64.AppImage linux-x64.deb" }
+    defaults:
+      run:
+        working-directory: electron
+        shell: bash
+    env:
+      VERSION: ${{ needs.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: electron/package-lock.json
+      - name: Linux system packages
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb libasound2t64 libgbm1 libgtk-3-0t64 libnss3
+      - name: Site reachable, host key matches, version not published yet
+        env:
+          ELECTRON_DEPLOY_HOST: ${{ secrets.ELECTRON_DEPLOY_HOST }}
+          ELECTRON_DEPLOY_USER: ${{ secrets.ELECTRON_DEPLOY_USER }}
+          ELECTRON_DEPLOY_KEY: ${{ secrets.ELECTRON_DEPLOY_KEY }}
+          ELECTRON_DEPLOY_KNOWN_HOSTS: ${{ secrets.ELECTRON_DEPLOY_KNOWN_HOSTS }}
+          ELECTRON_DEPLOY_PATH: ${{ vars.ELECTRON_DEPLOY_PATH }}
+        run: bash scripts/deploy.sh check "$VERSION"
+      # Install scripts of dependencies run here, so no secret is in this step's environment.
+      - run: npm ci
+      - name: Package (release build, real download URL)
+        env:
+          KLEI_RELEASE: "1"
+          KLEI_API_URL: ${{ vars.KLEI_API_URL }}
+          KLEI_AUTH_URL: ${{ vars.KLEI_AUTH_URL }}
+          KLEI_DOWNLOAD_BASE_URL: ${{ secrets.ELECTRON_DOWNLOAD_BASE_URL }}
+        run: npm run pack -- ${{ matrix.args }}
+      - name: Inspect unpacked app
+        run: node scripts/inspect-package.mjs release/${{ matrix.unpacked }}
+      - name: Secret scan of the build
+        run: node scripts/scan-secrets.mjs build
+      - name: Smoke launch from each installer
+        run: |
+          for f in ${{ matrix.files }}; do
+            bash scripts/smoke-installer.sh "$f"
+          done
+      - name: Size and SHA-256 of each installer
+        run: node scripts/release-manifest.mjs list release --json "$RUNNER_TEMP/entries-${{ matrix.id }}.json"
+      - name: Send installers to the staging folder
+        env:
+          ELECTRON_DEPLOY_HOST: ${{ secrets.ELECTRON_DEPLOY_HOST }}
+          ELECTRON_DEPLOY_USER: ${{ secrets.ELECTRON_DEPLOY_USER }}
+          ELECTRON_DEPLOY_KEY: ${{ secrets.ELECTRON_DEPLOY_KEY }}
+          ELECTRON_DEPLOY_KNOWN_HOSTS: ${{ secrets.ELECTRON_DEPLOY_KNOWN_HOSTS }}
+          ELECTRON_DEPLOY_PATH: ${{ vars.ELECTRON_DEPLOY_PATH }}
+        run: bash scripts/deploy.sh upload "$VERSION" release
+      - name: Upload file names, sizes and hashes
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: entries-${{ matrix.id }}
+          path: ${{ runner.temp }}/entries-${{ matrix.id }}.json
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    name: publish
+    needs: [verify, build]
+    runs-on: ubuntu-24.04
+    environment: electron-release
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: electron
+        shell: bash
+    env:
+      VERSION: ${{ needs.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: entries-*
+          merge-multiple: true
+          path: electron/entries
+      - name: Build release.json (exactly five installers of this version)
+        run: |
+          mkdir out
+          node scripts/release-manifest.mjs build --version "$VERSION" --out out/release.json entries/*.json
+      - name: Secret scan of the manifest
+        run: node scripts/scan-secrets.mjs out
+      - name: Publish (checksums verified on the site, release.json last, then rename)
+        env:
+          ELECTRON_DEPLOY_HOST: ${{ secrets.ELECTRON_DEPLOY_HOST }}
+          ELECTRON_DEPLOY_USER: ${{ secrets.ELECTRON_DEPLOY_USER }}
+          ELECTRON_DEPLOY_KEY: ${{ secrets.ELECTRON_DEPLOY_KEY }}
+          ELECTRON_DEPLOY_KNOWN_HOSTS: ${{ secrets.ELECTRON_DEPLOY_KNOWN_HOSTS }}
+          ELECTRON_DEPLOY_PATH: ${{ vars.ELECTRON_DEPLOY_PATH }}
+        run: bash scripts/deploy.sh finish "$VERSION" out/release.json

@@ -371,7 +371,7 @@ export function AiTab() {
       )}
     </form>
     <TaxonomyCards />
-    <div className="actions sticky">
+    <div className="actions foot">
       <button type="submit" form="ai-form" className="btn primary" disabled={!dirty || saving}>{saving ? 'Saving…' : 'Save AI settings'}</button>
     </div>
     </div>

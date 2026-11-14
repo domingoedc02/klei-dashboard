@@ -3,7 +3,7 @@
 
 use std::collections::VecDeque;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, UNIX_EPOCH};
 
@@ -17,7 +17,6 @@ use crate::error::{BridgeError, Kind};
 use crate::session::{Payload, Session};
 
 pub const MAX_BYTES: u64 = 25 * 1024 * 1024;
-pub const MAX_PHOTOS: usize = 200;
 pub const EXTENSIONS: [&str; 4] = ["jpg", "jpeg", "png", "webp"];
 const IN_FLIGHT: usize = 3;
 
@@ -165,9 +164,8 @@ pub fn stat(paths: Vec<PathBuf>) -> (Vec<Picked>, Vec<Rejected>) {
     (ok, bad)
 }
 
-/// Filters by extension and size, then keeps the first `room` files; the rest are refused as `Full`.
-/// The server still confirms the real image type.
-pub fn triage(picked: Vec<Picked>, room: usize) -> (Vec<Picked>, Vec<Rejected>) {
+/// Filters by extension and size. The batch ceiling is the server's call (a 413 with `limit`), which also confirms the real image type.
+pub fn triage(picked: Vec<Picked>) -> (Vec<Picked>, Vec<Rejected>) {
     let (mut send, mut refused) = (Vec::new(), Vec::new());
     for p in picked {
         let ext_ok = p.path.extension().and_then(|e| e.to_str()).is_some_and(|e| EXTENSIONS.iter().any(|x| x.eq_ignore_ascii_case(e)));
@@ -175,8 +173,6 @@ pub fn triage(picked: Vec<Picked>, room: usize) -> (Vec<Picked>, Vec<Rejected>) 
             Some(Reason::Type)
         } else if p.len > MAX_BYTES {
             Some(Reason::Size)
-        } else if send.len() >= room {
-            Some(Reason::Full)
         } else {
             None
         };
@@ -223,7 +219,7 @@ struct Run {
     total: usize,
     done: AtomicUsize,
     waiting: AtomicUsize,
-    stored_before: usize,
+    full: AtomicBool,
 }
 
 impl Run {
@@ -262,6 +258,9 @@ impl Run {
 
     /// Sends one file until the server answers. A lost connection or a busy server waits and re-sends with the same key.
     async fn one(&self, job: &Picked) -> Outcome {
+        if self.full.load(Ordering::SeqCst) {
+            return Outcome::Refused(Reason::Full);
+        }
         let path = job.path.clone();
         let Ok(Ok(bytes)) = tokio::task::spawn_blocking(move || std::fs::read(path)).await else {
             return Outcome::Refused(Reason::Unreadable);
@@ -282,8 +281,11 @@ impl Run {
                         return id.map_or_else(|| Outcome::Fatal(BridgeError::new(Kind::Failed, "bad upload answer")), Outcome::Stored);
                     }
                     413 => {
-                        let full = self.stored_before + self.out.lock().unwrap().stored.len() >= MAX_PHOTOS;
-                        return Outcome::Refused(if full { Reason::Full } else { Reason::Dimensions });
+                        let limit = serde_json::from_slice::<Value>(&raw.bytes).ok().is_some_and(|v| v["extensions"]["limit"].is_number());
+                        if limit {
+                            self.full.store(true, Ordering::SeqCst);
+                        }
+                        return Outcome::Refused(if limit { Reason::Full } else { Reason::Dimensions });
                     }
                     415 => return Outcome::Refused(Reason::Type),
                     403 => return Outcome::Fatal(BridgeError::new(Kind::NoAccess, "no access")),
@@ -327,12 +329,11 @@ pub async fn run(
     if view["id"].as_str() != Some(batch.as_str()) {
         return Err(BridgeError::new(Kind::BadRequest, "not the current batch"));
     }
-    let stored_before = view["photoIds"].as_array().map_or(0, Vec::len);
 
     let (picked, mut refused) = tokio::task::spawn_blocking(move || stat(paths))
         .await
         .map_err(|_| BridgeError::new(Kind::Failed, "could not read the files"))?;
-    let (queue, over) = triage(picked, MAX_PHOTOS.saturating_sub(stored_before));
+    let (queue, over) = triage(picked);
     refused.extend(over);
 
     let run = Arc::new(Run {
@@ -346,7 +347,7 @@ pub async fn run(
         fatal: Mutex::default(),
         done: AtomicUsize::new(0),
         waiting: AtomicUsize::new(0),
-        stored_before,
+        full: AtomicBool::new(false),
     });
     run.tick(None);
     let workers: Vec<_> = (0..IN_FLIGHT).map(|_| tokio::spawn(run.clone().worker())).collect();
@@ -368,7 +369,7 @@ pub const AVATAR_MAX_BYTES: u64 = 2 * 1024 * 1024;
 /// Sends one picked file as the signed-in User's avatar (Story 6.1). `stored` holds "avatar" on success; the server confirms the real type.
 pub async fn set_avatar(session: &Session, path: PathBuf) -> Result<Summary, BridgeError> {
     let (picked, mut refused) = stat(vec![path]);
-    let (send, more) = triage(picked, 1);
+    let (send, more) = triage(picked);
     refused.extend(more);
     let mut out = Summary::default();
     if let Some(p) = send.into_iter().next() {
@@ -454,22 +455,12 @@ mod triage_tests {
     }
 
     #[test]
-    fn extension_size_and_room_are_checked_in_that_order() {
-        let (send, refused) = triage(
-            vec![pick("a.JPG", 1), pick("b.gif", 1), pick("c.png", MAX_BYTES + 1), pick("d.webp", MAX_BYTES), pick("e.jpeg", 1), pick("f.png", 1)],
-            2,
-        );
+    fn extension_then_size_are_checked_and_the_count_is_not() {
+        let (send, refused) = triage(vec![pick("a.JPG", 1), pick("b.gif", 1), pick("c.png", MAX_BYTES + 1), pick("d.webp", MAX_BYTES), pick("e.jpeg", 1)]);
         let sent: Vec<_> = send.iter().map(|p| base_name(&p.path)).collect();
-        assert_eq!(sent, ["a.JPG", "d.webp"]);
+        assert_eq!(sent, ["a.JPG", "d.webp", "e.jpeg"]);
         let why: Vec<_> = refused.iter().map(|r| (r.name.as_str(), r.reason)).collect();
-        assert_eq!(why, [("b.gif", Reason::Type), ("c.png", Reason::Size), ("e.jpeg", Reason::Full), ("f.png", Reason::Full)]);
-    }
-
-    #[test]
-    fn a_full_batch_takes_nothing() {
-        let (send, refused) = triage(vec![pick("a.jpg", 1)], 0);
-        assert!(send.is_empty());
-        assert_eq!(refused[0].reason, Reason::Full);
+        assert_eq!(why, [("b.gif", Reason::Type), ("c.png", Reason::Size)]);
     }
 
     #[test]

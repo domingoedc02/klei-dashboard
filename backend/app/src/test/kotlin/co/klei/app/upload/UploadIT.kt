@@ -56,6 +56,7 @@ class UploadIT {
             r.add("spring.datasource.url") { pg.jdbcUrl }
             r.add("spring.datasource.username") { pg.username }
             r.add("spring.datasource.password") { pg.password }
+            r.add("klei.upload.max-photos") { 5 }
             r.add("klei.auth-port") { authPort }
             r.add("klei.auth-base-url") { "http://127.0.0.1:$authPort" }
             TestSupport.keys(r)
@@ -164,7 +165,7 @@ class UploadIT {
             "gif claiming jpeg" to Triple("sneaky-zq91.jpg", "GIF89a....".toByteArray(), 415),
             "polyglot" to Triple("poly-zq92.jpg", Images.polyglot(), 415),
             "undecodable" to Triple("cut-zq93.jpg", Images.jpeg().copyOf(100), 415),
-            "41 megapixels" to Triple("huge-zq94.png", Images.pngHeaderOnly(6500, 6500), 413),
+            "101 megapixels" to Triple("huge-zq94.png", Images.pngHeaderOnly(10_100, 10_000), 413),
             "over 25 MB" to Triple("big-zq95.jpg", ByteArray(25 * 1024 * 1024 + 1), 413),
         )
         for ((label, v) in bad) {
@@ -178,13 +179,14 @@ class UploadIT {
         assertTrue(UploadClient.call("GET", "$api/api/v1/uploads/current", p.token).text.contains(""""rejected":${bad.size}"""))
     }
 
-    @Test fun `the 201st photo is refused`() {
+    @Test fun `a photo past the batch ceiling is refused`() {
         val p = person(); val batch = open(p)
         val tiny = Images.jpeg(8, 8)
-        repeat(UploadLimits.MAX_PHOTOS) { assertEquals(201, add(p, batch, tiny).status) }
+        repeat(5) { assertEquals(201, add(p, batch, tiny).status) }
         val r = add(p, batch, tiny)
         assertEquals(413, r.status, r.text)
         assertTrue(r.text.contains("too_large"), r.text)
+        assertTrue(r.text.contains(""""extensions":{"limit":5}"""), r.text)
     }
 
     @Test fun `another user's batch and photos answer 404`() {

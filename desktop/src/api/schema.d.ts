@@ -1860,7 +1860,10 @@ export interface components {
             usedBy?: unknown;
             check?: string;
         };
-        Extensions_too_large: Record<string, never>;
+        Extensions_too_large: {
+            /** Format: int64 */
+            limit?: unknown;
+        };
         Extensions_unsupported_type: Record<string, never>;
         Extensions_validation_failed: Record<string, never>;
         Extensions_rate_limited: Record<string, never>;

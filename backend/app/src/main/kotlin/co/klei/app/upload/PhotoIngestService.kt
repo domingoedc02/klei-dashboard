@@ -4,6 +4,7 @@ import co.klei.app.web.ProblemCode
 import co.klei.app.web.ProblemException
 import jakarta.persistence.EntityManager
 import jakarta.persistence.LockModeType
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
@@ -26,6 +27,7 @@ class PhotoIngestService(
     private val images: ImageValidator,
     private val thumbs: ThumbnailService,
     private val vault: ObjectVault,
+    @Value("\${klei.upload.max-photos:5000}") private val maxPhotos: Int,
 ) {
     private val tx = TransactionTemplate(txm)
     private val decodes = Semaphore(UploadLimits.MAX_DECODES)
@@ -66,9 +68,12 @@ class PhotoIngestService(
     private fun precheck(userId: UUID, batchId: UUID, idem: ByteArray): UUID? = tx.execute {
         batches.owned(userId, batchId)
         val first = existing(batchId, idem)
-        if (first == null && count(batchId) >= UploadLimits.MAX_PHOTOS) throw ProblemException(ProblemCode.TOO_LARGE)
+        if (first == null && count(batchId) >= maxPhotos) throw batchFull()
         first?.id
     }
+
+    /** `limit` tells the app this 413 is a full batch, not an oversize image. */
+    private fun batchFull() = ProblemException(ProblemCode.TOO_LARGE, extensions = mapOf("limit" to maxPhotos))
 
     private fun reject(batchId: UUID, problem: ProblemCode): Nothing {
         batches.countRejected(batchId)
@@ -81,7 +86,7 @@ class PhotoIngestService(
         val batch = em.find(UploadBatch::class.java, batchId, LockModeType.PESSIMISTIC_WRITE)?.takeIf { it.userId == userId } ?: throw ProblemException(ProblemCode.NOT_FOUND)
         if (batch.phase == BatchPhase.PROCESSING) throw ProblemException(ProblemCode.CONFLICT)
         existing(batchId, idem)?.let { return@execute it.id to false }
-        if (count(batchId) >= UploadLimits.MAX_PHOTOS) throw ProblemException(ProblemCode.TOO_LARGE)
+        if (count(batchId) >= maxPhotos) throw batchFull()
         val now = Instant.now()
         for (k in listOf(original, thumb)) em.persist(StoredObject(k.id, k.wrappedDek, k.kekVersion, now))
         em.flush()

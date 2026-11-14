@@ -310,7 +310,7 @@ Not in MVP (Deferred, constraints kept): tenant DEK replacement, `KLEI_BIDX_KEY`
 
 Per Photo upload:
 
-1. The API receives one file (≤ 25 MB). Type comes from magic bytes (JPEG, PNG, WebP), never the header. The decoder refuses headers over 40 megapixels; at most two decodes run at once.
+1. The API receives one file (≤ 25 MB). Type comes from magic bytes (JPEG, PNG, WebP), never the header. The decoder refuses JPEG and PNG headers over 100 megapixels and WebP over 40 (Story 21.7; was 40 for all); at most two decodes run at once.
 2. Decode with `ImageIO` (TwelveMonkeys for WebP), reject on failure, build a 480 px JPEG thumbnail with metadata stripped. The original is stored as uploaded. Plain bytes exist only in this request's memory.
 3. `ObjectCipher` encrypts original and thumbnail with two fresh DEKs. Body `[version:1][nonce:12][ciphertext + tag]`, plaintext framed and padded to 64 KB steps, AAD `obj|<bucket>|<objectId>`.
 4. `PutObject` under random UUID keys (Content-Type `application/octet-stream`, no user metadata, no tags). Then, in one DB transaction, insert both `stored_object` rows and the `photo` row. If the commit fails, the objects are deleted.
@@ -755,3 +755,55 @@ Run on 2026-11-08 against the BMAD architecture rubric. Spine lint: 0 findings. 
 **Not checked.** Runtime behaviour (no code exists). Dokploy features beyond its documented compose support. Whether `dinov2-base` accepts a data URI (spike S-1). Deep Link, updater and keychain behaviour on unsigned builds per OS (spikes S-2, S-3). Story 1.7 closed S-4: the CSP (`connect-src 'none'`) does not block Tauri IPC, proven by the `KLEI_SMOKE=1` launch on macOS where the webview's `api_request` round trip ends the run. S-2 is half done: the `klei` scheme is registered at runtime on Linux and Windows with loopback fallback when registration fails, but opening a `klei://` link on each OS stays a manual release-checklist step.
 
 **Verdict.** Ready for epics and stories. All stories are unblocked.
+
+---
+
+## 13. Electron migration addendum (proposed; baseline Tauri remains authoritative)
+
+**Scope and authority.** Current-state inventory: `docs/brownfield-architecture.md`. Baseline remains the exact tree at `8e2eca27f91f5bfcd7a146961d603117bf8a597b` (re-baselined in Stories 21.5 and 21.7; first frozen at `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`); existing AD-1–AD-21 and FR-1–FR-44 remain authoritative for the protected Tauri application. This addendum and spine AD-22 onward describe only the proposed Electron migration. `docs/prd.md` owns product requirements; this document holds detailed target design/contracts; the migration spine owns target invariants. No application implementation, original-source edits, Tauri retirement, or cutover is authorized here. Reviewer records evidence as PASS/CONCERNS/FAIL; owner decides cutover and any later retirement. No deployed users exist: plan a fresh Electron install, no token import or cross-framework update.
+
+### 13.1 Target boundary and ownership
+
+```mermaid
+graph LR
+  renderer[Read-only desktop/src React] -->|narrow typed methods and events| preload[electron/src/preload]
+  preload -->|closed validated IPC| main[electron/src/main Node shell]
+  main -->|fixed HTTPS API and Auth origins| backend[Existing backend]
+  main --> kc[(OS keychain; implementation gated by 14.3)]
+  main --> os[Native dialogs, browser, protocol and filesystem]
+  main --> page[Download site page and latest.json, fixed HTTPS base URL with secret path]
+```
+
+Root `electron/` owns its package, lockfile, output, tests, build aliases and scripts; Electron workflow YAML is added only as new `.github/workflows/electron*.yml` files that call scripts under `electron/`. Electron consumes `desktop/src/` read-only. Prefer a Vite alias for its sole `@tauri-apps/api/core` import to an Electron-owned typed compatibility module; expose named narrow `contextBridge` methods, never generic `invoke` or Tauri internals. If that cannot preserve assets/fonts, dependency resolution, Channels and tests, use a baseline-SHA-recorded frozen copy under `electron/`, modifying only that copy. Electron-only aliases/copies may implement the Windows `klei-img.localhost` quirk and truthful manual-update labels. Redirect all caches/build output outside `desktop/`. The original `desktop/**`, `backend/**`, `infra/**`, `prototype/**`, `docs/api/**`, lockfiles, existing workflows and historical parity artifacts remain byte-identical.
+
+Electron main owns API/Auth networking, access and refresh tokens, keychain, file paths/bytes, native dialogs, image protocol/cache, drag/drop, deep links, update metadata and system-browser opening. Renderer has no Node integration, direct network, arbitrary filesystem/shell access, credential access, or arbitrary external URL opening. Configure `contextIsolation: true`, `sandbox: true`, `nodeIntegration: false`; enforce a restrictive CSP, deny untrusted navigation and popups, and check IPC sender frame/origin on every call. Validate every payload and reply at the process boundary. A preload API is typed and finite; event registration is separate from invocation, returns explicit unsubscribe, validates sequence/payload, and is bound to request/window lifecycle. Cancellation is an explicit operation; window destruction cannot leave channels/jobs orphaned.
+
+### 13.2 Command, session and native parity
+
+The nine commands and their full current contracts are enumerated in `docs/brownfield-architecture.md`. Keep a closed nine-operation allowlist, `{kind,message}` errors, safe error text, API method/path/health exception, `ifMatch`, idempotency, timeouts, single-flight refresh and one 401 retry. Port Rust behavior to Node main; no sidecar. Preserve keychain-only refresh-token persistence, memory-only access token and explicit `session_only`; keychain implementation is an Epic 14.3 decision. Do not assume `safeStorage` plus a file meets parity. Preserve PKCE S256, callback state/single-use rules, system browser, single-instance/deep-link behavior and loopback fallback; preview scheme must not take production `klei://` ownership.
+
+Native dialogs, all upload kinds (photo, dropped, attachment, avatar, cancel, watch, unwatch), native drag/drop lifecycle and 10 s drop TTL, 3-worker upload/retry/idempotency/cancel behavior, ZIP export/sanitization/partial-file cleanup, image protocol validation and bounded 300 s/400-entry in-memory thumbnail cache all have explicit stories in Epics 16–17. Preserve the existing rule that source files are read without temporary copies and renderer never sees paths or bytes. No business-content disk cache; audit Chromium cache, logs, crash output, swap/hibernation and image persistence with a sentinel test. Existing browser mocks do not prove native behavior. Startup ≤3 s and idle memory ≤300 MB remain unchanged, measured across the whole Electron process tree.
+
+### 13.3 Manual update exception and release envelope
+
+The sole approved parity exception is Electron’s manual-update flow. `check_update` maps to a bounded, version-only manifest lookup at the download site (AD-32, story 18.5): validate schema and version, impose timeout and response-size limits, disable redirects, and never leak feed details. `install_update` remains a compatibility command name only: after checking dirty work, open the download site page (fixed build-time base URL with a secret path) in the system browser. The renderer cannot choose a URL. Electron-only update copy must truthfully say “Download update” / manual install, never “Install and restart.” No `electron-updater`, automatic downloader/installer/restart, or claim of Minisign/signed-version verification is approved. Release integrity is optional SHA-256 comparison (the app is for internal use and unsigned); authenticity communication and Gatekeeper risk require separate documented qualification. No paid Apple Developer membership is assumed; unsigned Gatekeeper warnings or blocks remain a real risk, with no bypass recommendation.
+
+Preview app ID `co.klei.bridal.electron.preview`, profile, keychain entry and protocol ownership must be separate from Tauri. Production bundle ID is selected before first public release; never change a published identity casually. Packaging tooling, maintained Electron release, keychain/ZIP dependency and provisional OS matrix are decided/qualified by stories 14.3, 15.1 and 18.1. The owner approved the matrix on 2026-11-13: macOS 15+ arm64/x64, Windows 11 x64, Ubuntu 24.04 LTS x64, conditional on the selected Electron release's support window and on minimum/current runtime qualification (not yet run). CI is separately scoped to `electron/`, with isolated outputs/secrets/releases and `electron-v*` tags. Existing workflows remain unchanged. The download site (AD-32) is documented only; no server, host name, proxy, deploy credential or signing key is implied to exist.
+
+**Download site (AD-32, story 18.5).** A separate, read-only Spring Boot + Thymeleaf application in `electron/download-site/` serves the version list, per-OS downloads and `latest.json`. It runs on its own port (default 8090), shares no code, port, secret, image or database with `backend/`, and accepts no upload. Every route sits under one secret path token (43 or more characters from `[A-Za-z0-9_-]`, compared in constant time, never logged); anything else returns an empty 404. Responses carry no-referrer, noindex, no-store and a closed CSP; the page uses no JavaScript. The 19.4 workflow copies each release into the site's data directory. The secret path is a capability URL, not access control; a leaked URL is fixed by rotating the token and reinstalling the app. The public host name, HTTPS proxy, server and deploy credential are owner actions (OQ-M5).
+
+### 13.4 Migration work map and acceptance
+
+| Epic | Scope | Stories | Gate |
+| --- | --- | --- | --- |
+| 14 | Frozen baseline, protected-path gate, parity harness, feasibility and read-only renderer/shim spike | 14.1–14.4 | Establish source-byte baseline; keychain, unsigned install, protocol coexistence, persistence audit; renderer build only into `electron/`. |
+| 15 | Electron shell, sandbox, scheme/CSP, narrow preload/Channels and closed command registry | 15.1–15.4 | IPC trust checks and contract tests; no generic invoke. |
+| 16 | Config/API, refresh, keychain/session-only, PKCE/browser, deep link/single-instance/loopback, dirty state | 16.1–16.6 | Unit and native runtime evidence per OS. |
+| 17 | Upload, drop, attachment/avatar, export, image protocol, renderer behavior | 17.1–17.6 | Native file/dialog/protocol tests and full observable contract parity. |
+| 18 | Packaging, unsigned distribution, manual update, download site, fresh install/upgrade/reinstall/rollback | 18.1–18.5 | Document unsigned trust limitations; no auto installer claims. |
+| 19 | Isolated protection/build/test/OS qualification/release CI | 19.1–19.4 | No path bleed into original CI or artifacts. |
+| 20 | Full parity, performance, opt-in pilot, rollback rehearsal, separate retirement decision | 20.1–20.4 | Reviewer reports PASS/CONCERNS/FAIL; owner decides cutover/retirement. |
+
+**Story total: 33** (4+4+6+6+5+4+4). Dependency spine: 14.1→14.2→15.x→16.x→17.x→18.x→20.x; 14.3 gates 16.3, 16.5, 18.2 and 18.3; 14.4 gates 15.3; 19.1 follows 14.1; 17.5 requires 16.2; 18.5 follows 18.1 and gates 18.4 and 19.4; 17.1–17.3 require 16.1–16.2 and 15.3. Preserve every existing epic/story and completed record; migration does not close pending product work.
+
+Parity evidence must compare original and Electron at 1440×900, 1280×800, and 1100×700; test visual/interaction/accessibility separately from screenshot normalization. Native auth, keychain, file/dialog, image/deep-link protocols, single instance, update page and packaged lifecycle require actual runtime tests on supported OSes; browser mocks are insufficient. Require fresh install/manual upgrade/reinstall/rollback, credential retention, persistence sentinel, performance, and release-link checks. Pilot is opt-in; define rollback triggers and rehearse before any cutover. Retirement requires a separate owner decision; this plan authorizes no deletion. Documentation completion does not imply runtime, distribution, security, or release readiness.

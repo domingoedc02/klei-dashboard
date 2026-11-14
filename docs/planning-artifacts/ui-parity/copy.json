@@ -312,7 +312,7 @@
    "AI Upload",
    "Drop photos. AI groups the same gown, tags it, and drafts a description.",
    "Drop gown photos here",
-   "JPG, PNG or WebP up to 25 MB each. Upload up to 200 at once and AI groups them.",
+   "JPG, PNG or WebP up to 25 MB each. Add as many as you like and AI groups them.",
    "Choose photos"
   ]
  },
@@ -519,9 +519,11 @@
    "Select photos to move or split",
    "Move selected photos to",
    "Select photos above first, then choose a gown.",
+   "[Choose a gown…]",
    "Move",
    "Merge this whole gown into",
    "Moves all 3 photos into the gown you pick and removes this group.",
+   "[Choose a gown…]",
    "Merge",
    "Split selected photos into a new gown",
    "Select photos above first. They become a separate gown.",
@@ -602,7 +604,7 @@
    "Not a JPEG, PNG or WebP",
    "Remove them or convert to JPG or PNG, then retry.",
    "Drop gown photos here",
-   "JPG, PNG or WebP up to 25 MB each. Upload up to 200 at once and AI groups them.",
+   "JPG, PNG or WebP up to 25 MB each. Add as many as you like and AI groups them.",
    "Retry upload"
   ]
  },
@@ -755,9 +757,11 @@
    "Select photos to move or split",
    "Move selected photos to",
    "Select photos above first, then choose a gown.",
+   "[Choose a gown…]",
    "Move",
    "Merge this whole gown into",
    "Moves all 3 photos into the gown you pick and removes this group.",
+   "[Choose a gown…]",
    "Merge",
    "Split selected photos into a new gown",
    "Select photos above first. They become a separate gown.",
@@ -938,9 +942,11 @@
    "Select photos to move or split",
    "Move selected photos to",
    "2 photos selected. Choose a gown.",
+   "[Isolde]",
    "Move 2",
    "Merge this whole gown into",
    "Moves all 3 photos into the gown you pick and removes this group.",
+   "[Choose a gown…]",
    "Merge",
    "Split selected photos into a new gown",
    "Creates “Marguerite II” from the 2 selected.",
@@ -1123,9 +1129,11 @@
    "Select photos to move or split",
    "Move selected photos to",
    "Select photos above first, then choose a gown.",
+   "[Choose a gown…]",
    "Move",
    "Merge this whole gown into",
    "Moves all 3 photos into the gown you pick and removes this group.",
+   "[Choose a gown…]",
    "Merge",
    "Split selected photos into a new gown",
    "Select photos above first. They become a separate gown.",
@@ -1312,9 +1320,11 @@
    "Select photos to move or split",
    "Move selected photos to",
    "Select photos above first, then choose a gown.",
+   "[Choose a gown…]",
    "Move",
    "Merge this whole gown into",
    "Moves all 3 photos into the gown you pick and removes this group.",
+   "[Choose a gown…]",
    "Merge",
    "Split selected photos into a new gown",
    "Select photos above first. They become a separate gown.",
@@ -1500,9 +1510,11 @@
    "Select photos to move or split",
    "Move selected photos to",
    "Select photos above first, then choose a gown.",
+   "[Choose a gown…]",
    "Move",
    "Merge this whole gown into",
    "Moves all 3 photos into the gown you pick and removes this group.",
+   "[Choose a gown…]",
    "Merge",
    "Split selected photos into a new gown",
    "Select photos above first. They become a separate gown.",
@@ -2125,6 +2137,7 @@
    "Previous",
    "1 of 5",
    "Next",
+   "Full view",
    "Aurelia",
    "Edit",
    "Download .zip",
@@ -2212,6 +2225,7 @@
    "Previous",
    "3 of 5",
    "Next",
+   "Full view",
    "Aurelia",
    "Edit",
    "Download .zip",
@@ -2348,6 +2362,7 @@
    "Previous",
    "1 of 5",
    "Next",
+   "Full view",
    "Aurelia",
    "Edit",
    "Download .zip",
@@ -2506,6 +2521,7 @@
    "Previous",
    "1 of 5",
    "Next",
+   "Full view",
    "Aurelia",
    "Edit",
    "Download .zip",
@@ -2620,6 +2636,7 @@
    "Previous",
    "1 of 5",
    "Next",
+   "Full view",
    "Aurelia",
    "Edit",
    "Download .zip",
@@ -2846,9 +2863,9 @@
    "Fitting availability for a June wedding",
    "Added when you send",
    "Warmly, Eleanor Park Owner Klei Bridal",
+   "Ctrl/⌘ + Enter to send · Signature added on send",
    "Discard",
-   "Send",
-   "Ctrl/⌘ + Enter to send · Signature added on send"
+   "Send"
   ]
  },
  "inquiries-loading": {
@@ -3238,9 +3255,9 @@
    "Lace ball gown pricing",
    "Added when you send",
    "Warmly, Eleanor Park Owner Klei Bridal",
+   "Ctrl/⌘ + Enter to send · Signature added on send",
    "Discard",
-   "Send",
-   "Ctrl/⌘ + Enter to send · Signature added on send"
+   "Send"
   ]
  },
  "inquiries-thread-closed": {
@@ -3639,9 +3656,9 @@
    "Write a message before sending.",
    "Added when you send",
    "Warmly, Eleanor Park Owner Klei Bridal",
+   "Ctrl/⌘ + Enter to send · Signature added on send",
    "Discard",
-   "Send",
-   "Ctrl/⌘ + Enter to send · Signature added on send"
+   "Send"
   ]
  },
  "inquiries-customer-card": {
@@ -3864,9 +3881,9 @@
    "Fitting availability for a June wedding",
    "Added when you send",
    "Warmly, Eleanor Park Owner Klei Bridal",
+   "Ctrl/⌘ + Enter to send · Signature added on send",
    "Discard",
-   "Send",
-   "Ctrl/⌘ + Enter to send · Signature added on send"
+   "Send"
   ]
  },
  "client-profile-default": {
@@ -4055,7 +4072,6 @@
    "Email",
    "[eleanor@kleibridal.com]",
    "Ask an admin to change your email.",
-   "Save changes",
    "Password",
    "Current password",
    "[password]",
@@ -4069,7 +4085,8 @@
    "Authenticator app",
    "Add a second step when you sign in. Recommended for admins.",
    "Off",
-   "Set up"
+   "Set up",
+   "Save changes"
   ]
  },
  "settings-signature-default": {
@@ -5686,7 +5703,6 @@
    "Email",
    "[marcus@kleibridal.com]",
    "Ask an admin to change your email.",
-   "Save changes",
    "Password",
    "Current password",
    "[password]",
@@ -5700,7 +5716,8 @@
    "Authenticator app",
    "Add a second step when you sign in. Recommended for admins.",
    "Off",
-   "Set up"
+   "Set up",
+   "Save changes"
   ]
  },
  "settings-2fa-on": {
@@ -5789,7 +5806,6 @@
    "Email",
    "[eleanor@kleibridal.com]",
    "Ask an admin to change your email.",
-   "Save changes",
    "Password",
    "Current password",
    "[password]",
@@ -5805,7 +5821,8 @@
    "8 recovery codes left",
    "On",
    "Make new codes",
-   "Turn off"
+   "Turn off",
+   "Save changes"
   ]
  },
  "overlay-notifications-default": {
@@ -6768,10 +6785,10 @@
    "The AI provider took too long to answer.",
    "Retry",
    "Drop gown photos here",
-   "JPG, PNG or WebP up to 25 MB each. Upload up to 200 at once and AI groups them.",
+   "JPG, PNG or WebP up to 25 MB each. Add as many as you like and AI groups them.",
    "Choose photos",
    "In this batch",
-   "30 of 200 photos stored",
+   "30 photos stored",
    "×",
    "×",
    "×",
@@ -7389,9 +7406,11 @@
    "Select photos to move or split",
    "Move selected photos to",
    "Select photos above first, then choose a gown.",
+   "[Choose a gown…]",
    "Move",
    "Merge this whole gown into",
    "Moves all 3 photos into the gown you pick and removes this group.",
+   "[Choose a gown…]",
    "Merge",
    "Split selected photos into a new gown",
    "Select photos above first. They become a separate gown.",
@@ -7510,6 +7529,57 @@
    "Upload photos",
    "Couldn't load the dashboard .",
    "Retry"
+  ]
+ },
+ "viewer-lightbox": {
+  "desktop": [
+   "Skip to main content",
+   "[Search gowns, inquiries…]",
+   "AI Assistant",
+   "EP",
+   "Eleanor Park",
+   "K",
+   "Klei Bridal",
+   "Workspace",
+   "Dashboard",
+   "AI Upload",
+   "Gallery",
+   "Inquiries",
+   "2 new",
+   "Settings",
+   "Gallery",
+   "Aurelia",
+   "Previous",
+   "1 of 5",
+   "Next",
+   "Full view",
+   "Aurelia",
+   "Edit",
+   "Download .zip",
+   "Copy description",
+   "Delete folder",
+   "Silhouette",
+   "A-line",
+   "Fabric",
+   "Mikado",
+   "Neckline",
+   "Sweetheart",
+   "Sleeve",
+   "Strapless",
+   "Train",
+   "Chapel",
+   "Photos",
+   "5",
+   "Added",
+   "11/06/2026",
+   "Confidence",
+   "96 %",
+   "High",
+   "Description",
+   "Aurelia is a a-line gown in mikado with a sweetheart neckline and straplesss. The chapel train falls softly behind, finishing in a clean hem.",
+   "Close",
+   "Previous",
+   "Next"
   ]
  }
 }

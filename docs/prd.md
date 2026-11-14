@@ -2,7 +2,7 @@
 title: Klei Bridal Dashboard
 status: final
 created: 2026-11-08
-updated: 2026-11-10
+updated: 2026-11-13
 
 # PRD: Klei Bridal Dashboard
 *Working title. Confirm.*
@@ -206,7 +206,7 @@ A User can see summaries scoped to their Permissions and jump to the detail scre
 A User with Upload images can add Photos by drag-and-drop or file picker and start processing.
 
 **Consequences (testable):**
-- Accepted: JPEG, PNG, WebP up to 25 MB each, up to 200 Photos per Upload Batch `[ASSUMPTION]`; rejected files are listed with the reason. Confirmed 2026-11-10 (course correction): the cap stays 200; the prototype's 100 does not apply (Story 11.5).
+- Accepted: JPEG, PNG, WebP up to 25 MB each, up to 200 Photos per Upload Batch `[ASSUMPTION]`; rejected files are listed with the reason. Confirmed 2026-11-10 (course correction): the cap stays 200; the prototype's 100 does not apply (Story 11.5). Revised 2026-11-14 (course correction, Story 21.6): no fixed photo limit; the backend keeps one safety ceiling, `klei.upload.max-photos` (default 5,000), and a full batch reads "Batch is full".
 - Each Photo is encrypted client-side before storage (NFR-1) and stored under a random UUID key.
 - Users without Upload images see no upload action; API returns 403.
 
@@ -723,7 +723,7 @@ Resolved at Gate 2 (logged in memlog): scale numbers confirmed; whole-word searc
 11. **Viewer scope.** Viewer sees Dashboard (without inquiry widget), Gallery (read-only), personal Settings. Confirm.
 12. **Outbound SMTP in production.** Which provider/domain will send Invitation and Reply emails (SPF/DKIM, reply-to)?
 13. **Update host.** Where do signed Update packages and the update manifest live (Dokploy-served static path, MinIO public bucket, GitHub Releases)? Needs a stable HTTPS URL baked into the bundle.
-14. **Photo cap per Upload Batch.** ANSWERED 2026-11-10: 200 stays; the prototype's 100 does not apply (Story 11.5).
+14. **Photo cap per Upload Batch.** ANSWERED 2026-11-10: 200 stays; the prototype's 100 does not apply (Story 11.5). Revised 2026-11-14 (course correction, Story 21.6): no fixed photo limit; the backend keeps one safety ceiling, `klei.upload.max-photos` (default 5,000), and a full batch reads "Batch is full".
 15. **Away Message auto-send.** ANSWERED 2026-11-10: yes, once per Client per closure window (FR-32, Story 11.12).
 16. **Two-factor requirement setting.** ANSWERED 2026-11-10 (reply "yes" read as: accept the defaults). zxing QR library: yes. Admin-required 2FA: not built (FR-44). Reverse by writing a story if wanted.
 
@@ -731,7 +731,7 @@ Resolved at Gate 2 (logged in memlog): scale numbers confirmed; whole-word searc
 - §4.1 FR-1 — Authorization code + PKCE for the Deep Link return; loopback redirect fallback; backend URL is a build-time constant.
 - §4.1 FR-3 — Verification by code vs link decided in Auth ADR.
 - §4.1 FR-6 — Role/permission changes apply at next sign-in (wireframe copy).
-- §4.3 FR-8 — Upload limits: JPEG/PNG/WebP, 25 MB each, 200 Photos per batch (prototype says 100; the user kept 200 on 2026-11-10).
+- §4.3 FR-8 — Upload limits: JPEG/PNG/WebP, 25 MB each, 200 Photos per batch (prototype says 100; the user kept 200 on 2026-11-10). Revised 2026-11-14 (course correction, Story 21.6): no fixed photo limit; the backend keeps one safety ceiling, `klei.upload.max-photos` (default 5,000), and a full batch reads "Batch is full".
 - §4.3 FR-11 — Rearrange actions reversible until Save.
 - §4.4 FR-18 — Gown delete is a hard delete including MinIO objects.
 - §4.5 FR-23 — Staff with Reply to inquiries may edit Client fields.
@@ -746,3 +746,92 @@ Resolved at Gate 2 (logged in memlog): scale numbers confirmed; whole-word searc
 - §5 NFR-8 — RPO ≤ 24 h, RTO ≤ 4 h; Dokploy proxy routing; KEKs as Dokploy env vars with offline backup.
 - §7.1 — No telemetry or analytics.
 - §11 OPEN QUESTION 11 / Roles — Viewer sees Dashboard (no inquiry widget), Gallery read-only; Assistant requires Reply to inquiries.
+
+## 13. Electron Migration (additive, 2026-11-13)
+
+**Authority.** Sections 1–12 describe the **baseline product** and the protected Tauri app, frozen at commit `8e2eca27f91f5bfcd7a146961d603117bf8a597b` (re-baselined in Stories 21.5 and 21.7; first frozen at `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`), and stay authoritative for it (including NFR-4, §6 "Fixed stack: Tauri" and FR-43). This section adds requirements for a **separate Electron target** built in `electron/` on branch `electron-migration`. Where the two differ, this section governs the Electron target only. Detail: `docs/brownfield-architecture.md` (inventory and mapping), `docs/architecture.md` §13 and spine AD-22..AD-28 (design), `docs/prd/` (epics 14–20), `docs/stories/14.1`..`20.4` (32 stories).
+
+### 13.1 Goal and non-goals
+**Goal.** Ship the same desktop product on Electron with zero visual or functional regression, so the Tauri app can later be retired by a decision of the owner.
+**Non-goals** `[NON-GOAL for MVP]`: redesign, new product features, backend or API changes, dependency cleanup in `desktop/`, automatic updates, OS code signing or notarization, migration of existing installations or tokens (none are deployed), removing or editing the Tauri app.
+
+### 13.2 Migration requirements
+
+#### MFR-1: Original is protected
+**Consequences (testable):**
+- `git diff --exit-code 8e2eca27f91f5bfcd7a146961d603117bf8a597b -- desktop backend infra prototype docs/api docs/install-guide.md docs/release-checklist.md .github/workflows` is empty at every story close, and no untracked file appears outside the approved paths (`electron/`, `docs/`, new `.github/workflows/electron*.yml`). Existing tracked workflows stay byte-identical. Once a new `electron*.yml` is committed, the plain diff form lists it as `A`, so the gate is `electron/scripts/protected-paths.mjs` (story 14.1), which accepts only `A` or `??` on `.github/workflows/electron*.yml`. While such files are uncommitted, also run `git status --porcelain --untracked-files=all -- desktop backend infra prototype docs/api .github/workflows` and accept only `?? .github/workflows/electron*.yml`.
+- Electron build output, caches and node_modules live under `electron/` only; nothing is written to `desktop/dist` or `desktop/node_modules/.vite`.
+
+#### MFR-2: Parity
+**Consequences (testable):**
+- Every screen and state in `desktop/scripts/shots/screens.mjs` renders identically (zero geometry findings; each pixel difference reviewed) in the original renderer and in Electron, at 1440×900, 1280×800 and 1100×700.
+- Keyboard focus, toasts, Escape handling, reduced motion and accessibility checks (NFR-7) pass separately from screenshot normalisation.
+- Every critical flow in the parity matrix (startup, sign-in, upload, review, gallery, inquiries, settings, assistant, update) passes in the packaged Electron app on each supported OS.
+
+#### MFR-3: Narrow bridge
+The renderer reaches native features only through the nine existing bridge calls, with identical arguments, results, progress events and `{kind, message}` errors.
+**Consequences (testable):**
+- `contextIsolation` on, `sandbox` on, `nodeIntegration` off; navigation, popups and webview denied; IPC accepted only from the trusted top frame.
+- No generic invoke, filesystem, shell, URL-fetch or Node API reaches the renderer; a hostile-renderer test proves unknown commands, wrong payloads and foreign frames are rejected.
+- CSP keeps `connect-src 'none'`; credentials and base URLs never enter the renderer.
+
+#### MFR-4: Session and API behaviour (FR-1..FR-6, NFR-3, NFR-5)
+**Consequences (testable):**
+- `api_request` keeps method and path validation, the `/health/ready` exception, `If-Match`, `Idempotency-Key`, timeouts (10 s, 200 s for AI test and models), disabled redirects, single refresh and retry on 401, and `session_expired`.
+- Sign-in uses the system browser, PKCE S256 and state, `klei://auth/callback` or validated loopback; 300 s timeout; a newer sign-in cancels the older one.
+- Refresh token only in the OS credential store under a name that does not collide with the Tauri app; no credential store means fail closed, with "Continue without saving" keeping it in memory. No plaintext fallback.
+
+#### MFR-5: Native operations (FR-8, FR-17, FR-21, FR-30)
+**Consequences (testable):**
+- All `upload_files` kinds (`photo`, `dropped`, `attachment`, `avatar`, `cancel`, `watch`, `unwatch`) and `export_gowns` (`start`, `cancel`) keep their limits, retry, idempotency, progress, rejection reasons and cleanup of partial files.
+- The `klei-img` image scheme keeps its path set, headers (`no-store`, `nosniff`), thumbnail-only cache (300 s, 400 entries) and Windows host quirk.
+- Drag and drop keeps the 10 s expiry and sends paths only while a watch is active.
+- Business content is never written to disk by Chromium (cache, storage, logs, crash dumps) outside the user-chosen export; a sentinel audit proves it (NFR-1 reading: no plaintext persistent cache).
+
+#### MFR-6: Manual update (approved Electron-only exception to FR-43 and AD-15)
+No paid Apple Developer membership or other signing certificate exists, and nobody uses the app yet, so the Electron app does **not** download, verify, install or restart itself.
+**Consequences (testable):**
+- The app can check a version-only manifest (`latest.json`) served by the download site (story 18.5) and shows a non-blocking prompt; the prompt's button opens the download site's page in the system browser. Both URLs come from one fixed build-time base URL that contains the site's secret path; the renderer can neither supply nor read it.
+- Opening the page and any restart are refused while `set_dirty(true)` (unsent Draft or Upload review), keeping NFR-3.
+- Wording is truthful: "Download update", never "Install and restart". The check sends only version, OS and architecture (NFR-6).
+- A failed check leaves the app running and is quiet unless the User asked.
+- Package integrity and Gatekeeper/SmartScreen warnings are documented, not claimed solved. Tauri minisign verification and signed-version binding are not promised.
+
+#### MFR-7: Packaging and CI (NFR-4, NFR-9)
+**Consequences (testable):**
+- Installers for macOS (arm64 and x64), Windows x64 and Linux x64 (AppImage and .deb) build and smoke-launch in CI from new `electron*` workflows; existing workflows are untouched.
+- Releases use disjoint tags (`electron-v*`) and are published only to the download site: a separate Thymeleaf application under `electron/download-site/` with its own port and a secret URL path (story 18.5, AD-32). Artifacts are scanned for secrets before publication.
+- No signing certificate is used (internal-use app). SHA-256 values are shown beside each file for optional comparison.
+- A protection job runs without path filters so a forbidden change to original files cannot evade Electron-only filters.
+
+#### MFR-8: Cutover and rollback
+**Consequences (testable):**
+- Cutover needs: all stories done, parity matrix green on every OS, NFR-2 start-up ≤ 3 s and idle memory ≤ 300 MB (whole process tree) measured, rollback rehearsed.
+- The reviewer records PASS, CONCERNS or FAIL with evidence; the owner alone decides cutover and, separately, retirement. Retirement planning never deletes or edits the Tauri app.
+- Rollback = keep distributing the Tauri installers; Electron preview uses a separate app id, profile and credential entry so both can coexist.
+
+### 13.3 Risks
+1. Chromium may persist business content (cache, storage, logs) contrary to NFR-1.
+2. Credential storage may be weaker than the OS keychain (`safeStorage` plus a file is not equivalent).
+3. Unsigned macOS installs trigger Gatekeeper; a manual Update button does not remove that or prove package authenticity.
+4. Two apps may fight over `klei://` and the rotating refresh token.
+5. Existing screenshot evidence uses a mocked Tauri in plain Chromium; it cannot prove native parity, size or performance.
+6. Rewriting about 1,300 lines of Rust in Node can change retry, cancel and error behaviour; the Rust tests are the behaviour specification.
+7. The download site is public. Its secret path is obscurity, not access control: a leaked URL, proxy log, browser history or referrer exposes every installer, and the URL is compiled into every installed app. Mitigations: a random token of at least 43 characters, no-referrer, noindex and no-store headers, an empty 404 for everything else, no directory listing, token rotation (installed apps then need a reinstall).
+
+### 13.4 Decisions and open questions
+**Decided** (owner, 2026-11-13): port Rust to Node, no sidecar; manual update instead of auto-update; fresh installs only; isolated preview identities; reviewer verifies and owner decides cutover and retirement.
+**Open (non-blocking):**
+- OQ-M1. **Resolved (owner, 2026-11-13).** Support matrix approved: macOS 15+ (arm64, x64), Windows 11 x64, Ubuntu 24.04 LTS x64. Still bounded by the Electron release chosen in 15.1: if its support window excludes one of these, 15.1 records it and the owner decides.
+- OQ-M2. **Resolved (owner, 2026-11-13), subject to evidence.** `@napi-rs/keyring` approved as the keychain candidate; the ZIP library is chosen in story 14.3 after current-version verification. 14.3 must prove keychain parity; any other store (for example `safeStorage` plus a file) needs a new owner decision.
+- OQ-M3. **Resolved by the owner (2026-11-13).** Host: a small Thymeleaf download site (story 18.5) on its own port, public, behind a long secret URL path. It lists each version with per-OS downloads (macOS arm64 and x64, Windows x64, Linux AppImage and .deb), and serves the version-only manifest; the Update button opens its page. Integrity: no certificates because the app is for internal use only; SHA-256 values are shown for optional comparison.
+- OQ-M5. **Direction chosen by the owner (2026-11-14); values still pending, blocks any distribution.** The site runs as a separate application on the existing Dokploy server, on a new subdomain with the Dokploy HTTPS proxy, container port 8090. Owner actions, none confirmed done: create the subdomain and point it at the server; the secret-path token is generated by the owner and never committed or pasted; the GitHub environment `electron-release` (requires owner approval) holds `ELECTRON_DOWNLOAD_BASE_URL`, `ELECTRON_DEPLOY_HOST`, `ELECTRON_DEPLOY_USER`, `ELECTRON_DEPLOY_KEY`, `ELECTRON_DEPLOY_KNOWN_HOSTS` and variable `ELECTRON_DEPLOY_PATH`. The environment and secrets belong to a repository setting that does not exist yet and is not created by this documentation task.
+- OQ-M4. **Resolved for the preview (owner, 2026-11-13).** Preview identity `co.klei.bridal.electron.preview` with loopback sign-in and no `klei://` claim does not conflict with the Tauri app. The production app id and the `klei://` handover are fixed in story 20.4 at cutover, and Electron claims `klei://` only after the owner has retired or uninstalled the Tauri app.
+- AD-24 fallback. **Pre-approved (owner, 2026-11-13).** If story 14.4 proves Option B impossible, Option A is allowed, with preload accepting only the nine allowlisted command names and no other dispatch. 14.4 records the failure evidence.
+- Owner action (repository settings, not a document edit, not done): after story 19.1 lands, make the protection job a required status check and require review for changes to `.github/workflows/electron*.yml`.
+- Branches: `develop`, `main` and `electron-migration` all point at `51949da`; no other commits exist to merge (owner confirmed, 2026-11-13).
+
+### 13.5 Assumptions Index (migration)
+- §13 MFR-6 — Manifest is a small JSON with a version string served by the download site (18.5); the renderer's existing install flow tolerates `install_update` resolving after opening the page (unverified until the 18.3 renderer test passes).
+- §13.4 OQ-M1 — Matrix approved by the owner; runtime qualification per OS is still unperformed.
+- §13.4 OQ-M3 — The owner can run a Java 25 container behind HTTPS on a public port and give the release workflow write access to its data directory; unverified (OQ-M5).

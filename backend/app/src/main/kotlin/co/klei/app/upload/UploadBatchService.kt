@@ -19,7 +19,6 @@ data class BatchView(val id: UUID, val phase: String, val photoIds: List<UUID>, 
 
 object UploadLimits {
     const val MAX_FILE_BYTES = 25L * 1024 * 1024
-    const val MAX_PHOTOS = 200
     const val MAX_DECODES = 2
 }
 

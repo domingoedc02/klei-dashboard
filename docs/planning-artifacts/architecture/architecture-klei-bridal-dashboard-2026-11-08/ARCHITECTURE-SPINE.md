@@ -319,3 +319,97 @@ Source tree:
 | Outbound SMTP provider (production) | Mailpit in dev. Invitation, verify and reset need a real provider before go-live; chosen at deploy time (owner: operator). |
 | Public Inquiry intake, integration credentials | PRD non-goal; FR-24 callers are a Staff user (AD-9). |
 | Dark mode, i18n, offline cache | Out of MVP (PRD §9.2). |
+
+## Electron Migration Scope and Authority
+
+**Scoped authority notice:** This addendum governs only the proposed Electron migration from frozen baseline `8e2eca27f91f5bfcd7a146961d603117bf8a597b` (re-baselined in Stories 21.5 and 21.7; first frozen at `51949da2a0f8347c5f1f56fc5d87d8ada6e60643`). Existing AD-1–AD-21 and FR-1–FR-44 remain authoritative for the protected Tauri product. AD-22 onward apply only to the Electron target; they neither amend Tauri behavior nor authorize implementation, cutover, retirement, or deletion. `docs/brownfield-architecture.md` inventories current contracts; `docs/architecture.md` carries target detail. Reviewers record PASS/CONCERNS/FAIL; the owner decides any pilot, cutover, or separate retirement action. No deployed users: fresh install, no Tauri-token import or cross-framework update.
+
+### Target paradigm
+
+Main-process-owned Electron desktop shell with an isolated React renderer. Node main owns credentials, networking, files, and native operations; narrow typed preload is the only renderer boundary. Keep original renderer source read-only; prefer an Electron-owned Vite alias for the sole `@tauri-apps/api/core` import, with a baseline-SHA-recorded Electron-owned copy as fallback only if read-only build qualification fails.
+
+```mermaid
+graph LR
+  renderer[Read-only desktop/src React] -->|typed named methods and events| preload[electron/src/preload]
+  preload -->|closed validated IPC| main[electron/src/main Node]
+  main -->|fixed HTTPS origins| backend[Existing backend]
+  main --> keychain[(OS keychain)]
+  main --> native[Dialogs, files, protocols, system browser]
+  main --> releases[Download site page and latest.json, secret path]
+```
+
+### AD-22 — Isolated Electron target [ADOPTED]
+
+- **Binds:** MFR-1, MFR-7
+- **Prevents:** Electron work changing the frozen Tauri product or sharing mutable build/dependency artifacts with it.
+- **Rule:** Keep `desktop/**`, `backend/**`, `infra/**`, `prototype/**`, `docs/api/**`, existing workflows and lockfiles byte-identical to the baseline. All Electron dependencies, lockfile, sources, tests, scripts, configuration, outputs and caches belong under root `electron/`; no Electron build writes under `desktop/`. The one exception is workflow YAML: GitHub reads it only from `.github/workflows/`, so Electron workflows are new files named `electron*.yml` (additions, never edits), and every script and config they call lives under `electron/`. Enforce protected-path and allowlist checks before merge.
+
+### AD-23 — Hardened process boundary
+
+- **Binds:** MFR-1, MFR-3
+- **Prevents:** Renderer access to Node, credentials, arbitrary IPC, filesystem, shell, network, or untrusted navigation.
+- **Rule:** Electron windows set `contextIsolation: true`, `sandbox: true`, `nodeIntegration: false`; apply restrictive CSP, deny untrusted navigation and popups, and verify the trusted frame/origin on every IPC call. Validate all inputs at the main boundary. Preload exposes only named typed methods; never expose generic `invoke`, raw IPC, Tauri internals, shell/filesystem APIs, or renderer-supplied URLs.
+
+### AD-24 — Closed compatibility shim
+
+- **Binds:** MFR-2, MFR-3
+- **Prevents:** Renderer behavior drift or a general command-dispatch capability bypassing the process boundary.
+- **Rule:** Reproduce the nine existing command contracts through a closed internal allowlist and explicit typed preload methods. Reuse `desktop/src/bridge.ts` contracts without editing original source; alias its sole Tauri core import where qualified, otherwise use only an Electron-owned SHA-recorded copy. Implement `Channel` through separately registered, schema-validated listeners with unsubscribe, event-sequence validation, explicit cancellation, and request/window-lifecycle cleanup. No raw command name or arbitrary dispatch crosses preload. Owner-approved exception (2026-11-13): only if story 14.4 records that the alias route cannot work, preload may accept a command name for exactly the nine allowlisted names, validated before any handler runs, with no other dispatch.
+
+### AD-25 — Main-owned session and API [ADOPTED]
+
+- **Binds:** MFR-2, MFR-4
+- **Prevents:** Token exposure, refresh races, API-origin drift, or divergent validation and errors.
+- **Rule:** Main owns fixed API/Auth origins, HTTP, access-token memory, refresh-token persistence, PKCE, refresh serialization, one 401 retry, and bridge errors `{kind,message}`. Preserve method/path/body validation, read-only `/health/ready` exception, `ifMatch`, `idempotencyKey`, timeouts, and safe error text. Preserve `session_only`, sign-in/out, dirty-state and all nine commands. Tokens, local paths, response secrets, and arbitrary server error bodies never enter renderer responses or logs.
+
+### AD-26 — Native operations and persistence [ADOPTED]
+
+- **Binds:** MFR-2, MFR-5
+- **Prevents:** Lost native behavior, unsafe image paths, orphaned work, or business content persisted outside the requested export.
+- **Rule:** Port Rust I/O behavior to Node in Electron main; no sidecar. Preserve all upload kinds (`photo`, `dropped`, `attachment`, `avatar`, `cancel`, `watch`, `unwatch`), preflight/triage, three workers, retry, idempotency, cancellation, watched-window drop events and 10 s TTL, attachment/avatar limits, export progress/cancel/sanitization/partial-file cleanup/single-export lock, and image protocol route validation. Preserve bounded in-memory thumbnail caching and Windows `klei-img.localhost`; full images and avatars remain uncached. Main alone reads selected files and writes the ZIP only to the user-chosen path. Persist no business content in Chromium caches, app storage, logs, or temporary files; require a persistence-sentinel audit. Preserve clipboard, `execCommand('insertText')`, `beforeunload`, hash routing, focus and accessibility behavior.
+
+### AD-27 — Separate app identity and protocol ownership [ADOPTED]
+
+- **Binds:** MFR-1, MFR-4, MFR-8
+- **Prevents:** Preview credentials/profile collisions or interference with Tauri's `klei://` handler.
+- **Rule:** Preview uses `co.klei.bridal.electron.preview`, a separate profile and keychain entry, and loopback auth; it does not claim `klei://` or interfere with Tauri testing. Select stable production bundle ID and protocol ownership before first public release. With no deployed users, require fresh install; do not migrate Tauri tokens or installations.
+
+### AD-28 — Manual update exception [ADOPTED]
+
+- **Binds:** MFR-2, MFR-6
+- **Prevents:** Renderer-controlled external URLs, false parity claims, or promises of installer verification/restart.
+- **Rule:** The Electron Update action opens the download site's page (AD-32; one fixed build-time HTTPS base URL whose path is a long secret token) in the system browser after the dirty-work guard. `check_update` may read only a bounded version manifest from that same site; validate shape/version, timeout, response size, and no redirects. `install_update` is a compatibility name for opening that page after the guard. Electron-only UI says “Download update” / manual install, never “Install and restart.” This is the sole approved Electron-only exception to FR-43/AD-15. No automatic downloader, installer, restart, `electron-updater`, Minisign verification, or signed-version-binding claim. Unsigned macOS Gatekeeper warnings or blocks remain a release risk; do not recommend bypassing them. The app is for internal use and carries no signing certificate.
+
+### AD-29 — Isolated packaging and operational qualification
+
+- **Binds:** MFR-7
+- **Prevents:** Electron releases modifying Tauri pipelines or claiming unqualified platform support.
+- **Rule:** Keep Electron packaging and CI/release isolated: build config, scripts and outputs under `electron/`, workflow YAML only as new `.github/workflows/electron*.yml` files (the protection job has no path filter), with isolated outputs, credentials and `electron-v*` tags; existing workflows remain unchanged. Qualify fresh install, manual upgrade, reinstall, rollback, keychain, protocols, persistence and performance on every declared OS. Provisional recommendation only: macOS 15+ arm64/x64, vendor-supported Windows 11 x64, Ubuntu 24.04 LTS x64; support remains conditional on the chosen maintained Electron security support, hardware needs, and minimum/current runtime qualification. No paid Apple Developer membership, signing keys, or release credentials are assumed; the download site (AD-32) is the only release host.
+
+### AD-30 — Parity evidence and performance gates
+
+- **Binds:** MFR-2, MFR-8
+- **Prevents:** Browser mocks or screenshots being mistaken for native proof, or silent relaxation of existing budgets.
+- **Rule:** Preserve UI, interactions, accessibility, session, persistence, and native-operation contracts. Compare screenshots/interactions at 1440×900, 1280×800, and 1100×700; assess focus, toast and accessibility separately from screenshot normalization. Retain cold-start ≤3 s and idle memory ≤300 MB across the complete process tree. Browser mocks are not native-runtime evidence. Require actual per-OS Tauri/Electron runtime evidence for auth, keychain, dialogs/files, protocols, single-instance, update page and packaged lifecycle.
+
+### AD-31 — Cutover and retirement authority
+
+- **Binds:** MFR-8
+- **Prevents:** Documentation completion or an internal Electron build being treated as production approval.
+- **Rule:** Keep Tauri usable until parity, security, packaging and rollback gates pass; incomplete Electron builds remain internal-only. Define rollback triggers and rehearse rollback before any cutover. Reviewers assess evidence and record PASS/CONCERNS/FAIL; only the owner authorizes a pilot, cutover, or separately gated Tauri-retirement decision. No deletion is authorized here.
+
+### AD-32 — Download site [ADOPTED]
+
+- **Binds:** MFR-6, MFR-7
+- **Prevents:** Installers or the update manifest being coupled to the backend, or reachable by a visitor who does not hold the URL.
+- **Rule:** Electron installers and the version-only manifest are served by a separate read-only Spring Boot + Thymeleaf application in `electron/download-site/`, on its own port (default 8090), sharing no code, port, secret, image or database with `backend/`. Every route sits under one secret path token of at least 43 characters from `[A-Za-z0-9_-]`; any other path, method or malformed name returns an empty 404. The token is compared in constant time, never logged, and compiled into the app inside one build-time base URL. Responses carry no-referrer, noindex and no-store headers and a closed CSP; the page has no JavaScript and no third-party origin. The secret path is a capability URL, not access control: rotation means reinstalling the app. No certificates are used; SHA-256 values are shown for optional comparison. Releases arrive only from the 19.4 workflow; the site accepts no upload.
+
+### Electron migration deferred
+
+| Item | Constraint / revisit |
+| --- | --- |
+| Maintained Electron and keychain/ZIP dependency versions | Select and verify during 14.3/15.1 qualification; do not assume `safeStorage` plus a file matches OS-keychain guarantees. Do not pin unverified versions here. |
+| Packaging tool and production bundle ID | Decide before distribution (14.3, 15.1, 20.4); no signing keys or release credentials are implied to exist. |
+| Download-site server, public host name, HTTPS proxy, final port, token value and deploy credential | Owner provides before distribution (OQ-M5); none exists yet. |
+| Supported OS minimums | Owner-approved 2026-11-13: macOS 15+, Windows 11, Ubuntu 24.04 LTS; stays conditional on the selected Electron release's support window and on minimum/current real-runtime qualification passing. |
+| Cutover and Tauri retirement | Separate owner decisions after 14–20 acceptance; no deletion authorized. |

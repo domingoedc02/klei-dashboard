@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Klei Bridal downloads</title>
+  <link rel="stylesheet" th:href="@{/{t}/static/site.css(t=${token})}">
+</head>
+<body>
+<main>
+  <h1>Klei Bridal desktop app</h1>
+  <p class="note">Preview builds for internal use. The app is not signed, so your computer will warn the first time you open it. Steps are below.</p>
+
+  <section th:if="${#lists.isEmpty(releases)}" aria-labelledby="none">
+    <h2 id="none">No versions yet</h2>
+    <p>Nothing has been published.</p>
+  </section>
+
+  <section th:each="r, s : ${releases}" th:attr="aria-labelledby='v-' + ${s.index}">
+    <h2 th:id="'v-' + ${s.index}">
+      Version <span th:text="${r.version}">0.1.0</span>
+      <span class="tag">Preview</span>
+      <span class="tag" th:if="${s.first}">Latest</span>
+    </h2>
+    <p>Published <time th:datetime="${r.pubDate}" th:text="${r.date}">2026-01-01</time></p>
+    <table>
+      <caption class="sr" th:text="'Files for version ' + ${r.version}">Files</caption>
+      <thead>
+        <tr><th scope="col">System</th><th scope="col">Chip</th><th scope="col">Type</th><th scope="col">Size</th><th scope="col">SHA-256</th><th scope="col">Download</th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="f : ${r.files}">
+          <th scope="row" th:text="${f.osLabel}">macOS</th>
+          <td th:text="${f.archLabel}">arm64</td>
+          <td th:text="${f.kind}">dmg</td>
+          <td th:text="${f.sizeLabel}">1.0 MB</td>
+          <td><code th:text="${f.sha256}">abc</code></td>
+          <td><a th:href="@{/{t}/files/{v}/{n}(t=${token},v=${r.version},n=${f.name})}" th:text="${f.name}">file</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section aria-labelledby="first">
+    <h2 id="first">First launch</h2>
+    <ul>
+      <li><strong>macOS:</strong> open the disk image, drag the app to Applications, open it. If macOS says it cannot verify the app, choose <strong>Done</strong>, then open <strong>System Settings</strong>, <strong>Privacy &amp; Security</strong> and choose <strong>Open Anyway</strong>. On macOS 14 or earlier, right-click the app in Finder and choose <strong>Open</strong> instead.</li>
+      <li><strong>Windows 11:</strong> run the installer. If a blue "Windows protected your PC" window appears, choose <strong>More info</strong>, then <strong>Run anyway</strong>.</li>
+      <li><strong>Ubuntu 24.04:</strong> for the AppImage, run <code>chmod +x</code> on the file, then open it. For the <code>.deb</code>, install it with your software installer.</li>
+    </ul>
+    <p>The SHA-256 values are shown so you can compare a downloaded file with the one published here. Comparing them is optional.</p>
+  </section>
+</main>
+</body>
+</html>

@@ -11,12 +11,13 @@ import { Review } from './Review';
 type Batch = components['schemas']['BatchView'];
 type Rejection = { name: string; reason: RejectReason };
 
-const MAX_PHOTOS = 200;
+const STRIP_MAX = 60;
+const REJECTED_MAX = 50;
 const WHY: Record<RejectReason, string> = {
   type: 'Not a JPEG, PNG or WebP',
   size: 'Over 25 MB',
-  full: `Batch is full: ${MAX_PHOTOS} photos`,
-  dimensions: 'Image is too large: over 40 megapixels',
+  full: 'Batch is full. Group these photos, then upload the rest.',
+  dimensions: 'Image is too large: over 100 megapixels (WebP: 40)',
   unreadable: "Couldn't read the file",
 };
 
@@ -30,7 +31,7 @@ const HEAD = (
 const BATCHES = '/api/v1/uploads';
 const POLL_MS = 2000;
 
-// shortcut: the strip lists every stored photo (at most 200) and the shell caches thumbnails; add paging if the batch limit grows.
+// shortcut: the strip shows the first 60 stored photos and the rejected list the first 50; a photo past 60 cannot be removed here, add paging when that matters.
 export function Upload() {
   const shell = useShell();
   const { request, toast, setDirty } = shell;
@@ -71,7 +72,11 @@ export function Upload() {
   }, [request]);
 
   const addIds = useCallback((add: string[]) => {
-    setBatch((b) => (typeof b === 'object' ? { ...b, ids: [...b.ids, ...add.filter((id) => !b.ids.includes(id))] } : b));
+    setBatch((b) => {
+      if (typeof b !== 'object') return b;
+      const have = new Set(b.ids);
+      return { ...b, ids: [...b.ids, ...add.filter((id) => !have.has(id))] };
+    });
   }, []);
 
   const send = useCallback(
@@ -204,9 +209,10 @@ export function Upload() {
         <div className="err-summary" role="alert">
           <b>{rejected.length === 1 ? '1 file' : `${rejected.length} files`} couldn’t be uploaded.</b>{' '}
           <ul role="list" aria-label="Files not uploaded">
-            {rejected.map((r, i) => (
+            {rejected.slice(0, REJECTED_MAX).map((r, i) => (
               <li key={`${r.name}-${i}`}><span className="name">{r.name}</span> <span className="hint">{WHY[r.reason]}</span></li>
             ))}
+            {rejected.length > REJECTED_MAX && <li>and {rejected.length - REJECTED_MAX} more</li>}
           </ul>
           {canRetry && <span> Remove them or convert to JPG or PNG, then retry.</span>}
         </div>
@@ -216,7 +222,7 @@ export function Upload() {
           <div className="drop-inner">
             <img className="illo" src={art} alt="" />
             <h2>Drop gown photos here</h2>
-            <p className="lede">JPG, PNG or WebP up to 25 MB each. Upload up to {MAX_PHOTOS} at once and AI groups them.</p>
+            <p className="lede">JPG, PNG or WebP up to 25 MB each. Add as many as you like and AI groups them.</p>
             <button type="button" className="btn primary" disabled={running} onClick={() => { setRejected([]); void send('photo'); }}>
               {canRetry ? 'Retry upload' : 'Choose photos'}
             </button>
@@ -240,12 +246,12 @@ export function Upload() {
       {adding && batch.ids.length > 0 && (
         <div className="stored">
           <h2>In this batch</h2>
-          <p className="hint">{batch.ids.length} of {MAX_PHOTOS} photos stored</p>
+          <p className="hint">{batch.ids.length} {batch.ids.length === 1 ? 'photo' : 'photos'} stored</p>
           {phase === 'empty' && !running && (
             <button type="button" className="btn primary" disabled={starting} onClick={() => void start()}>Start grouping</button>
           )}
           <ul className="strip" aria-label="Stored photos">
-            {batch.ids.map((p, i) => (
+            {batch.ids.slice(0, STRIP_MAX).map((p, i) => (
               <li key={p}>
                 <img src={thumbUrl(batch.id, p)} alt={`Photo ${i + 1}`} loading="lazy" width={96} height={96} />
                 {!running && (
@@ -253,6 +259,7 @@ export function Upload() {
                 )}
               </li>
             ))}
+            {batch.ids.length > STRIP_MAX && <li className="hint">and {batch.ids.length - STRIP_MAX} more</li>}
           </ul>
         </div>
       )}

@@ -28,7 +28,7 @@ class ThumbnailService(private val images: ImageValidator) {
         return encode(fit(decoded, info, size))
     }
 
-    // Decoding at 1/n scale keeps a 40 MP photo from needing 160 MB of heap; WebP is read whole.
+    // Decoding at 1/n scale keeps a 100 MP photo from needing 400 MB of heap; WebP is read whole.
     private fun decode(bytes: ByteArray, info: Inspected, size: Int): BufferedImage = images.reader(bytes, info.type) { r ->
         val param = r.defaultReadParam
         val step = if (info.type == ImageType.WEBP) 1 else maxOf(1, maxOf(info.width, info.height) / (size * 2))

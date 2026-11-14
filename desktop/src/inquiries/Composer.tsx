@@ -305,12 +305,12 @@ export function Composer({ inquiryId, to, subject, onSent }: { inquiryId: string
           ))}
         </ul>
       )}
+      <p className="hint composer-keys">{shell.me.preferences?.enterToSend ? 'Enter to send · Shift+Enter for a new line' : 'Ctrl/⌘ + Enter to send'}{signature ? ' · Signature added on send' : ''}</p>
       <div className="composer-foot">
         <button type="button" className="btn" disabled={!ready || (blank && files.length === 0)} onClick={() => void discard()}>Discard</button>
         <span role="status" className="hint composer-saved">{save === 'saving' ? 'Saving…' : save === 'saved' ? 'Saved as draft' : save === 'failed' ? 'Draft not saved' : ''}</span>
         <button type="submit" className="btn primary" disabled={!ready || sending || shell.offline} title={shell.offline ? 'You are offline.' : undefined}><Icon name="send" />{sending ? 'Sending…' : 'Send'}</button>
       </div>
-      <p className="hint composer-keys">{shell.me.preferences?.enterToSend ? 'Enter to send · Shift+Enter for a new line' : 'Ctrl/⌘ + Enter to send'}{signature ? ' · Signature added on send' : ''}</p>
     </form>
   );
 }

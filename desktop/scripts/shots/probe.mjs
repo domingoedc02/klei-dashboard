@@ -60,6 +60,10 @@ function inPage() {
 
   if (document.documentElement.scrollWidth > W + 1) issues.push({ kind: 'page-h-scroll', sel: 'html', text: '', detail: `scrollWidth ${document.documentElement.scrollWidth} > ${W}` });
 
+  // The frame never scrolls: only panels do (Epic 21).
+  const de = document.documentElement;
+  if (de.scrollHeight > H + 1 || document.body.scrollTop > 0 || de.scrollTop > 0) issues.push({ kind: 'page-v-scroll', sel: 'html', text: '', detail: `scrollHeight ${de.scrollHeight} > ${H} or scrolled ${de.scrollTop}` });
+
   // Visible = not clipped away by a scroll/hidden ancestor.
   const vis = leaves.filter((l) => !l.clip.empty);
 

@@ -168,7 +168,7 @@ export function SignatureTab() {
           {problems.stale && <> <button type="button" className="link" onClick={() => { setState('loading'); void load(); }}>Reload</button></>}
         </p>
       )}
-      <div className="actions">
+      <div className="actions foot">
         <button type="submit" className="btn primary" disabled={saving || !dirty}>Save changes</button>
       </div>
     </form>

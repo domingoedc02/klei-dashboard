@@ -84,5 +84,40 @@ class ClustererTest {
         assertNotEquals("high", confidenceBand(g.confidence))
     }
 
+    /** The textbook O(n^3) average-link search the nearest-neighbour chain replaced; ties go to the lowest pair. */
+    private fun reference(vectors: List<FloatArray>, threshold: Double): List<List<Int>> {
+        val sim = Clusterer.similarities(vectors)
+        val live = vectors.indices.map { mutableListOf(it) }.toMutableList()
+        while (true) {
+            var best = -1.0; var bi = -1; var bj = -1
+            for (i in live.indices) for (j in i + 1 until live.size) {
+                val avg = live[i].sumOf { a -> live[j].sumOf { b -> sim[a, b] } } / (live[i].size * live[j].size)
+                if (avg > best) { best = avg; bi = i; bj = j }
+            }
+            if (bi < 0 || best < threshold) break
+            live[bi].addAll(live[bj]); live.removeAt(bj)
+        }
+        return live.map { it.sorted() }.sortedBy { it.first() }
+    }
+
+    @Test fun `groups equal a plain average-link search on random vectors`() {
+        val rnd = java.util.Random(7)
+        repeat(20) {
+            val vs = List(60) { FloatArray(4) { rnd.nextGaussian().toFloat() } }
+            for (t in listOf(0.0, 0.3, 0.55, 0.75)) {
+                assertEquals(reference(vs, t), Clusterer.cluster(vs, t).map { c -> c.members }, "threshold $t")
+            }
+        }
+    }
+
+    @Test fun `two thousand photos in twenty gowns make twenty groups`() {
+        val rnd = java.util.Random(11)
+        val centres = List(20) { FloatArray(32) { rnd.nextGaussian().toFloat() } }
+        val vs = List(2000) { i -> FloatArray(32) { d -> centres[i % 20][d] + 0.05f * rnd.nextGaussian().toFloat() } }
+        val groups = Clusterer.cluster(vs, Clusterer.threshold(3))
+        assertEquals(20, groups.size)
+        assertTrue(groups.all { it.members.size == 100 })
+    }
+
     private fun cosine(a: FloatArray, b: FloatArray) = a.indices.sumOf { (a[it] * b[it]).toDouble() }
 }

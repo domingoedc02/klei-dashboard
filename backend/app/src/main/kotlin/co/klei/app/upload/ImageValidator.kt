@@ -12,7 +12,7 @@ class Inspected(val type: ImageType, val width: Int, val height: Int)
 
 /**
  * AD-7: the type comes from magic bytes, never from the request. The header is read first and refused above
- * [MAX_PIXELS], so a small file that claims a huge canvas never reaches a decoder (decompression bomb).
+ * [maxPixels], so a small file that claims a huge canvas never reaches a decoder (decompression bomb).
  */
 @Component
 class ImageValidator {
@@ -29,7 +29,7 @@ class ImageValidator {
             throw ProblemException(ProblemCode.UNSUPPORTED_TYPE)
         }
         if (w < 1 || h < 1) throw ProblemException(ProblemCode.UNSUPPORTED_TYPE)
-        if (w.toLong() * h > MAX_PIXELS) throw ProblemException(ProblemCode.TOO_LARGE)
+        if (w.toLong() * h > maxPixels(type)) throw ProblemException(ProblemCode.TOO_LARGE)
         return Inspected(type, w, h)
     }
 
@@ -47,7 +47,13 @@ class ImageValidator {
     }
 
     companion object {
-        const val MAX_PIXELS = 40_000_000L
+        /** JPEG and PNG decode at 1/n scale (see [ThumbnailService]), so heap holds the thumbnail, not the photo. */
+        const val MAX_PIXELS = 100_000_000L
+
+        /** WebP is read whole at 4 bytes a pixel, so 40 MP is 160 MB of heap. */
+        const val MAX_WEBP_PIXELS = 40_000_000L
+
+        fun maxPixels(type: ImageType) = if (type == ImageType.WEBP) MAX_WEBP_PIXELS else MAX_PIXELS
 
         fun sniff(b: ByteArray): ImageType? = when {
             b.size >= 3 && b[0] == 0xFF.toByte() && b[1] == 0xD8.toByte() && b[2] == 0xFF.toByte() -> ImageType.JPEG
