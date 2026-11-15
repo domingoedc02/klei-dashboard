@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { randomUUID } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
 import { test } from 'node:test'
 import { KeychainError, OsKeychain } from '../src/main/keychain.ts'
 
@@ -9,7 +9,8 @@ import { KeychainError, OsKeychain } from '../src/main/keychain.ts'
 if (process.platform === 'darwin' || process.platform === 'win32') {
   test(`live OS credential store (${process.platform}): round trip, or every call fails closed`, { timeout: 30_000 }, async () => {
     const k = new OsKeychain(`co.klei.bridal.electron.preview.citest.${randomUUID()}`)
-    const big = 'tok-' + 'x'.repeat(4000)
+    // RefreshService issues 32 random bytes as base64url (43 characters), within Windows credential limits.
+    const replacement = randomBytes(32).toString('base64url')
     try {
       let usable = true
       try {
@@ -24,8 +25,8 @@ if (process.platform === 'darwin' || process.platform === 'win32') {
         return
       }
       assert.equal(await k.load(), 'tok-1')
-      await k.store(big)
-      assert.equal(await k.load(), big)
+      await k.store(replacement)
+      assert.equal(await k.load(), replacement)
       await k.clear()
       assert.equal(await k.load(), null)
       await k.clear()
