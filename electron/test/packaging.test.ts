@@ -18,12 +18,12 @@ test('identity: preview app id and product name, never the Tauri ones', () => {
   assert.ok(!/^appId: co\.klei\.bridal$/m.test(yml))
 })
 
-test('targets: dmg arm64 and x64, NSIS x64, AppImage and deb x64 - nothing else', () => {
-  assert.match(yml, /target: dmg, arch: \[arm64, x64\]/)
+test('targets: CLI-selected dmg architecture, NSIS x64, AppImage and deb x64 - nothing else', () => {
+  assert.match(yml, /^mac:\r?\n {2}target:\r?\n {4}- dmg\r?$/m)
   assert.match(yml, /target: nsis, arch: \[x64\]/)
   assert.match(yml, /target: AppImage, arch: \[x64\]/)
   assert.match(yml, /target: deb, arch: \[x64\]/)
-  assert.equal([...yml.matchAll(/target: (\w+),/g)].length, 4)
+  assert.equal([...yml.matchAll(/target: (\w+),/g)].length, 3)
 })
 
 test('no URL scheme is registered, no updater or publish feed is configured', () => {

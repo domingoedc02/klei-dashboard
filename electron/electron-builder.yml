@@ -16,7 +16,7 @@ asar: true
 npmRebuild: false
 mac:
   target:
-    - { target: dmg, arch: [arm64, x64] }
+    - dmg
   icon: icon.icns
   category: public.app-category.business
   # Ad hoc: Apple silicon will not start a binary whose signature the repackaging broke. No Developer ID, no notarization.
